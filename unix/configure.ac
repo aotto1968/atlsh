@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 
-AC_INIT([tcl],[8.5])
+AC_INIT([tcl],[8.5],[https://github.com/aotto1968/atlsh/issues],[atlsh.tar.gz],[https://github.com/aotto1968/atlsh])
 AC_PREREQ(2.69)
 
 dnl This is only used when included from macosx/configure.ac
@@ -17,16 +17,42 @@ m4_ifdef([SC_USE_CONFIG_HEADERS], [
     /* Undef unused package specific autoheader defines so that we can
      * include both tclConfig.h and tkConfig.h at the same time: */
     /* override */ #undef PACKAGE_NAME
-    /* override */ #undef PACKAGE_STRING
     /* override */ #undef PACKAGE_TARNAME
+    /* override */ #undef PACKAGE_VERSION
+    /* override */ #undef PACKAGE_STRING
     #endif /* _TCLCONFIG */])
 ])
 
 TCL_VERSION=8.5
 TCL_MAJOR_VERSION=8
 TCL_MINOR_VERSION=5
-TCL_PATCH_LEVEL=".19"
+TCL_PATCH_LEVEL=".20"
 VERSION=${TCL_VERSION}
+
+EXTRA_INSTALL_BINARIES=${EXTRA_INSTALL_BINARIES:-"@:"}
+EXTRA_BUILD_HTML=${EXTRA_BUILD_HTML:-"@:"}
+
+#------------------------------------------------------------------------
+# Setup configure arguments for bundled packages
+#------------------------------------------------------------------------
+
+PKG_CFG_ARGS="$ac_configure_args ${PKG_CFG_ARGS}"
+
+if test -r "$cache_file" -a -f "$cache_file"; then
+    case $cache_file in
+	[[\\/]]* | ?:[[\\/]]* ) pkg_cache_file=$cache_file ;;
+	*) pkg_cache_file=../../$cache_file ;;
+    esac
+    PKG_CFG_ARGS="${PKG_CFG_ARGS} --cache-file=$pkg_cache_file"
+fi
+
+#------------------------------------------------------------------------
+# Empty slate for bundled packages, to avoid stale configuration
+#------------------------------------------------------------------------
+#rm -Rf pkgs
+if test -f Makefile; then
+    make distclean-packages
+fi
 
 #------------------------------------------------------------------------
 # Handle the --prefix=... option
@@ -72,6 +98,12 @@ AC_C_INLINE
 
 SC_MISSING_POSIX_HEADERS
 
+#--------------------------------------------------------------------
+# Determines the correct executable file extension (.exe)
+#--------------------------------------------------------------------
+
+AC_EXEEXT
+
 #------------------------------------------------------------------------
 # If we're using GCC, see if the compiler understands -pipe.  If so, use it.
 # It makes compiling go faster.  (This is only a performance feature.)
@@ -81,7 +113,7 @@ if test -z "$no_pipe" && test -n "$GCC"; then
     AC_CACHE_CHECK([if the compiler understands -pipe],
 	tcl_cv_cc_pipe, [
 	hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -pipe"
-	AC_TRY_COMPILE(,, tcl_cv_cc_pipe=yes, tcl_cv_cc_pipe=no)
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[tcl_cv_cc_pipe=yes],[tcl_cv_cc_pipe=no])
 	CFLAGS=$hold_cflags])
     if test $tcl_cv_cc_pipe = yes; then
 	CFLAGS="$CFLAGS -pipe"
@@ -110,6 +142,17 @@ SC_TCL_LINK_LIBS
 LIBS="$LIBS$THREADS_LIBS"
 
 SC_ENABLE_SHARED
+
+#--------------------------------------------------------------------
+# Look for a native installed tclsh binary (if available)
+# If one cannot be found then use the binary we build (fails for
+# cross compiling). This is used for NATIVE_TCLSH in Makefile.
+#--------------------------------------------------------------------
+
+SC_PROG_TCLSH
+if test "$TCLSH_PROG" = ""; then
+  TCLSH_PROG='./${TCL_EXE}'
+fi
 
 #--------------------------------------------------------------------
 # The statements below define a collection of compile flags.  This
@@ -149,7 +192,7 @@ AC_CHECK_FUNCS(getcwd, , [AC_DEFINE(USEGETWD, 1, [Is getcwd Posix-compliant?])])
 # Nb: if getcwd uses popen and pwd(1) (like SunOS 4) we should really
 # define USEGETWD even if the posix getcwd exists. Add a test ?
 
-AC_REPLACE_FUNCS(opendir strtol waitpid)
+AC_REPLACE_FUNCS(mkstemp opendir strtol waitpid)
 AC_CHECK_FUNC(strerror, , [AC_DEFINE(NO_STRERROR, 1, [Do we have strerror()])])
 AC_CHECK_FUNC(getwd, , [AC_DEFINE(NO_GETWD, 1, [Do we have getwd()])])
 AC_CHECK_FUNC(wait3, , [AC_DEFINE(NO_WAIT3, 1, [Do we have wait3()])])
@@ -163,7 +206,7 @@ if test "`uname -s`" = "Darwin" && test "${TCL_THREADS}" = 1 && \
 fi
 AC_CHECK_FUNC(realpath, , [AC_DEFINE(NO_REALPATH, 1, [Do we have realpath()])])
 
-SC_TCL_GETADDRINFO
+SC_TCL_IPV6
 
 #--------------------------------------------------------------------
 #	Look for thread-safe variants of some library functions.
@@ -201,12 +244,17 @@ if test "${TCL_THREADS}" = 1; then
 fi
 
 #---------------------------------------------------------------------------
-#	Determine which interface to use to talk to the serial port.
-#	Note that #include lines must begin in leftmost column for
-#	some compilers to recognize them as preprocessor directives.
+#	Check for serial port interface.
+#
+#	termios.h is present on all POSIX systems.
+#	sys/ioctl.h is almost always present, though what it contains
+#	is system-specific.
+#	sys/modem.h is needed on HP-UX.
 #---------------------------------------------------------------------------
 
-SC_SERIAL_PORT
+AC_CHECK_HEADERS(termios.h)
+AC_CHECK_HEADERS(sys/ioctl.h)
+AC_CHECK_HEADERS(sys/modem.h)
 
 #--------------------------------------------------------------------
 #	Include sys/select.h if it exists and if it supplies things
@@ -219,8 +267,8 @@ SC_SERIAL_PORT
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([for fd_set in sys/types], tcl_cv_type_fd_set, [
-    AC_TRY_COMPILE([#include <sys/types.h>],[fd_set readMask, writeMask;],
-	tcl_cv_type_fd_set=yes, tcl_cv_type_fd_set=no)])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>]], [[fd_set readMask, writeMask;]])],
+	[tcl_cv_type_fd_set=yes],[tcl_cv_type_fd_set=no])])
 tcl_ok=$tcl_cv_type_fd_set
 if test $tcl_ok = no; then
     AC_CACHE_CHECK([for fd_mask in sys/select], tcl_cv_grep_fd_mask, [
@@ -248,22 +296,22 @@ SC_TIME_HANDLER
 #--------------------------------------------------------------------
 
 if test "$ac_cv_cygwin" != "yes"; then
-AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
+    AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 fi
 AC_CHECK_TYPES([blkcnt_t])
 AC_CHECK_FUNC(fstatfs, , [AC_DEFINE(NO_FSTATFS, 1, [Do we have fstatfs()?])])
 
 #--------------------------------------------------------------------
-#       Some system have no memcmp or it does not work with 8 bit
-#       data, this checks it and add memcmp.o to LIBOBJS if needed
+#       Some system have no memcmp or it does not work with 8 bit data, this
+#       checks it and add memcmp.o to LIBOBJS if needed
 #--------------------------------------------------------------------
 
 AC_FUNC_MEMCMP
 
 #--------------------------------------------------------------------
-#       Some system like SunOS 4 and other BSD like systems
-#       have no memmove (we assume they have bcopy instead).
-#       {The replacement define is in compat/string.h}
+#       Some system like SunOS 4 and other BSD like systems have no memmove
+#       (we assume they have bcopy instead). {The replacement define is in
+#       compat/string.h}
 #--------------------------------------------------------------------
 
 AC_CHECK_FUNC(memmove, , [
@@ -271,12 +319,11 @@ AC_CHECK_FUNC(memmove, , [
     AC_DEFINE(NO_STRING_H, 1, [Do we have <string.h>?]) ])
 
 #--------------------------------------------------------------------
-#	On some systems strstr is broken: it returns a pointer even
-#	even if the original string is empty.
+#	On some systems strstr is broken: it returns a pointer even even if
+#	the original string is empty.
 #--------------------------------------------------------------------
 
 SC_TCL_CHECK_BROKEN_FUNC(strstr, [
-    extern int strstr();
     exit(strstr("\0test", "test") ? 1 : 0);
 ])
 
@@ -287,20 +334,8 @@ SC_TCL_CHECK_BROKEN_FUNC(strstr, [
 #--------------------------------------------------------------------
 
 SC_TCL_CHECK_BROKEN_FUNC(strtoul, [
-    extern int strtoul();
     char *term, *string = "0";
     exit(strtoul(string,&term,0) != 0 || term != string+1);
-])
-
-#--------------------------------------------------------------------
-#	Check for the strtod function.  This is tricky because in some
-#	versions of Linux strtod mis-parses strings starting with "+".
-#--------------------------------------------------------------------
-
-SC_TCL_CHECK_BROKEN_FUNC(strtod, [
-    extern double strtod();
-    char *term, *string = " +69";
-    exit(strtod(string,&term) != 69 || term != string+4);
 ])
 
 #--------------------------------------------------------------------
@@ -314,12 +349,12 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 AC_CACHE_CHECK([for socklen_t], tcl_cv_type_socklen_t, [
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 	#include <sys/types.h>
 	#include <sys/socket.h>
-    ],[
+    ]], [[
     	socklen_t foo;
-    ],[tcl_cv_type_socklen_t=yes],[tcl_cv_type_socklen_t=no])])
+    ]])],[tcl_cv_type_socklen_t=yes],[tcl_cv_type_socklen_t=no])])
 if test $tcl_cv_type_socklen_t = no; then
     AC_DEFINE(socklen_t, int, [Define as int if socklen_t is not available])
 fi
@@ -374,12 +409,12 @@ AC_CHECK_FUNC(opendir, , [AC_DEFINE(USE_DIRENT2_H, 1, [May we include <dirent2.h
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([union wait], tcl_cv_union_wait, [
-    AC_TRY_LINK([#include <sys/types.h>
-#include <sys/wait.h>], [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <sys/wait.h>]], [[
 union wait x;
 WIFEXITED(x);		/* Generates compiler error if WIFEXITED
 			 * uses an int. */
-    ], tcl_cv_union_wait=yes, tcl_cv_union_wait=no)])
+    ]])],[tcl_cv_union_wait=yes],[tcl_cv_union_wait=no])])
 if test $tcl_cv_union_wait = no; then
     AC_DEFINE(NO_UNION_WAIT, 1, [Do we have a usable 'union wait'?])
 fi
@@ -429,10 +464,10 @@ fi
 
 AC_C_CHAR_UNSIGNED
 AC_CACHE_CHECK([signed char declarations], tcl_cv_char_signed, [
-    AC_TRY_COMPILE(, [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
 	signed char *p;
 	p = 0;
-	], tcl_cv_char_signed=yes, tcl_cv_char_signed=no)])
+	]])],[tcl_cv_char_signed=yes],[tcl_cv_char_signed=no])])
 if test $tcl_cv_char_signed = yes; then
     AC_DEFINE(HAVE_SIGNED_CHAR, 1, [Are characters signed?])
 fi
@@ -442,8 +477,9 @@ fi
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([for a putenv() that copies the buffer], tcl_cv_putenv_copy, [
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdlib.h>
+	#include <string.h>
 	#define OURVAR "havecopy=yes"
 	int main (int argc, char *argv[])
 	{
@@ -460,10 +496,10 @@ AC_CACHE_CHECK([for a putenv() that copies the buffer], tcl_cv_putenv_copy, [
 		return 1;
 	    }
 	}
-    ],
-    tcl_cv_putenv_copy=no,
-    tcl_cv_putenv_copy=yes,
-    tcl_cv_putenv_copy=no)])
+    ]])],
+    [tcl_cv_putenv_copy=no],
+    [tcl_cv_putenv_copy=yes],
+    [tcl_cv_putenv_copy=no])])
 if test $tcl_cv_putenv_copy = yes; then
     AC_DEFINE(HAVE_PUTENV_THAT_COPIES, 1,
 	[Does putenv() copy strings or incorporate them by reference?])
@@ -476,19 +512,19 @@ fi
 SC_ENABLE_LANGINFO
 
 #--------------------------------------------------------------------
-# Check for support of chflags function
+# Check for support of chflags and mkstemps functions
 #--------------------------------------------------------------------
 
-AC_CHECK_FUNCS(chflags)
+AC_CHECK_FUNCS(chflags mkstemps)
 
 #--------------------------------------------------------------------
 # Check for support of isnan() function or macro
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([isnan], tcl_cv_isnan, [
-    AC_TRY_LINK([#include <math.h>], [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]], [[
 isnan(0.0);			/* Generates an error if isnan is missing */
-], tcl_cv_isnan=yes, tcl_cv_isnan=no)])
+]])],[tcl_cv_isnan=yes],[tcl_cv_isnan=no])])
 if test $tcl_cv_isnan = no; then
     AC_DEFINE(NO_ISNAN, 1, [Do we have a usable 'isnan'?])
 fi
@@ -516,7 +552,7 @@ if test "`uname -s`" = "Darwin" ; then
     if test "$ac_cv_header_AvailabilityMacros_h" = yes; then
 	AC_CACHE_CHECK([if weak import is available], tcl_cv_cc_weak_import, [
 	    hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -Werror"
-	    AC_TRY_LINK([
+	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		    #ifdef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 		    #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1020
 		    #error __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1020
@@ -525,8 +561,8 @@ if test "`uname -s`" = "Darwin" ; then
 		    #error MAC_OS_X_VERSION_MIN_REQUIRED < 1020
 		    #endif
 		    int rand(void) __attribute__((weak_import));
-		], [rand();],
-		tcl_cv_cc_weak_import=yes, tcl_cv_cc_weak_import=no)
+		]], [[rand();]])],
+		[tcl_cv_cc_weak_import=yes],[tcl_cv_cc_weak_import=no])
 	    CFLAGS=$hold_cflags])
 	if test $tcl_cv_cc_weak_import = yes; then
 	    AC_DEFINE(HAVE_WEAK_IMPORT, 1, [Is weak import available?])
@@ -534,7 +570,7 @@ if test "`uname -s`" = "Darwin" ; then
 	AC_CACHE_CHECK([if Darwin SUSv3 extensions are available],
 	    tcl_cv_cc_darwin_c_source, [
 	    hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -Werror"
-	    AC_TRY_COMPILE([
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 		    #ifdef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 		    #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1050
 		    #error __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1050
@@ -544,7 +580,7 @@ if test "`uname -s`" = "Darwin" ; then
 		    #endif
 		    #define _DARWIN_C_SOURCE 1
 		    #include <sys/cdefs.h>
-		],,tcl_cv_cc_darwin_c_source=yes, tcl_cv_cc_darwin_c_source=no)
+		]], [[]])],[tcl_cv_cc_darwin_c_source=yes],[tcl_cv_cc_darwin_c_source=no])
 	    CFLAGS=$hold_cflags])
 	if test $tcl_cv_cc_darwin_c_source = yes; then
 	    AC_DEFINE(_DARWIN_C_SOURCE, 1,
@@ -560,28 +596,27 @@ else
 fi
 
 #--------------------------------------------------------------------
-# Check for support of fts functions (readdir replacement)
+#	Check for support of fts functions (readdir replacement)
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([for fts], tcl_cv_api_fts, [
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	    #include <sys/param.h>
 	    #include <sys/stat.h>
 	    #include <fts.h>
-	], [
+	]], [[
 	    char*const p[2] = {"/", NULL};
 	    FTS *f = fts_open(p, FTS_PHYSICAL|FTS_NOCHDIR|FTS_NOSTAT, NULL);
 	    FTSENT *e = fts_read(f); fts_close(f);
-	], tcl_cv_api_fts=yes, tcl_cv_api_fts=no)])
+	]])],[tcl_cv_api_fts=yes],[tcl_cv_api_fts=no])])
 if test $tcl_cv_api_fts = yes; then
     AC_DEFINE(HAVE_FTS, 1, [Do we have fts functions?])
 fi
 
 #--------------------------------------------------------------------
-#	The statements below check for systems where POSIX-style
-#	non-blocking I/O (O_NONBLOCK) doesn't work or is unimplemented.
-#	On these systems (mostly older ones), use the old BSD-style
-#	FIONBIO approach instead.
+#	The statements below check for systems where POSIX-style non-blocking
+#	I/O (O_NONBLOCK) doesn't work or is unimplemented. On these systems
+#	(mostly older ones), use the old BSD-style FIONBIO approach instead.
 #--------------------------------------------------------------------
 
 SC_BLOCKING_STYLE
@@ -590,7 +625,7 @@ SC_BLOCKING_STYLE
 
 AC_MSG_CHECKING([whether to use dll unloading])
 AC_ARG_ENABLE(dll-unloading,
-    AC_HELP_STRING([--enable-dll-unloading],
+    AS_HELP_STRING([--enable-dll-unloading],
 	[enable the 'unload' command (default: on)]),
     [tcl_ok=$enableval], [tcl_ok=yes])
 if test $tcl_ok = yes; then
@@ -601,12 +636,12 @@ AC_MSG_RESULT([$tcl_ok])
 #------------------------------------------------------------------------
 #	Check whether the timezone data is supplied by the OS or has
 #	to be installed by Tcl. The default is autodetection, but can
-#	be overriden on the configure command line either way.
+#	be overridden on the configure command line either way.
 #------------------------------------------------------------------------
 
 AC_MSG_CHECKING([for timezone data])
 AC_ARG_WITH(tzdata,
-    AC_HELP_STRING([--with-tzdata],
+    AS_HELP_STRING([--with-tzdata],
 	[install timezone data (default: autodetect)]),
     [tcl_ok=$withval], [tcl_ok=auto])
 #
@@ -654,7 +689,7 @@ fi
 #--------------------------------------------------------------------
 
 AC_ARG_ENABLE(dtrace,
-    AC_HELP_STRING([--enable-dtrace],
+    AS_HELP_STRING([--enable-dtrace],
 	[build with DTrace support (default: off)]),
     [tcl_ok=$enableval], [tcl_ok=no])
 if test $tcl_ok = yes; then
@@ -717,7 +752,7 @@ fi
 #--------------------------------------------------------------------
 
 AC_CACHE_CHECK([whether the cpuid instruction is usable], tcl_cv_cpuid, [
-    AC_TRY_LINK(, [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[
 	int index,regsPtr[4];
     __asm__ __volatile__("mov %%ebx, %%edi     \n\t"
                  "cpuid            \n\t"
@@ -725,7 +760,7 @@ AC_CACHE_CHECK([whether the cpuid instruction is usable], tcl_cv_cpuid, [
                  "mov %%edi, %%ebx  \n\t"
                  : "=a"(regsPtr[0]), "=S"(regsPtr[1]), "=c"(regsPtr[2]), "=d"(regsPtr[3])
                  : "a"(index) : "edi");
-    ], tcl_cv_cpuid=yes, tcl_cv_cpuid=no)])
+    ]])],[tcl_cv_cpuid=yes],[tcl_cv_cpuid=no])])
 if test $tcl_cv_cpuid = yes; then
     AC_DEFINE(HAVE_CPUID, 1, [Is the cpuid instruction usable?])
 fi
@@ -745,7 +780,7 @@ eval "TCL_LIB_FILE=libtcl${LIB_SUFFIX}"
 
 eval "TCL_LIB_FILE=${TCL_LIB_FILE}"
 
-TCL_LIBRARY='$(prefix)/lib/tcl$(VERSION)'
+test -z "$TCL_LIBRARY" && TCL_LIBRARY='$(prefix)/lib/tcl$(VERSION)'
 PRIVATE_INCLUDE_DIR='$(includedir)'
 HTML_DIR='$(DISTDIR)/html'
 
@@ -758,7 +793,7 @@ if test "`uname -s`" = "Darwin" ; then
     SC_ENABLE_FRAMEWORK
     TCL_SHLIB_LD_EXTRAS="-compatibility_version ${TCL_VERSION} -current_version ${TCL_VERSION}`echo ${TCL_PATCH_LEVEL} | awk ['{match($0, "\\\.[0-9]+"); print substr($0,RSTART,RLENGTH)}']`"
     TCL_SHLIB_LD_EXTRAS="${TCL_SHLIB_LD_EXTRAS}"' -install_name "${DYLIB_INSTALL_DIR}"/${TCL_LIB_FILE}'
-    echo "$LDFLAGS " | grep -q -- '-prebind ' && TCL_SHLIB_LD_EXTRAS="${TCL_SHLIB_LD_EXTRAS}"' -seg1addr 0xa000000'
+    echo "$LDFLAGS " | grep -q -- '-prebind ' && TCL_SHLIB_LD_EXTRAS="${TCL_SHLIB_LD_EXTRAS}"' -seg1addr 0xA000000'
     TCL_SHLIB_LD_EXTRAS="${TCL_SHLIB_LD_EXTRAS}"' -sectcreate __TEXT __info_plist Tcl-Info.plist'
     EXTRA_TCLSH_LIBS='-sectcreate __TEXT __info_plist Tclsh-Info.plist'
     EXTRA_APP_CC_SWITCHES='-mdynamic-no-pic'
@@ -778,6 +813,12 @@ if test "$FRAMEWORK_BUILD" = "1" ; then
         unset n f v
     ], VERSION=${TCL_VERSION})
     LD_LIBRARY_PATH_VAR="DYLD_FRAMEWORK_PATH"
+    # default install directory for bundled packages
+    if test "${libdir}" = '${exec_prefix}/lib' -o "`basename ${libdir}`" = 'Frameworks'; then
+        PACKAGE_DIR="/Library/Tcl"
+    else
+        PACKAGE_DIR="$libdir"
+    fi
     if test "${libdir}" = '${exec_prefix}/lib'; then
         # override libdir default
         libdir="/Library/Frameworks"
@@ -792,7 +833,7 @@ if test "$FRAMEWORK_BUILD" = "1" ; then
     PRIVATE_INCLUDE_DIR="${libdir}/PrivateHeaders"
     HTML_DIR="${libdir}/Resources/Documentation/Reference/Tcl"
     EXTRA_INSTALL="install-private-headers html-tcl"
-    EXTRA_BUILD_HTML='@ln -fs contents.htm "$(HTML_INSTALL_DIR)"/TclTOC.html'
+    EXTRA_BUILD_HTML='@ln -fs contents.htm "$(HTML_INSTALL_DIR)/TclTOC.html"'
     EXTRA_INSTALL_BINARIES='@echo "Installing Info.plist to $(LIB_INSTALL_DIR)/Resources/" && $(INSTALL_DATA_DIR) "$(LIB_INSTALL_DIR)/Resources" && $(INSTALL_DATA) Tcl-Info.plist "$(LIB_INSTALL_DIR)/Resources/Info.plist"'
     EXTRA_INSTALL_BINARIES="$EXTRA_INSTALL_BINARIES"' && echo "Installing license.terms to $(LIB_INSTALL_DIR)/Resources/" && $(INSTALL_DATA) "$(TOP_DIR)/license.terms" "$(LIB_INSTALL_DIR)/Resources"'
     EXTRA_INSTALL_BINARIES="$EXTRA_INSTALL_BINARIES"' && echo "Finalizing Tcl.framework" && rm -f "$(LIB_INSTALL_DIR)/../Current" && ln -s "$(VERSION)" "$(LIB_INSTALL_DIR)/../Current" && for f in "$(LIB_FILE)" tclConfig.sh Resources Headers PrivateHeaders; do rm -f "$(LIB_INSTALL_DIR)/../../$$f" && ln -s "Versions/Current/$$f" "$(LIB_INSTALL_DIR)/../.."; done && f="$(STUB_LIB_FILE)" && rm -f "$(LIB_INSTALL_DIR)/../../$$f" && ln -s "Versions/$(VERSION)/$$f" "$(LIB_INSTALL_DIR)/../.."'
@@ -804,6 +845,8 @@ if test "$FRAMEWORK_BUILD" = "1" ; then
 else
     # libdir must be a fully qualified path and not ${exec_prefix}/lib
     eval libdir="$libdir"
+    # default install directory for bundled packages
+    PACKAGE_DIR="$libdir"
     if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
         TCL_LIB_FLAG="-ltcl${TCL_VERSION}"
     else
@@ -826,13 +869,13 @@ VERSION=${TCL_VERSION}
 
 if test "$FRAMEWORK_BUILD" = "1" ; then
     test -z "$TCL_PACKAGE_PATH" && \
-	TCL_PACKAGE_PATH="~/Library/Tcl /Library/Tcl /System/Library/Tcl ~/Library/Frameworks /Library/Frameworks /System/Library/Frameworks"
+	TCL_PACKAGE_PATH="~/Library/Tcl /Library/Tcl ~/Library/Frameworks /Library/Frameworks"
     test -z "$TCL_MODULE_PATH"  && \
-	TCL_MODULE_PATH="~/Library/Tcl /Library/Tcl /System/Library/Tcl"
+	TCL_MODULE_PATH="~/Library/Tcl /Library/Tcl"
 elif test "$prefix/lib" != "$libdir"; then
-    TCL_PACKAGE_PATH="${libdir} ${prefix}/lib ${TCL_PACKAGE_PATH}"
+    test -z "$TCL_PACKAGE_PATH" && TCL_PACKAGE_PATH="{${libdir}} {${prefix}/lib} ${TCL_PACKAGE_PATH}"
 else
-    TCL_PACKAGE_PATH="${prefix}/lib ${TCL_PACKAGE_PATH}"
+    test -z "$TCL_PACKAGE_PATH" && TCL_PACKAGE_PATH="{${prefix}/lib} ${TCL_PACKAGE_PATH}"
 fi
 
 #--------------------------------------------------------------------
@@ -845,7 +888,7 @@ fi
 #
 eval "TCL_STUB_LIB_FILE=libtclstub${TCL_UNSHARED_LIB_SUFFIX}"
 eval "TCL_STUB_LIB_FILE=\"${TCL_STUB_LIB_FILE}\""
-eval "TCL_STUB_LIB_DIR=${libdir}"
+eval "TCL_STUB_LIB_DIR=\"${libdir}\""
 
 if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
     TCL_STUB_LIB_FLAG="-ltclstub${TCL_VERSION}"
@@ -913,6 +956,7 @@ AC_SUBST(TCL_MODULE_PATH)
 AC_SUBST(TCL_LIBRARY)
 AC_SUBST(PRIVATE_INCLUDE_DIR)
 AC_SUBST(HTML_DIR)
+AC_SUBST(PACKAGE_DIR)
 
 AC_SUBST(EXTRA_CC_SWITCHES)
 AC_SUBST(EXTRA_APP_CC_SWITCHES)
@@ -934,3 +978,7 @@ AC_CONFIG_FILES([
     tcl.pc:../unix/tcl.pc.in
 ])
 AC_OUTPUT
+
+dnl Local Variables:
+dnl mode: autoconf
+dnl End:

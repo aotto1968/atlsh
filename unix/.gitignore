@@ -8,4 +8,5 @@ tcl.pc
 tclConfig.sh
 libtcl8.5.so
 tclsh
+autom4te.cache
 

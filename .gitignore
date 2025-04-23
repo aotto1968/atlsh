@@ -1,2 +1,6 @@
 Makefile.in
 tags
+**/.shortcut
+**/.labelignore
+**/.vimrc
+**/*.sw*
