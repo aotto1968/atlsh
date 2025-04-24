@@ -61,7 +61,7 @@ char *tclEmptyStringRep = &tclEmptyString;
 
 typedef struct ObjData {
     Tcl_Obj *objPtr;		/* The pointer to the allocated Tcl_Obj. */
-    CONST char *file;		/* The name of the source file calling this
+    const char *file;		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line;			/* Line number in the source file; used for
 				 * debugging. */
@@ -166,11 +166,11 @@ typedef struct PendingObjData {
 #ifndef TCL_THREADS
 static PendingObjData pendingObjData;
 #define ObjInitDeletionContext(contextPtr) \
-    PendingObjData *CONST contextPtr = &pendingObjData
+    PendingObjData *const contextPtr = &pendingObjData
 #else
 static Tcl_ThreadDataKey pendingObjDataKey;
 #define ObjInitDeletionContext(contextPtr) \
-    PendingObjData *CONST contextPtr = (PendingObjData *) \
+    PendingObjData *const contextPtr = (PendingObjData *) \
 	    Tcl_GetThreadData(&pendingObjDataKey, sizeof(PendingObjData))
 #endif
 
@@ -942,7 +942,7 @@ Tcl_AppendAllObjTypes(
 
 Tcl_ObjType *
 Tcl_GetObjType(
-    CONST char *typeName)	/* Name of Tcl object type to look up. */
+    const char *typeName)	/* Name of Tcl object type to look up. */
 {
     register Tcl_HashEntry *hPtr;
     Tcl_ObjType *typePtr = NULL;
@@ -1075,7 +1075,7 @@ TclDbDumpActiveObjects(
 void
 TclDbInitNewObj(
     register Tcl_Obj *objPtr,
-    register CONST char *file,	/* The name of the source file calling this
+    register const char *file,	/* The name of the source file calling this
 				 * function; used for debugging. */
     register int line)		/* Line number in the source file; used for
 				 * debugging. */
@@ -1205,7 +1205,7 @@ Tcl_NewObj(void)
 
 Tcl_Obj *
 Tcl_DbNewObj(
-    register CONST char *file,	/* The name of the source file calling this
+    register const char *file,	/* The name of the source file calling this
 				 * function; used for debugging. */
     register int line)		/* Line number in the source file; used for
 				 * debugging. */
@@ -1223,7 +1223,7 @@ Tcl_DbNewObj(
 
 Tcl_Obj *
 Tcl_DbNewObj(
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -1788,7 +1788,7 @@ Tcl_NewBooleanObj(
 Tcl_Obj *
 Tcl_DbNewBooleanObj(
     register int boolValue,	/* Boolean used to initialize new object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -1808,7 +1808,7 @@ Tcl_DbNewBooleanObj(
 Tcl_Obj *
 Tcl_DbNewBooleanObj(
     register int boolValue,	/* Boolean used to initialize new object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2174,7 +2174,7 @@ Tcl_NewDoubleObj(
 Tcl_Obj *
 Tcl_DbNewDoubleObj(
     register double dblValue,	/* Double used to initialize the object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2194,7 +2194,7 @@ Tcl_DbNewDoubleObj(
 Tcl_Obj *
 Tcl_DbNewDoubleObj(
     register double dblValue,	/* Double used to initialize the object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2481,7 +2481,7 @@ Tcl_GetIntFromObj(
     }
     if ((ULONG_MAX > UINT_MAX) && ((l > UINT_MAX) || (l < -(long)UINT_MAX))) {
 	if (interp != NULL) {
-	    CONST char *s =
+	    const char *s =
 		    "integer value too large to represent as non-long integer";
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(s, -1));
 	    Tcl_SetErrorCode(interp, "ARITH", "IOVERFLOW", s, NULL);
@@ -2644,7 +2644,7 @@ Tcl_Obj *
 Tcl_DbNewLongObj(
     register long longValue,	/* Long integer used to initialize the new
 				 * object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2665,7 +2665,7 @@ Tcl_Obj *
 Tcl_DbNewLongObj(
     register long longValue,	/* Long integer used to initialize the new
 				 * object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2947,7 +2947,7 @@ Tcl_DbNewWideIntObj(
     register Tcl_WideInt wideValue,
 				/* Wide integer used to initialize the new
 				 * object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -2966,7 +2966,7 @@ Tcl_DbNewWideIntObj(
     register Tcl_WideInt wideValue,
 				/* Long integer used to initialize the new
 				 * object. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -3313,7 +3313,7 @@ Tcl_NewBignumObj(
 Tcl_Obj *
 Tcl_DbNewBignumObj(
     mp_int *bignumValue,
-    CONST char *file,
+    const char *file,
     int line)
 {
     Tcl_Obj *objPtr;
@@ -3326,7 +3326,7 @@ Tcl_DbNewBignumObj(
 Tcl_Obj *
 Tcl_DbNewBignumObj(
     mp_int *bignumValue,
-    CONST char *file,
+    const char *file,
     int line)
 {
     return Tcl_NewBignumObj(bignumValue);
@@ -3651,7 +3651,7 @@ void
 Tcl_DbIncrRefCount(
     register Tcl_Obj *objPtr,	/* The object we are registering a reference
 				 * to. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -3716,7 +3716,7 @@ void
 Tcl_DbDecrRefCount(
     register Tcl_Obj *objPtr,	/* The object we are releasing a reference
 				 * to. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -3782,7 +3782,7 @@ Tcl_DbDecrRefCount(
 int
 Tcl_DbIsShared(
     register Tcl_Obj *objPtr,	/* The object to test for being shared. */
-    CONST char *file,		/* The name of the source file calling this
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -3918,7 +3918,7 @@ TclCompareObjKeys(
 {
     Tcl_Obj *objPtr1 = (Tcl_Obj *) keyPtr;
     Tcl_Obj *objPtr2 = (Tcl_Obj *) hPtr->key.oneWordValue;
-    register CONST char *p1, *p2;
+    register const char *p1, *p2;
     register int l1, l2;
 
     /*
@@ -4007,7 +4007,7 @@ TclHashObjKey(
     void *keyPtr)		/* Key from which to compute hash value. */
 {
     Tcl_Obj *objPtr = (Tcl_Obj *) keyPtr;
-    CONST char *string = TclGetString(objPtr);
+    const char *string = TclGetString(objPtr);
     int length = objPtr->length;
     unsigned int result = 0;
     int i;

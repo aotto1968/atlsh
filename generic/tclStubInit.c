@@ -537,7 +537,7 @@ TclIntStubs tclIntStubs = {
     TclVarHashCreateVar, /* 234 */
     TclInitVarHashTable, /* 235 */
     TclBackgroundException, /* 236 */
-    NULL, /* 237 */
+    TclResetCancellation, /* 237 */
     NULL, /* 238 */
     NULL, /* 239 */
     NULL, /* 240 */
@@ -1372,9 +1372,9 @@ TclStubs tclStubs = {
     NULL, /* 601 */
     NULL, /* 602 */
     NULL, /* 603 */
-    NULL, /* 604 */
-    NULL, /* 605 */
-    NULL, /* 606 */
+    Tcl_ParseArgsObjv, /* 604 */
+    Tcl_GetErrorLine, /* 605 */
+    Tcl_SetErrorLine, /* 606 */
     NULL, /* 607 */
     NULL, /* 608 */
     NULL, /* 609 */

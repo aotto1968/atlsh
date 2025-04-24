@@ -557,13 +557,13 @@ Tcl_ScanObjCmd(
     ClientData dummy,    	/* Not used. */
     Tcl_Interp *interp,		/* Current interpreter. */
     int objc,			/* Number of arguments. */
-    Tcl_Obj *CONST objv[])	/* Argument objects. */
+    Tcl_Obj *const objv[])	/* Argument objects. */
 {
     char *format;
     int numVars, nconversions, totalVars = -1;
     int objIndex, offset, i, result, code;
     long value;
-    CONST char *string, *end, *baseString;
+    const char *string, *end, *baseString;
     char op = 0;
     int width, underflow = 0;
     Tcl_WideInt wideValue;

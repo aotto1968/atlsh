@@ -88,7 +88,7 @@ static void		StdinProc(ClientData clientData, int mask);
 void
 Tcl_SetStartupScript(
     Tcl_Obj *path,		/* Filesystem path of startup script file */
-    CONST char *encoding)	/* Encoding of the data in that file */
+    const char *encoding)	/* Encoding of the data in that file */
 {
     Tcl_Obj *newEncoding = NULL;
     if (encoding != NULL) {
@@ -124,7 +124,7 @@ Tcl_SetStartupScript(
  *	The path of the startup script; NULL if none has been set.
  *
  * Side effects:
- * 	If encodingPtr is not NULL, stores a (CONST char *) in it pointing to
+ * 	If encodingPtr is not NULL, stores a (const char *) in it pointing to
  * 	the encoding name registered for the startup script. Tcl retains
  * 	ownership of the string, and may free it. Caller should make a copy
  * 	for long-term use.
@@ -134,8 +134,8 @@ Tcl_SetStartupScript(
 
 Tcl_Obj *
 Tcl_GetStartupScript(
-    CONST char **encodingPtr)	/* When not NULL, points to storage for the
-				 * (CONST char *) that points to the
+    const char **encodingPtr)	/* When not NULL, points to storage for the
+				 * (const char *) that points to the
 				 * registered encoding name for the startup
 				 * script */
 {
@@ -217,7 +217,7 @@ TclGetStartupScriptPath(void)
 
 void
 TclSetStartupScriptFileName(
-    CONST char *fileName)
+    const char *fileName)
 {
     Tcl_Obj *path = Tcl_NewStringObj(fileName,-1);
     Tcl_SetStartupScript(path, NULL);
@@ -240,7 +240,7 @@ TclSetStartupScriptFileName(
  *----------------------------------------------------------------------
  */
 
-CONST char *
+const char *
 TclGetStartupScriptFileName(void)
 {
     Tcl_Obj *path = Tcl_GetStartupScript(NULL);
@@ -273,13 +273,13 @@ Tcl_SourceRCFile(
     Tcl_Interp *interp)		/* Interpreter to source rc file into. */
 {
     Tcl_DString temp;
-    CONST char *fileName;
+    const char *fileName;
     Tcl_Channel errChannel;
 
     fileName = Tcl_GetVar(interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
     if (fileName != NULL) {
 	Tcl_Channel c;
-	CONST char *fullName;
+	const char *fullName;
 
 	Tcl_DStringInit(&temp);
 	fullName = Tcl_TranslateFileName(interp, fileName, &temp);
@@ -338,7 +338,7 @@ Tcl_Main(
 				 * but before starting to execute commands. */
 {
     Tcl_Obj *path, *resultPtr, *argvPtr, *commandPtr = NULL;
-    CONST char *encodingName = NULL;
+    const char *encodingName = NULL;
     PromptType prompt = PROMPT_START;
     int code, length, tty, exitCode = 0;
     Tcl_Channel inChannel, outChannel, errChannel;
@@ -382,7 +382,7 @@ Tcl_Main(
     if (path == NULL) {
 	Tcl_ExternalToUtfDString(NULL, argv[0], -1, &appName);
     } else {
-	CONST char *pathName = Tcl_GetStringFromObj(path, &length);
+	const char *pathName = Tcl_GetStringFromObj(path, &length);
 	Tcl_ExternalToUtfDString(NULL, pathName, length, &appName);
 	path = Tcl_NewStringObj(Tcl_DStringValue(&appName), -1);
 	Tcl_SetStartupScript(path, encodingName);

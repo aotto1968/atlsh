@@ -70,7 +70,7 @@ TclpDlopen(
     ldr_module_t lm;
     char *pkg;
     char *fileName = Tcl_GetString(pathPtr);
-    CONST char *native;
+    const char *native;
 
     /*
      * First try the full path the user gave us.  This is particularly
@@ -142,7 +142,7 @@ Tcl_PackageInitProc *
 TclpFindSymbol(
     Tcl_Interp *interp,
     Tcl_LoadHandle loadHandle,
-    CONST char *symbol)
+    const char *symbol)
 {
     return ldr_lookup_package((char *)loadHandle, symbol);
 }
@@ -195,7 +195,7 @@ TclpUnloadFile(
 
 int
 TclGuessPackageName(
-    CONST char *fileName,	/* Name of file containing package (already
+    const char *fileName,	/* Name of file containing package (already
 				 * translated to local form if needed). */
     Tcl_DString *bufPtr)	/* Initialized empty dstring. Append package
 				 * name to this if possible. */

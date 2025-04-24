@@ -190,7 +190,7 @@ proc genStubs::declare {args} {
 	    puts stderr "Duplicate entry: declare $args"
 	}
     }
-    regsub -all const $decl CONST decl
+    regsub -all const $decl const decl
     regsub -all _XCONST $decl _Xconst decl
     regsub -all "\[ \t\n\]+" [string trim $decl] " " decl
     set decl [parseDecl $decl]

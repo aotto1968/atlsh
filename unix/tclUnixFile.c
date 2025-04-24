@@ -13,8 +13,8 @@
 #include "tclInt.h"
 #include "tclFileSystem.h"
 
-static int NativeMatchType(Tcl_Interp *interp, CONST char* nativeEntry,
-	CONST char* nativeName, Tcl_GlobTypeData *types);
+static int NativeMatchType(Tcl_Interp *interp, const char* nativeEntry,
+	const char* nativeName, Tcl_GlobTypeData *types);
 
 /*
  *---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ static int NativeMatchType(Tcl_Interp *interp, CONST char* nativeEntry,
 
 void
 TclpFindExecutable(
-    CONST char *argv0)		/* The value of the application's argv[0]
+    const char *argv0)		/* The value of the application's argv[0]
 				 * (native). */
 {
     Tcl_Encoding encoding;
@@ -220,12 +220,12 @@ TclpMatchInDirectory(
     Tcl_Interp *interp,		/* Interpreter to receive errors. */
     Tcl_Obj *resultPtr,		/* List object to lappend results. */
     Tcl_Obj *pathPtr,		/* Contains path to directory to search. */
-    CONST char *pattern,	/* Pattern to match against. */
+    const char *pattern,	/* Pattern to match against. */
     Tcl_GlobTypeData *types)	/* Object containing list of acceptable types.
 				 * May be NULL. In particular the directory
 				 * flag is very important. */
 {
-    CONST char *native;
+    const char *native;
     Tcl_Obj *fileNamePtr;
     int matchResult = 0;
 
@@ -247,11 +247,11 @@ TclpMatchInDirectory(
 	 * Match a file directly.
 	 */
 	Tcl_Obj *tailPtr;
-	CONST char *nativeTail;
+	const char *nativeTail;
 
-	native = (CONST char*) Tcl_FSGetNativePath(pathPtr);
+	native = (const char*) Tcl_FSGetNativePath(pathPtr);
 	tailPtr = TclPathPart(interp, pathPtr, TCL_PATH_TAIL);
-	nativeTail = (CONST char*) Tcl_FSGetNativePath(tailPtr);
+	nativeTail = (const char*) Tcl_FSGetNativePath(tailPtr);
 	matchResult = NativeMatchType(interp, native, nativeTail, types);
 	if (matchResult == 1) {
 	    Tcl_ListObjAppendElement(interp, resultPtr, pathPtr);
@@ -261,7 +261,7 @@ TclpMatchInDirectory(
     } else {
 	DIR *d;
 	Tcl_DirEntry *entryPtr;
-	CONST char *dirName;
+	const char *dirName;
 	int dirLength;
 	int matchHidden, matchHiddenPat;
 	int nativeDirLen;
@@ -336,7 +336,7 @@ TclpMatchInDirectory(
 		|| (types && (types->perm & TCL_GLOB_PERM_HIDDEN));
 	while ((entryPtr = TclOSreaddir(d)) != NULL) {	/* INTL: Native. */
 	    Tcl_DString utfDs;
-	    CONST char *utfname;
+	    const char *utfname;
 
 	    /*
 	     * Skip this file if it doesn't agree with the hidden parameters
@@ -417,8 +417,8 @@ TclpMatchInDirectory(
 static int
 NativeMatchType(
     Tcl_Interp *interp,       /* Interpreter to receive errors. */
-    CONST char *nativeEntry,  /* Native path to check. */
-    CONST char *nativeName,   /* Native filename to check. */
+    const char *nativeEntry,  /* Native path to check. */
+    const char *nativeName,   /* Native filename to check. */
     Tcl_GlobTypeData *types)  /* Type description to match against. */
 {
     Tcl_StatBuf buf;
@@ -576,13 +576,13 @@ NativeMatchType(
 
 char *
 TclpGetUserHome(
-    CONST char *name,		/* User name for desired home directory. */
+    const char *name,		/* User name for desired home directory. */
     Tcl_DString *bufferPtr)	/* Uninitialized or free DString filled with
 				 * name of user's home directory. */
 {
     struct passwd *pwPtr;
     Tcl_DString ds;
-    CONST char *native;
+    const char *native;
 
     native = Tcl_UtfToExternalDString(NULL, name, -1, &ds);
     pwPtr = TclpGetPwNam(native);			/* INTL: Native. */
@@ -616,7 +616,7 @@ TclpObjAccess(
     Tcl_Obj *pathPtr,		/* Path of file to access */
     int mode)			/* Permission setting. */
 {
-    CONST char *path = Tcl_FSGetNativePath(pathPtr);
+    const char *path = Tcl_FSGetNativePath(pathPtr);
     if (path == NULL) {
 	return -1;
     } else {
@@ -644,7 +644,7 @@ int
 TclpObjChdir(
     Tcl_Obj *pathPtr)		/* Path to new working directory */
 {
-    CONST char *path = Tcl_FSGetNativePath(pathPtr);
+    const char *path = Tcl_FSGetNativePath(pathPtr);
     if (path == NULL) {
 	return -1;
     } else {
@@ -711,7 +711,7 @@ TclpGetNativeCwd(
     {
 	return NULL;
     }
-    if ((clientData != NULL) && strcmp(buffer, (CONST char*)clientData) == 0) {
+    if ((clientData != NULL) && strcmp(buffer, (const char*)clientData) == 0) {
 	/*
 	 * No change to pwd.
 	 */
@@ -746,7 +746,7 @@ TclpGetNativeCwd(
  *----------------------------------------------------------------------
  */
 
-CONST char *
+const char *
 TclpGetCwd(
     Tcl_Interp *interp,		/* If non-NULL, used for error reporting. */
     Tcl_DString *bufferPtr)	/* Uninitialized or free DString filled with
@@ -792,14 +792,14 @@ TclpGetCwd(
 
 char *
 TclpReadlink(
-    CONST char *path,		/* Path of file to readlink (UTF-8). */
+    const char *path,		/* Path of file to readlink (UTF-8). */
     Tcl_DString *linkPtr)	/* Uninitialized or free DString filled with
 				 * contents of link (UTF-8). */
 {
 #ifndef DJGPP
     char link[MAXPATHLEN];
     int length;
-    CONST char *native;
+    const char *native;
     Tcl_DString ds;
 
     native = Tcl_UtfToExternalDString(NULL, path, -1, &ds);
@@ -838,7 +838,7 @@ TclpObjStat(
     Tcl_Obj *pathPtr,		/* Path of file to stat */
     Tcl_StatBuf *bufPtr)	/* Filled with results of stat call. */
 {
-    CONST char *path = Tcl_FSGetNativePath(pathPtr);
+    const char *path = Tcl_FSGetNativePath(pathPtr);
     if (path == NULL) {
 	return -1;
     } else {
@@ -855,8 +855,8 @@ TclpObjLink(
     int linkAction)
 {
     if (toPtr != NULL) {
-	CONST char *src = Tcl_FSGetNativePath(pathPtr);
-	CONST char *target = NULL;
+	const char *src = Tcl_FSGetNativePath(pathPtr);
+	const char *target = NULL;
 
 	if (src == NULL) {
 	    return NULL;
@@ -1050,8 +1050,8 @@ TclpNativeToNormalized(
     Tcl_Obj *objPtr;
     int len;
 
-    CONST char *copy;
-    Tcl_ExternalToUtfDString(NULL, (CONST char*)clientData, -1, &ds);
+    const char *copy;
+    Tcl_ExternalToUtfDString(NULL, (const char*)clientData, -1, &ds);
 
     copy = Tcl_DStringValue(&ds);
     len = Tcl_DStringLength(&ds);
@@ -1160,7 +1160,7 @@ TclNativeDupInternalRep(
      * ASCII representation when running on Unix.
      */
 
-    len = sizeof(char) + (strlen((CONST char*) clientData) * sizeof(char));
+    len = sizeof(char) + (strlen((const char*) clientData) * sizeof(char));
 
     copy = (char *) ckalloc(len);
     memcpy((void *) copy, (void *) clientData, len);

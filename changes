@@ -2751,13 +2751,13 @@ reporting a fix to this problem.)  Also fixed file "mtime" etc. to
 return times from GMT rather than local time zone.  (RJ)
 
 3/18/97 (feature change) Declaration of objv in Tcl_ObjCmdProc function
-changed from "Tcl_Obj *objv[]" to "Tcl_Obj *CONST objv[]".  All Tcl object
+changed from "Tcl_Obj *objv[]" to "Tcl_Obj *const objv[]".  All Tcl object
 commands changed to use new declaration of objv.  Naive translation of
 string-based command procs to object-based command procs could very easily
 have yielded code where the contents of the objv array were changed.  This
 is not a problem with string-based command procs, but doing something as
 simple as objv[2] = objv[3] would corrupt the runtime stack and cause Tcl to
-crash.  Introduced CONST in declaration of objv so that attempted assignment
+crash.  Introduced const in declaration of objv so that attempted assignment
 of new pointer values to elements of the objv array will be caught by the
 compiler. (CCS)
 *** POTENTIAL INCOMPATIBILITY with Tcl 8.0a2 ***
@@ -5093,7 +5093,7 @@ byte compiler execution stack (sofer)
 2001-04-09 (bug fix)[219136,232558] improved use of thread-safe functions in
 unix time commands (kenny)
 
-2001-04-24 (new feature)[TIP 27] started CONST-ification of the Tcl APIs (kenny)
+2001-04-24 (new feature)[TIP 27] started const-ification of the Tcl APIs (kenny)
 
 2001-05-03 (new feature) [auto_import] now matches patterns like
 [namespace import], not like [string match] (porter)
@@ -5425,7 +5425,7 @@ argument to [subst] (sofer, english)
 2002-02-28 (performance enhancement)[458872] fully qualified command names use
 cached Command for all namespaces, avoiding repeated lookups (sofer)
 
- * (new feature)[TIP 27] completed CONST-ification of TCL APIs.
+ * (new feature)[TIP 27] completed const-ification of TCL APIs.
 Added compiler macro USE_NON_CONST to keep using those old API prototypes
 that present irreconcilable source incompatibilities with header files
 of prior Tcl releases.  Others will need to be reconciled.
@@ -5443,7 +5443,7 @@ encodings. (taguchi, takahashi, hobbs)
 
 2002-03-08 (platform feature) mingw 1.1 build favored (dejong)
 
-2002-03-20 (new feature)[TIP 27] CONST-ified variable access functions (porter)
+2002-03-20 (new feature)[TIP 27] const-ified variable access functions (porter)
 
 2002-03-24 (bug fix)[511666,511658,523217,530960] expanded
 Tcl_FSMatchInDirectory to handle assorted [glob] bugs in VFS. (darley)
@@ -5567,7 +5567,7 @@ options to configure (max)
 2002-07-30 (bug fix)[584603] WriteChars infinite loop non-UTF-8 string (kupries)
 
 2002-08-04 (new feature)[584051,580433,585105,582429][TIP 27] Tcl interfaces
-	are now fully CONST-ified.  Use the symbols USE_NON_CONST or
+	are now fully const-ified.  Use the symbols USE_NON_CONST or
 	USE_COMPAT_CONST to select interfaces with fewer changes.
         *** POTENTIAL INCOMPATIBILITY ***
 

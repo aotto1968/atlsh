@@ -895,7 +895,7 @@ declare 227 {
 }
 declare 228 {
     int TclObjInterpProcCore(register Tcl_Interp *interp, Tcl_Obj *procNameObj,
-             int skip, ProcErrorProc errorProc)
+            int skip, ProcErrorProc errorProc)
 }
 declare 229 {
     int	TclPtrMakeUpvar(Tcl_Interp *interp, Var *otherP1Ptr,
@@ -943,6 +943,10 @@ declare 243 {
 declare 249 {
     char *TclDoubleDigits(double dv, int ndigits, int flags,
 			  int *decpt, int *signum, char **endPtr)
+}
+# TIP #285: Script cancellation support.
+declare 237 {
+    int TclResetCancellation(Tcl_Interp *interp, int force)
 }
 
 ##############################################################################

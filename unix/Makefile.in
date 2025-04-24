@@ -817,9 +817,11 @@ install-libraries: libraries $(INSTALL_TZDATA) install-msgs
 	@echo "Installing package msgcat 1.5.2 as a Tcl Module";
 	@$(INSTALL_DATA) $(TOP_DIR)/library/msgcat/msgcat.tcl \
 	        "$(MODULE_INSTALL_DIR)"/../tcl8/8.5/msgcat-1.5.2.tm;
-	@echo "Installing package tcltest 2.3.8 as a Tcl Module";
-	@$(INSTALL_DATA) $(TOP_DIR)/library/tcltest/tcltest.tcl \
+	@echo "Installing package tcltest 2.3.8 and 2.5.3 as a Tcl Module";
+	@$(INSTALL_DATA) $(TOP_DIR)/library/tcltest/tcltest23.tcl \
 	        "$(MODULE_INSTALL_DIR)"/../tcl8/8.5/tcltest-2.3.8.tm;
+	@$(INSTALL_DATA) $(TOP_DIR)/library/tcltest/tcltest25.tcl \
+	        "$(MODULE_INSTALL_DIR)"/../tcl8/8.5/tcltest-2.5.3.tm;
 	@echo "Installing package platform 1.0.14 as a Tcl Module";
 	@$(INSTALL_DATA) $(TOP_DIR)/library/platform/platform.tcl \
 	        "$(MODULE_INSTALL_DIR)"/../tcl8/8.4/platform-1.0.14.tm;
@@ -986,11 +988,9 @@ COMPILEHDR	= $(GENERIC_DIR)/tclCompile.h
 FSHDR		= $(GENERIC_DIR)/tclFileSystem.h
 IOHDR		= $(GENERIC_DIR)/tclIO.h
 MATHHDRS	= $(GENERIC_DIR)/tclTomMath.h $(GENERIC_DIR)/tommath.h
-PARSEHDR	= 
-#PARSEHDR	= $(GENERIC_DIR)/tclParse.h
+PARSEHDR	= $(GENERIC_DIR)/tclParse.h
 NREHDR		= $(GENERIC_DIR)/tclInt.h
-TRIMHDR		= 
-#TRIMHDR		= $(GENERIC_DIR)/tclStringTrim.h
+TRIMHDR		= $(GENERIC_DIR)/tclStringTrim.h
 
 TCL_LOCATIONS	= -DTCL_LIBRARY="\"${TCL_LIBRARY}\"" \
 	-DTCL_PACKAGE_PATH="\"${TCL_PACKAGE_PATH}\""
@@ -1018,7 +1018,7 @@ tclAlloc.o: $(GENERIC_DIR)/tclAlloc.c
 tclAsync.o: $(GENERIC_DIR)/tclAsync.c
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclAsync.c
 
-tclBasic.o: $(GENERIC_DIR)/tclBasic.c $(COMPILEHDR) $(MATHHDRS) $(NREHDR) 
+tclBasic.o: $(GENERIC_DIR)/tclBasic.c $(COMPILEHDR) $(MATHHDRS) $(NREHDR)
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclBasic.c
 
 tclBinary.o: $(GENERIC_DIR)/tclBinary.c
@@ -1180,18 +1180,18 @@ tclPkg.o: $(GENERIC_DIR)/tclPkg.c
 # prefix/exec_prefix but all the different paths individually.
 
 tclPkgConfig.o: $(GENERIC_DIR)/tclPkgConfig.c
-	$(CC) -c $(CC_SWITCHES)					\
+	$(CC) -c $(CC_SWITCHES) \
 		-DCFG_INSTALL_LIBDIR="\"$(LIB_INSTALL_DIR)\"" \
 		-DCFG_INSTALL_BINDIR="\"$(BIN_INSTALL_DIR)\"" \
 		-DCFG_INSTALL_SCRDIR="\"$(SCRIPT_INSTALL_DIR)\"" \
 		-DCFG_INSTALL_INCDIR="\"$(INCLUDE_INSTALL_DIR)\"" \
 		-DCFG_INSTALL_DOCDIR="\"$(MAN_INSTALL_DIR)\"" \
-		\
 		-DCFG_RUNTIME_LIBDIR="\"$(libdir)\"" \
 		-DCFG_RUNTIME_BINDIR="\"$(bindir)\"" \
 		-DCFG_RUNTIME_SCRDIR="\"$(TCL_LIBRARY)\"" \
 		-DCFG_RUNTIME_INCDIR="\"$(includedir)\"" \
 		-DCFG_RUNTIME_DOCDIR="\"$(mandir)\"" \
+		-DCFG_RUNTIME_DLLFILE="\"$(TCL_LIB_FILE)\"" \
 		\
 		$(GENERIC_DIR)/tclPkgConfig.c
 
@@ -1201,7 +1201,7 @@ tclPosixStr.o: $(GENERIC_DIR)/tclPosixStr.c
 tclPreserve.o: $(GENERIC_DIR)/tclPreserve.c
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclPreserve.c
 
-tclProc.o: $(GENERIC_DIR)/tclProc.c $(COMPILEHDR)
+tclProc.o: $(GENERIC_DIR)/tclProc.c $(COMPILEHDR) $(NREHDR)
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclProc.c
 
 tclRegexp.o: $(GENERIC_DIR)/tclRegexp.c $(TCLREHDRS)
@@ -1228,7 +1228,7 @@ tclStubInit.o: $(GENERIC_DIR)/tclStubInit.c
 tclTrace.o: $(GENERIC_DIR)/tclTrace.c
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclTrace.c
 
-tclUtil.o: $(GENERIC_DIR)/tclUtil.c
+tclUtil.o: $(GENERIC_DIR)/tclUtil.c $(PARSEHDR) $(TRIMHDR)
 	$(CC) -c $(CC_SWITCHES) $(GENERIC_DIR)/tclUtil.c
 
 tclUtf.o: $(GENERIC_DIR)/tclUtf.c $(GENERIC_DIR)/tclUniData.c

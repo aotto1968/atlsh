@@ -8457,7 +8457,7 @@ Tcl_FileEventObjCmd(
     int modeIndex;		/* Index of mode argument. */
     int mask;
     static const char *modeOptions[] = {"readable", "writable", NULL};
-    static CONST int maskArray[] = {TCL_READABLE, TCL_WRITABLE};
+    static const int maskArray[] = {TCL_READABLE, TCL_WRITABLE};
 
     if ((objc != 3) && (objc != 4)) {
 	Tcl_WrongNumArgs(interp, 1, objv, "channelId event ?script?");

@@ -174,8 +174,8 @@ static char pkgPath[sizeof(TCL_PACKAGE_PATH)+200] = TCL_PACKAGE_PATH;
  */
 
 typedef struct LocaleTable {
-    CONST char *lang;
-    CONST char *encoding;
+    const char *lang;
+    const char *encoding;
 } LocaleTable;
 
 /*
@@ -188,7 +188,7 @@ typedef struct LocaleTable {
  * among existing platforms.
  */
 
-static CONST LocaleTable localeTable[] = {
+static const LocaleTable localeTable[] = {
 	    {"",		"iso8859-1"},
 		    {"ansi-1251",	"cp1251"},
 	    {"ansi_x3.4-1968",	"iso8859-1"},
@@ -527,7 +527,7 @@ TclpInitLibraryPath(
 {
 #define LIBRARY_SIZE	    32
     Tcl_Obj *pathPtr, *objPtr;
-    CONST char *str;
+    const char *str;
     Tcl_DString buffer;
 
     pathPtr = Tcl_NewObj();
@@ -546,7 +546,7 @@ TclpInitLibraryPath(
     if ((str != NULL) && (str[0] != '\0')) {
 	Tcl_DString ds;
 	int pathc;
-	CONST char **pathv;
+	const char **pathv;
 	char installLib[LIBRARY_SIZE];
 
 	Tcl_DStringInit(&ds);
@@ -659,9 +659,9 @@ TclpSetInterfaces(void)
     /* do nothing */
 }
 
-static CONST char *
+static const char *
 SearchKnownEncodings(
-    CONST char *encoding)
+    const char *encoding)
 {
     int left = 0;
     int right = sizeof(localeTable)/sizeof(LocaleTable);
@@ -682,12 +682,12 @@ SearchKnownEncodings(
     return NULL;
 }
 
-CONST char *
+const char *
 Tcl_GetEncodingNameFromEnvironment(
     Tcl_DString *bufPtr)
 {
-    CONST char *encoding;
-    CONST char *knownEncoding;
+    const char *encoding;
+    const char *knownEncoding;
 
     Tcl_DStringInit(bufPtr);
 
@@ -743,7 +743,7 @@ Tcl_GetEncodingNameFromEnvironment(
     }
 
     if (encoding != NULL) {
-	CONST char *p;
+	const char *p;
 	Tcl_DString ds;
 
 	Tcl_DStringInit(&ds);
@@ -852,7 +852,7 @@ TclpSetVariables(
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED > 1020 */
 
     if (MacOSXGetLibraryPath(interp, MAXPATHLEN, tclLibPath) == TCL_OK) {
-	CONST char *str;
+	const char *str;
 	CFBundleRef bundleRef;
 
 	Tcl_SetVar(interp, "tclDefaultLibrary", tclLibPath, TCL_GLOBAL_ONLY);
@@ -958,7 +958,7 @@ TclpSetVariables(
 
 #elif !defined NO_UNAME
     if (uname(&name) >= 0) {
-	CONST char *native;
+	const char *native;
 
 	unameOK = 1;
 
@@ -1055,7 +1055,7 @@ TclpSetVariables(
 
 int
 TclpFindVariable(
-    CONST char *name,		/* Name of desired environment variable
+    const char *name,		/* Name of desired environment variable
 				 * (native). */
     int *lengthPtr)		/* Used to return length of name (for
 				 * successful searches) or number of non-NULL
@@ -1063,7 +1063,7 @@ TclpFindVariable(
 				 * searches). */
 {
     int i, result = -1;
-    register CONST char *env, *p1, *p2;
+    register const char *env, *p1, *p2;
     Tcl_DString envString;
 
     Tcl_DStringInit(&envString);

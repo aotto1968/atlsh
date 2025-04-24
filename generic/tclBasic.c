@@ -166,7 +166,9 @@ static const CmdInfo builtInCmds[] = {
     {"split",		Tcl_SplitObjCmd,	NULL,			1},
     {"subst",		Tcl_SubstObjCmd,	NULL,			1},
     {"switch",		Tcl_SwitchObjCmd,	TclCompileSwitchCmd,	1},
+    {"throw",           Tcl_ThrowObjCmd,        NULL,                   1},
     {"trace",		Tcl_TraceObjCmd,	NULL,			1},
+    {"try",             Tcl_TryObjCmd,          NULL,                   1},
     {"unset",		Tcl_UnsetObjCmd,	NULL,			1},
     {"uplevel",		Tcl_UplevelObjCmd,	NULL,			1},
     {"upvar",		Tcl_UpvarObjCmd,	TclCompileUpvarCmd,	1},
@@ -3530,6 +3532,41 @@ TclInterpReady(
 /*
  *----------------------------------------------------------------------
  *
+ * TclResetCancellation --
+ *
+ *	Reset the script cancellation flags if the nesting level
+ *	(iPtr->numLevels) for the interp is zero or argument force is
+ *	non-zero.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	The script cancellation flags for the interp may be reset.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+TclResetCancellation(
+    Tcl_Interp *interp,
+    int force)
+{
+    Interp *iPtr = (Interp *) interp;
+
+    if (iPtr == NULL) {
+	return TCL_ERROR;
+    }
+
+    if (force || (iPtr->numLevels == 0)) {
+	TclUnsetCancelFlags(iPtr);
+    }
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * TclEvalObjvInternal
  *
  *	This function evaluates a Tcl command that has already been parsed
@@ -4103,7 +4140,7 @@ TclEvalEx(
 				 * TCL_EVAL_GLOBAL is currently supported. */
     int line,			/* The line the script starts on. */
     int*  clNextOuter,       /* Information about an outer context for */
-    CONST char* outerScript) /* continuation line data. This is set only in
+    const char* outerScript) /* continuation line data. This is set only in
 			      * TclSubstTokens(), to properly handle
 			      * [...]-nested commands. The 'outerScript'
 			      * refers to the most-outer script containing the

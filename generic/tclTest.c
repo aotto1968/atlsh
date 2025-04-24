@@ -442,7 +442,7 @@ static int		TestHashSystemHashCmd(ClientData clientData,
 #if defined(HAVE_CPUID) || defined(__WIN32__)
 static int		TestcpuidCmd (ClientData dummy,
 			    Tcl_Interp* interp, int objc,
-			    Tcl_Obj *CONST objv[]);
+			    Tcl_Obj *const objv[]);
 #endif
 
 static Tcl_Filesystem testReportingFilesystem = {
@@ -3271,7 +3271,7 @@ TestlocaleCmd(
     	"ctype", "numeric", "time", "collate", "monetary",
 	"all",	NULL
     };
-    static CONST int lcTypes[] = {
+    static const int lcTypes[] = {
 	LC_CTYPE, LC_NUMERIC, LC_TIME, LC_COLLATE, LC_MONETARY,
 	LC_ALL
     };
@@ -7581,6 +7581,7 @@ TestconcatobjCmd(
     }
     return result;
 }
+
 
 /*
  * Local Variables:

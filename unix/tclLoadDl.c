@@ -64,7 +64,7 @@ TclpDlopen(
 				 * file. */
 {
     void *handle;
-    CONST char *native;
+    const char *native;
 
     /*
      * First try the full path the user gave us. This is particularly
@@ -133,9 +133,9 @@ Tcl_PackageInitProc *
 TclpFindSymbol(
     Tcl_Interp *interp,		/* Place to put error messages. */
     Tcl_LoadHandle loadHandle,	/* Value from TcpDlopen(). */
-    CONST char *symbol)		/* Symbol to look up. */
+    const char *symbol)		/* Symbol to look up. */
 {
-    CONST char *native;
+    const char *native;
     Tcl_DString newName, ds;
     VOID *handle = (VOID*)loadHandle;
     Tcl_PackageInitProc *proc;
@@ -214,7 +214,7 @@ TclpUnloadFile(
 
 int
 TclGuessPackageName(
-    CONST char *fileName,	/* Name of file containing package (already
+    const char *fileName,	/* Name of file containing package (already
 				 * translated to local form if needed). */
     Tcl_DString *bufPtr)	/* Initialized empty dstring. Append package
 				 * name to this if possible. */

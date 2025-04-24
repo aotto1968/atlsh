@@ -3905,7 +3905,7 @@ TclCompileSwitchCmd(
      */
 
     if (numWords == 1) {
-	CONST char *bytes;
+	const char *bytes;
 	int maxLen, numBytes;
 	int bline;		/* TIP #280: line of the pattern/action list,
 				 * and start of list for when tracking the
@@ -3932,7 +3932,7 @@ TclCompileSwitchCmd(
 	numWords = 0;
 
 	while (numBytes > 0) {
-	    CONST char *prevBytes = bytes;
+	    const char *prevBytes = bytes;
 	    int literal;
 
 	    if (TCL_OK != TclFindElement(NULL, bytes, numBytes,
@@ -5703,7 +5703,7 @@ TclCompileUpvarCmd(
     tokenPtr = TokenAfter(parsePtr->tokenPtr);
     if(TclWordKnownAtCompileTime(tokenPtr, objPtr)) {
 	CallFrame *framePtr;
-	Tcl_ObjType *newTypePtr, *typePtr = objPtr->typePtr;
+	const Tcl_ObjType *newTypePtr, *typePtr = objPtr->typePtr;
 
 	/*
 	 * Attempt to convert to a level reference. Note that TclObjGetFrame

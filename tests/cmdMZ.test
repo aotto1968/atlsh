@@ -57,10 +57,10 @@ test cmdMZ-1.4 {Tcl_PwdObjCmd: failure} {unix nonPortable} {
 
 test cmdMZ-2.1 {Tcl_RenameObjCmd: error conditions} {
     list [catch {rename r1} msg] $msg $::errorCode
-} {1 {wrong # args: should be "rename oldName newName"} NONE}
+} {1 {wrong # args: should be "rename oldName newName"} {TCL WRONGARGS}}
 test cmdMZ-2.2 {Tcl_RenameObjCmd: error conditions} {
     list [catch {rename r1 r2 r3} msg] $msg $::errorCode
-} {1 {wrong # args: should be "rename oldName newName"} NONE}
+} {1 {wrong # args: should be "rename oldName newName"} {TCL WRONGARGS}}
 test cmdMZ-2.3 {Tcl_RenameObjCmd: success} {
     catch {rename r2 {}}
     proc r1 {} {return "r1"}
@@ -266,10 +266,10 @@ test cmdMZ-3.6 {Tcl_SourceObjCmd: simple script} {
 
 test cmdMZ-4.1 {Tcl_SplitObjCmd: split errors} {
     list [catch split msg] $msg $::errorCode
-} {1 {wrong # args: should be "split string ?splitChars?"} NONE}
+} {1 {wrong # args: should be "split string ?splitChars?"} {TCL WRONGARGS}}
 test cmdMZ-4.2 {Tcl_SplitObjCmd: split errors} {
     list [catch {split a b c} msg] $msg $::errorCode
-} {1 {wrong # args: should be "split string ?splitChars?"} NONE}
+} {1 {wrong # args: should be "split string ?splitChars?"} {TCL WRONGARGS}}
 test cmdMZ-4.3 {Tcl_SplitObjCmd: basic split commands} {
     split "a\n b\t\r c\n "
 } {a {} b {} {} c {} {}}

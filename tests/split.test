@@ -73,10 +73,10 @@ test split-1.14 {basic split commands} {
 
 test split-2.1 {split errors} {
     list [catch split msg] $msg $errorCode
-} {1 {wrong # args: should be "split string ?splitChars?"} NONE}
+} {1 {wrong # args: should be "split string ?splitChars?"} {TCL WRONGARGS}}
 test split-2.2 {split errors} {
     list [catch {split a b c} msg] $msg $errorCode
-} {1 {wrong # args: should be "split string ?splitChars?"} NONE}
+} {1 {wrong # args: should be "split string ?splitChars?"} {TCL WRONGARGS}}
 
 # cleanup
 catch {rename foo {}}

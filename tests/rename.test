@@ -54,10 +54,10 @@ test rename-2.1 {renaming built-in command} {
 
 test rename-3.1 {error conditions} {
     list [catch {rename r1} msg] $msg $errorCode
-} {1 {wrong # args: should be "rename oldName newName"} NONE}
+} {1 {wrong # args: should be "rename oldName newName"} {TCL WRONGARGS}}
 test rename-3.2 {error conditions} {
     list [catch {rename r1 r2 r3} msg] $msg $errorCode
-} {1 {wrong # args: should be "rename oldName newName"} NONE}
+} {1 {wrong # args: should be "rename oldName newName"} {TCL WRONGARGS}}
 test rename-3.3 {error conditions} {
     proc r1 {} {}
     proc r2 {} {}

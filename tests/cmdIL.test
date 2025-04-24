@@ -9,7 +9,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2
+    package require tcltest 2.3
     namespace import -force ::tcltest::*
 }
 
@@ -18,10 +18,10 @@ testConstraint memory [llength [info commands memory]]
 
 test cmdIL-1.1 {Tcl_LsortObjCmd procedure} {
     list [catch {lsort} msg] $msg
-} {1 {wrong # args: should be "lsort ?options? list"}}
+} {1 {wrong # args: should be "lsort ?-option value ...? list"}}
 test cmdIL-1.2 {Tcl_LsortObjCmd procedure} {
     list [catch {lsort -foo {1 3 2 5}} msg] $msg
-} {1 {bad option "-foo": must be -ascii, -command, -decreasing, -dictionary, -increasing, -index, -indices, -integer, -nocase, -real, or -unique}}
+} {1 {bad option "-foo": must be -ascii, -command, -decreasing, -dictionary, -increasing, -index, -indices, -integer, -nocase, -real, -stride, or -unique}}
 test cmdIL-1.3 {Tcl_LsortObjCmd procedure, default options} {
     lsort {d e c b a \{ d35 d300}
 } {a b c d d300 d35 e \{}
@@ -454,15 +454,15 @@ test cmdIL-6.1 {lassign command syntax} -body {
     testLassign
 } -returnCodes 1 -cleanup {
     rename testLassign {}
-} -result {wrong # args: should be "lassign list varName ?varName ...?"}
+} -result {wrong # args: should be "lassign list ?varName ...?"}
 test cmdIL-6.2 {lassign command syntax} -body {
     proc testLassign {} {
 	lassign x
     }
     testLassign
-} -returnCodes 1 -cleanup {
+} -returnCodes 0 -cleanup {
     rename testLassign {}
-} -result {wrong # args: should be "lassign list varName ?varName ...?"}
+} 
 test cmdIL-6.3 {lassign command} -body {
     proc testLassign {} {
 	set x FAIL
@@ -585,16 +585,16 @@ test cmdIL-6.13 {lassign command syntax} -body {
     testLassign
 } -returnCodes 1 -cleanup {
     rename testLassign {}
-} -result {wrong # args: should be "lassign list varName ?varName ...?"}
+} -result {wrong # args: should be "lassign list ?varName ...?"}
 test cmdIL-6.14 {lassign command syntax} -body {
     proc testLassign {} {
 	set lassign lassign
 	$lassign x
     }
     testLassign
-} -returnCodes 1 -cleanup {
+} -returnCodes 0 -cleanup {
     rename testLassign {}
-} -result {wrong # args: should be "lassign list varName ?varName ...?"}
+} 
 test cmdIL-6.15 {lassign command} -body {
     proc testLassign {} {
 	set lassign lassign

@@ -43,7 +43,7 @@ typedef struct CmdTable
  */
 
 static int	ProcBodyTestProcObjCmd(ClientData dummy,
-			Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+			Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static int	ProcBodyTestInitInternal(Tcl_Interp *interp, int isSafe);
 static int	RegisterCommand(Tcl_Interp* interp,
 			const char *namespace, const CmdTable *cmdTablePtr);
@@ -55,12 +55,12 @@ int             Procbodytest_SafeInit(Tcl_Interp * interp);
  * declarations of the enable command procedure.
  */
 
-static CONST CmdTable commands[] = {
+static const CmdTable commands[] = {
     { procCommand,	ProcBodyTestProcObjCmd,	1 },
     { 0, 0, 0 }
 };
 
-static CONST CmdTable safeCommands[] = {
+static const CmdTable safeCommands[] = {
     { procCommand,	ProcBodyTestProcObjCmd,	1 },
     { 0, 0, 0 }
 };
@@ -174,7 +174,7 @@ ProcBodyTestInitInternal(
                                  * is initialized */
     int isSafe)			/* 1 if this is a safe interpreter */
 {
-    CONST CmdTable *cmdTablePtr;
+    const CmdTable *cmdTablePtr;
 
     cmdTablePtr = (isSafe) ? &safeCommands[0] : &commands[0];
     for ( ; cmdTablePtr->cmdName ; cmdTablePtr++) {

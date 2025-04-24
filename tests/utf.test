@@ -9,7 +9,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2
+    package require tcltest 2.3
     namespace import -force ::tcltest::*
 }
 
@@ -134,15 +134,15 @@ test utf-10.4 {Tcl_UtfBackslash: stops at first non-hex} {
 test utf-10.5 {Tcl_UtfBackslash: stops after 4 hex chars} {
     set x \u4e216
 } "[bytestring \xe4\xb8\xa1]6"
-proc bsCheck {char num} {
+proc bsCheck {char num {constraints {}}} {
     global errNum
-    test utf-10.$errNum {backslash substitution} {
+    test utf-10.$errNum {backslash substitution} $constraints {
 	scan $char %c value
 	set value
     } $num
     incr errNum
 }
-set errNum 6
+set errNum 8
 bsCheck \b	8
 bsCheck \e	101
 bsCheck \f	12
@@ -171,15 +171,35 @@ bsCheck \x	120
 bsCheck \xa	10
 bsCheck \xA	10
 bsCheck \x41	65
-bsCheck \x541	65
+bsCheck \x541	65	pre388	;# == \x41
+bsCheck \x541	84	!pre388	;# == \x54 1
 bsCheck \u	117
 bsCheck \uk	117
 bsCheck \u41	65
 bsCheck \ua	10
 bsCheck \uA	10
 bsCheck \340	224
-bsCheck \ua1	161
-bsCheck \u4e21	20001
+bsCheck \uA1	161
+bsCheck \u4E21	20001
+bsCheck \741    225	pre388	;# == \341
+bsCheck \741    60	!pre388	;# == \74 1
+bsCheck \U      85
+bsCheck \Uk     85
+bsCheck \U41    65			Uesc
+bsCheck \Ua     10			Uesc
+bsCheck \UA     10			Uesc
+bsCheck \UA1    161			Uesc
+bsCheck \U4E21  20001			Uesc
+bsCheck \U004E21        20001		Uesc
+bsCheck \U00004E21      20001		Uesc
+bsCheck \U0000004E21    78		Uesc
+bsCheck \U00110000      69632		fullutf
+bsCheck \U01100000      69632		fullutf
+bsCheck \U11000000      69632		fullutf
+bsCheck \U0010FFFF      1114111		fullutf
+bsCheck \U010FFFF0      1114111		fullutf
+bsCheck \U10FFFF00      1114111		fullutf
+bsCheck \UFFFFFFFF      1048575		fullutf
 
 test utf-11.1 {Tcl_UtfToUpper} {
     string toupper {}

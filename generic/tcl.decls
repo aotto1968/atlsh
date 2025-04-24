@@ -153,7 +153,7 @@ declare 35 {
 }
 declare 36 {
     int Tcl_GetIndexFromObj(Tcl_Interp *interp, Tcl_Obj *objPtr,
-	    CONST84 char **tablePtr, const char *msg, int flags, int *indexPtr)
+	    CONST84 char *const *tablePtr, const char *msg, int flags, int *indexPtr)
 }
 declare 37 {
     int Tcl_GetInt(Tcl_Interp *interp, const char *src, int *intPtr)
@@ -2107,6 +2107,20 @@ declare 578 {
 }
 declare 579 {
     void Tcl_AppendPrintfToObj(Tcl_Obj *objPtr, const char *format, ...)
+}
+
+# TIP#265 (option parser) dkf for Sam Bromley
+declare 604 {
+    int Tcl_ParseArgsObjv(Tcl_Interp *interp, const Tcl_ArgvInfo *argTable,
+	    int *objcPtr, Tcl_Obj *const *objv, Tcl_Obj ***remObjv)
+}
+
+# TIP#336 (manipulate the error line) dgp
+declare 605 {
+    int Tcl_GetErrorLine(Tcl_Interp *interp)
+}
+declare 606 {
+    void Tcl_SetErrorLine(Tcl_Interp *interp, int lineNum)
 }
 declare 630 {
     void TclUnusedStubEntry(void)

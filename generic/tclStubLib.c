@@ -43,14 +43,14 @@ TclTomMathStubs* tclTomMathStubsPtr = NULL;
  *----------------------------------------------------------------------
  */
 #undef Tcl_InitStubs
-CONST char *
+const char *
 Tcl_InitStubs(
     Tcl_Interp *interp,
-    CONST char *version,
+    const char *version,
     int exact)
 {
     Interp *iPtr = (Interp *) interp;
-    CONST char *actualVersion = NULL;
+    const char *actualVersion = NULL;
     ClientData pkgData = NULL;
     TclStubs *stubsPtr = iPtr->stubTable;
 
@@ -71,14 +71,14 @@ Tcl_InitStubs(
 	return NULL;
     }
     if (exact) {
-	CONST char *p = version;
+	const char *p = version;
 	int count = 0;
 
 	while (*p) {
 	    count += !ISDIGIT(*p++);
 	}
 	if (count == 1) {
-	    CONST char *q = actualVersion;
+	    const char *q = actualVersion;
 
 	    p = version;
 	    while (*p && (*p == *q)) {
@@ -130,10 +130,10 @@ Tcl_InitStubs(
 
 #undef TclTomMathInitializeStubs
 
-CONST char*
+const char*
 TclTomMathInitializeStubs(
     Tcl_Interp* interp,		/* Tcl interpreter */
-    CONST char* version,	/* Tcl version needed */
+    const char* version,	/* Tcl version needed */
     int epoch,			/* Stubs table epoch from the header files */
     int revision		/* Stubs table revision number from the
 				 * header files */

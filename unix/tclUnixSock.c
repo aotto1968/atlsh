@@ -40,7 +40,7 @@ InitializeHostName(
     int *lengthPtr,
     Tcl_Encoding *encodingPtr)
 {
-    CONST char *native = NULL;
+    const char *native = NULL;
 
 #ifndef NO_UNAME
     struct utsname u;
@@ -127,7 +127,7 @@ InitializeHostName(
  *----------------------------------------------------------------------
  */
 
-CONST char *
+const char *
 Tcl_GetHostName(void)
 {
     return Tcl_GetString(TclGetProcessGlobalValue(&hostName));

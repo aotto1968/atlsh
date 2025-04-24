@@ -15,7 +15,7 @@
 # the "testthread" command indicates that this is the case.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2
+    package require tcltest 2.3
     namespace import -force ::tcltest::*
 }
 

@@ -125,7 +125,7 @@ struct vars {
 /* =====^!^===== begin forwards =====^!^===== */
 /* automatically gathered by fwd; do not hand-edit */
 /* === regexec.c === */
-int exec(regex_t *, CONST chr *, size_t, rm_detail_t *, size_t, regmatch_t [], int);
+int exec(regex_t *, const chr *, size_t, rm_detail_t *, size_t, regmatch_t [], int);
 static int find(struct vars *, struct cnfa *, struct colormap *);
 static int cfind(struct vars *, struct cnfa *, struct colormap *);
 static int cfindloop(struct vars *, struct cnfa *, struct colormap *, struct dfa *, struct dfa *, chr **);
@@ -157,13 +157,13 @@ static struct sset *pickss(struct vars *, struct dfa *, chr *, chr *);
 
 /*
  - exec - match regular expression
- ^ int exec(regex_t *, CONST chr *, size_t, rm_detail_t *,
+ ^ int exec(regex_t *, const chr *, size_t, rm_detail_t *,
  ^					size_t, regmatch_t [], int);
  */
 int
 exec(
     regex_t *re,
-    CONST chr *string,
+    const chr *string,
     size_t len,
     rm_detail_t *details,
     size_t nmatch,

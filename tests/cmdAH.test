@@ -1335,10 +1335,10 @@ catch {file attributes $gorpfile -permissions 0765}
 
 test cmdAH-28.1 {Tcl_FileObjCmd: stat} {
     list [catch {file stat _bogus_} msg] $msg $errorCode
-} {1 {wrong # args: should be "file stat name varName"} NONE}
+} {1 {wrong # args: should be "file stat name varName"} {TCL WRONGARGS}}
 test cmdAH-28.2 {Tcl_FileObjCmd: stat} {
     list [catch {file stat _bogus_ a b} msg] $msg $errorCode
-} {1 {wrong # args: should be "file stat name varName"} NONE}
+} {1 {wrong # args: should be "file stat name varName"} {TCL WRONGARGS}}
 test cmdAH-28.3 {Tcl_FileObjCmd: stat} {
     catch {unset stat}
     set stat(blocks) [set stat(blksize) {}]

@@ -18,8 +18,8 @@
  */
 
 static List *		AttemptNewList(Tcl_Interp *interp, int objc,
-			    Tcl_Obj *CONST objv[]);
-static List *		NewListIntRep(int objc, Tcl_Obj *CONST objv[], int p);
+			    Tcl_Obj *const objv[]);
+static List *		NewListIntRep(int objc, Tcl_Obj *const objv[], int p);
 static void		DupListInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr);
 static void		FreeListInternalRep(Tcl_Obj *listPtr);
 static int		SetListFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr);
@@ -72,7 +72,7 @@ Tcl_ObjType tclListType = {
 static List *
 NewListIntRep(
     int objc,
-    Tcl_Obj *CONST objv[],
+    Tcl_Obj *const objv[],
     int p)
 {
     List *listRepPtr;
@@ -152,7 +152,7 @@ static List *
 AttemptNewList(
     Tcl_Interp *interp,
     int objc,
-    Tcl_Obj *CONST objv[])
+    Tcl_Obj *const objv[])
 {
     List *listRepPtr = NewListIntRep(objc, objv, 0);
 
@@ -202,7 +202,7 @@ AttemptNewList(
 Tcl_Obj *
 Tcl_NewListObj(
     int objc,			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[])	/* An array of pointers to Tcl objects. */
+    Tcl_Obj *const objv[])	/* An array of pointers to Tcl objects. */
 {
     return Tcl_DbNewListObj(objc, objv, "unknown", 0);
 }
@@ -212,7 +212,7 @@ Tcl_NewListObj(
 Tcl_Obj *
 Tcl_NewListObj(
     int objc,			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[])	/* An array of pointers to Tcl objects. */
+    Tcl_Obj *const objv[])	/* An array of pointers to Tcl objects. */
 {
     List *listRepPtr;
     Tcl_Obj *listPtr;
@@ -273,8 +273,8 @@ Tcl_NewListObj(
 Tcl_Obj *
 Tcl_DbNewListObj(
     int objc,			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[],	/* An array of pointers to Tcl objects. */
-    CONST char *file,		/* The name of the source file calling this
+    Tcl_Obj *const objv[],	/* An array of pointers to Tcl objects. */
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -309,8 +309,8 @@ Tcl_DbNewListObj(
 Tcl_Obj *
 Tcl_DbNewListObj(
     int objc,			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[],	/* An array of pointers to Tcl objects. */
-    CONST char *file,		/* The name of the source file calling this
+    Tcl_Obj *const objv[],	/* An array of pointers to Tcl objects. */
+    const char *file,		/* The name of the source file calling this
 				 * function; used for debugging. */
     int line)			/* Line number in the source file; used for
 				 * debugging. */
@@ -345,7 +345,7 @@ void
 Tcl_SetListObj(
     Tcl_Obj *objPtr,		/* Object whose internal rep to init. */
     int objc,			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[])	/* An array of pointers to Tcl objects. */
+    Tcl_Obj *const objv[])	/* An array of pointers to Tcl objects. */
 {
     List *listRepPtr;
 
@@ -800,7 +800,7 @@ Tcl_ListObjReplace(
     int first,			/* Index of first element to replace. */
     int count,			/* Number of elements to replace. */
     int objc,			/* Number of objects to insert. */
-    Tcl_Obj *CONST objv[])	/* An array of objc pointers to Tcl objects to
+    Tcl_Obj *const objv[])	/* An array of objc pointers to Tcl objects to
 				 * insert. */
 {
     List *listRepPtr;
@@ -1800,18 +1800,16 @@ SetListFromAny(
  *
  * UpdateStringOfList --
  *
- *	Update the string representation for a list object. Note: This
- *	function does not invalidate an existing old string rep so storage
- *	will be lost if this has not already been done.
+ *	Update the string representation for a list object.
  *
- * Results:
- *	None.
+ *	Any previously-exising string representation is not invalidated, so
+ *	storage is lost if this has not been taken care of.
  *
- * Side effects:
- *	The object's string is set to a valid string that results from the
- *	list-to-string conversion. This string will be empty if the list has
- *	no elements. The list internal representation should not be NULL and
- *	we assume it is not NULL.
+ * Effect
+ *
+ *	The string representation of 'listPtr' is set to the resulting string.
+ *	This string will be empty if the list has no elements. It is assumed
+ *	that the list internal representation is not NULL.
  *
  *----------------------------------------------------------------------
  */
@@ -1820,12 +1818,13 @@ static void
 UpdateStringOfList(
     Tcl_Obj *listPtr)		/* List object with string rep to update. */
 {
-#   define LOCAL_SIZE 20
-    int localFlags[LOCAL_SIZE], *flagPtr = NULL;
+#   define LOCAL_SIZE 64
+    char localFlags[LOCAL_SIZE], *flagPtr = NULL;
     List *listRepPtr = ListRepPtr(listPtr);
     int numElems = listRepPtr->elemCount;
     int i, length, bytesNeeded = 0;
-    char *elem, *dst;
+    const char *elem;
+    char *dst;
     Tcl_Obj **elemPtrs;
 
     /*
@@ -1836,7 +1835,9 @@ UpdateStringOfList(
 
     listRepPtr->canonicalFlag = 1;
 
-    /* Handle empty list case first, so rest of the routine is simpler */
+    /*
+     * Handle empty list case first, so rest of the routine is simpler.
+     */
 
     if (numElems == 0) {
 	listPtr->bytes = tclEmptyStringRep;
@@ -1851,12 +1852,15 @@ UpdateStringOfList(
     if (numElems <= LOCAL_SIZE) {
 	flagPtr = localFlags;
     } else {
-	/* We know numElems <= LIST_MAX, so this is safe. */
-	flagPtr = (int *) ckalloc((unsigned) numElems * sizeof(int));
+	/*
+	 * We know numElems <= LIST_MAX, so this is safe.
+	 */
+
+	flagPtr = ckalloc(numElems);
     }
     elemPtrs = &listRepPtr->elements;
     for (i = 0; i < numElems; i++) {
-	flagPtr[i] = ( i ? TCL_DONT_QUOTE_HASH : 0 );
+	flagPtr[i] = (i ? TCL_DONT_QUOTE_HASH : 0);
 	elem = TclGetStringFromObj(elemPtrs[i], &length);
 	bytesNeeded += TclScanElement(elem, length, flagPtr+i);
 	if (bytesNeeded < 0) {
@@ -1872,19 +1876,36 @@ UpdateStringOfList(
      * Pass 2: copy into string rep buffer.
      */
 
+    /*
+     * We used to set the string length here, relying on a presumed
+     * guarantee that the number of bytes TclScanElement() calls reported
+     * to be needed was a precise count and not an over-estimate, so long
+     * as the same flag values were passed to TclConvertElement().
+     *
+     * Then we saw [35a8f1c04a], where a bug in TclScanElement() caused
+     * that guarantee to fail. Rather than trust there are no more bugs,
+     * we set the length after the loop based on what was actually written,
+     * an not on what was predicted.
+     *
     listPtr->length = bytesNeeded - 1;
-    listPtr->bytes = ckalloc((unsigned) bytesNeeded);
+     *
+     */
+
+    listPtr->bytes = ckalloc(bytesNeeded);
     dst = listPtr->bytes;
     for (i = 0; i < numElems; i++) {
-	flagPtr[i] |= ( i ? TCL_DONT_QUOTE_HASH : 0 );
+	flagPtr[i] |= (i ? TCL_DONT_QUOTE_HASH : 0);
 	elem = TclGetStringFromObj(elemPtrs[i], &length);
 	dst += TclConvertElement(elem, length, dst, flagPtr[i]);
 	*dst++ = ' ';
     }
-    listPtr->bytes[listPtr->length] = '\0';
+    dst[-1] = '\0';
+
+    /* Here is the safe setting of the string length. */
+    listPtr->length = dst - 1 - listPtr->bytes;
 
     if (flagPtr != localFlags) {
-	ckfree((char *) flagPtr);
+	ckfree(flagPtr);
     }
 }
 

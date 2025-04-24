@@ -384,7 +384,7 @@ Tcl_GetTime(
 
 struct tm *
 TclpGetDate(
-    CONST time_t *time,
+    const time_t *time,
     int useGMT)
 {
     if (useGMT) {
@@ -412,7 +412,7 @@ TclpGetDate(
 
 struct tm *
 TclpGmtime(
-    CONST time_t *timePtr)	/* Pointer to the number of seconds since the
+    const time_t *timePtr)	/* Pointer to the number of seconds since the
 				 * local system's epoch */
 {
     /*
@@ -451,7 +451,7 @@ TclpGmtime(
 
 struct tm *
 TclpLocaltime(
-    CONST time_t *timePtr)	/* Pointer to the number of seconds since the
+    const time_t *timePtr)	/* Pointer to the number of seconds since the
 				 * local system's epoch */
 {
     /*
@@ -608,7 +608,7 @@ NativeGetTime(
 static void
 SetTZIfNecessary(void)
 {
-    CONST char *newTZ = getenv("TZ");
+    const char *newTZ = getenv("TZ");
 
     Tcl_MutexLock(&tmMutex);
     if (newTZ == NULL) {

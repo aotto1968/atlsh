@@ -144,6 +144,13 @@ typedef struct Dict {
 } Dict;
 
 /*
+ * Accessor macro for converting between a Tcl_Obj* and a Dict. Note that this
+ * must be assignable as well as readable.
+ */
+
+#define DICT(dictObj)   ((dictObj)->internalRep.twoPtrValue.ptr1)
+
+/*
  * The structure below defines the dictionary object type by means of
  * functions that can be invoked by generic object code.
  */
@@ -457,14 +464,14 @@ static void
 UpdateStringOfDict(
     Tcl_Obj *dictPtr)
 {
-#define LOCAL_SIZE 20
-    int localFlags[LOCAL_SIZE], *flagPtr = NULL;
-    Dict *dict = dictPtr->internalRep.twoPtrValue.ptr1;
+#define LOCAL_SIZE 64
+    char localFlags[LOCAL_SIZE], *flagPtr = NULL;
+    Dict *dict = DICT(dictPtr);
     ChainEntry *cPtr;
     Tcl_Obj *keyPtr, *valuePtr;
     int i, length, bytesNeeded = 0;
-    char *elem, *dst;
-    const int maxFlags = UINT_MAX / sizeof(int);
+    const char *elem;
+    char *dst;
 
     /*
      * This field is the most useful one in the whole hash structure, and it
@@ -486,10 +493,8 @@ UpdateStringOfDict(
 
     if (numElems <= LOCAL_SIZE) {
 	flagPtr = localFlags;
-    } else if (numElems > maxFlags) {
-	Tcl_Panic("max size for a Tcl value (%d bytes) exceeded", INT_MAX);
     } else {
-	flagPtr = (int *) ckalloc((unsigned) numElems*sizeof(int));
+	flagPtr = ckalloc(numElems);
     }
     for (i=0,cPtr=dict->entryChainHead; i<numElems; i+=2,cPtr=cPtr->nextPtr) {
 	/*
@@ -498,7 +503,7 @@ UpdateStringOfDict(
 	 */
 
 	flagPtr[i] = ( i ? TCL_DONT_QUOTE_HASH : 0 );
-	keyPtr = (Tcl_Obj *) Tcl_GetHashKey(&dict->table, &cPtr->entry);
+	keyPtr = Tcl_GetHashKey(&dict->table, &cPtr->entry);
 	elem = TclGetStringFromObj(keyPtr, &length);
 	bytesNeeded += TclScanElement(elem, length, flagPtr+i);
 	if (bytesNeeded < 0) {
@@ -523,11 +528,11 @@ UpdateStringOfDict(
      */
 
     dictPtr->length = bytesNeeded - 1;
-    dictPtr->bytes = ckalloc((unsigned) bytesNeeded);
+    dictPtr->bytes = ckalloc(bytesNeeded);
     dst = dictPtr->bytes;
     for (i=0,cPtr=dict->entryChainHead; i<numElems; i+=2,cPtr=cPtr->nextPtr) {
 	flagPtr[i] |= ( i ? TCL_DONT_QUOTE_HASH : 0 );
-	keyPtr = (Tcl_Obj *) Tcl_GetHashKey(&dict->table, &cPtr->entry);
+	keyPtr = Tcl_GetHashKey(&dict->table, &cPtr->entry);
 	elem = TclGetStringFromObj(keyPtr, &length);
 	dst += TclConvertElement(elem, length, dst, flagPtr[i]);
 	*dst++ = ' ';
@@ -541,7 +546,7 @@ UpdateStringOfDict(
     dictPtr->bytes[dictPtr->length] = '\0';
 
     if (flagPtr != localFlags) {
-	ckfree((char *) flagPtr);
+	ckfree(flagPtr);
     }
 }
 

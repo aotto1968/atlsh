@@ -3,3 +3,4 @@ tags
 **/.labelignore
 **/.vimrc
 **/*.sw*
+.vimdiff

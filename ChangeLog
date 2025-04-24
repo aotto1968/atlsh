@@ -1767,7 +1767,7 @@ a better first place to look now.
 
 2011-01-19  Jan Nijtmans  <nijtmans@users.sf.net>
 
-	* tools/genStubs.tcl:       Make sure to use CONST/VOID in stead of
+	* tools/genStubs.tcl:       Make sure to use const/VOID in stead of
 	* generic/tclIntDecls.h:    const/void when appropriate. This allows to
 	* generic/tclIntPlatDecls.h:use const/void in the *.decls file always,
 	* generic/tclTomMathDecls.h:genStubs will do the right thing.

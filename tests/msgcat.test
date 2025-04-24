@@ -13,7 +13,7 @@
 # message catalogs for locales foo, foo_BAR, and foo_BAR_baz.
 
 package require Tcl 8.5
-if {[catch {package require tcltest 2}]} {
+if {[catch {package require tcltest 2.3}]} {
     puts stderr "Skipping tests in [info script].  tcltest 2 required."
     return
 }

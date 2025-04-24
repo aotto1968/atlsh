@@ -43,7 +43,7 @@ typedef struct QCCD {
 
 static int		QueryConfigObjCmd(ClientData clientData,
 			    Tcl_Interp *interp, int objc,
-			    struct Tcl_Obj *CONST *objv);
+			    struct Tcl_Obj *const *objv);
 static void		QueryConfigDelete(ClientData clientData);
 static Tcl_Obj *	GetConfigDict(Tcl_Interp *interp);
 static void		ConfigDictDeleteProc(ClientData clientData,
@@ -69,11 +69,11 @@ void
 Tcl_RegisterConfig(
     Tcl_Interp *interp,		/* Interpreter the configuration command is
 				 * registered in. */
-    CONST char *pkgName,	/* Name of the package registering the
+    const char *pkgName,	/* Name of the package registering the
 				 * embedded configuration. ASCII, thus in
 				 * UTF-8 too. */
     Tcl_Config *configuration,	/* Embedded configuration. */
-    CONST char *valEncoding)	/* Name of the encoding used to store the
+    const char *valEncoding)	/* Name of the encoding used to store the
 				 * configuration values, ASCII, thus UTF-8. */
 {
     Tcl_Obj *pDB, *pkgDict;
@@ -197,13 +197,13 @@ QueryConfigObjCmd(
     ClientData clientData,
     Tcl_Interp *interp,
     int objc,
-    struct Tcl_Obj *CONST *objv)
+    struct Tcl_Obj *const *objv)
 {
     QCCD *cdPtr = (QCCD *) clientData;
     Tcl_Obj *pkgName = cdPtr->pkg;
     Tcl_Obj *pDB, *pkgDict, *val, *listPtr;
     int n, index;
-    static CONST char *subcmdStrings[] = {
+    static const char *subcmdStrings[] = {
 	"get", "list", NULL
     };
     enum subcmds {
@@ -211,7 +211,7 @@ QueryConfigObjCmd(
     };
     Tcl_DString conv;
     Tcl_Encoding venc = NULL;
-    CONST char *value;
+    const char *value;
 
     if ((objc < 2) || (objc > 3)) {
 	Tcl_WrongNumArgs(interp, 1, objv, "subcommand ?argument?");

@@ -27,7 +27,7 @@ static Tcl_PanicProc *panicProc = NULL;
  * panic procedure, if any. (TclpPanic may be NULL via a macro.)
  */
 
-static Tcl_PanicProc *CONST platformPanicProc = TclpPanic;
+static Tcl_PanicProc *const platformPanicProc = TclpPanic;
 
 /*
  *----------------------------------------------------------------------
@@ -70,7 +70,7 @@ Tcl_SetPanicProc(
 
 void
 Tcl_PanicVA(
-    CONST char *format,		/* Format string, suitable for passing to
+    const char *format,		/* Format string, suitable for passing to
 				 * fprintf. */
     va_list argList)		/* Variable argument list. */
 {
@@ -121,7 +121,7 @@ Tcl_PanicVA(
 	/* ARGSUSED */
 void
 Tcl_Panic(
-    CONST char *format,
+    const char *format,
     ...)
 {
     va_list argList;
