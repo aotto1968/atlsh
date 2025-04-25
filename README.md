@@ -4,17 +4,19 @@
  *  @copyright    (C) NHI - #1 - Project - Group
  *                This software has NO permission to copy,
  *                please contact AUTHOR for additional information
- *  @version      26ad3d0c4db2580ec216e2a0f020c9441c51785e
- *  @date         Fri Apr 25 12:09:06 2025 +0200
+ *  @version      6b7ff3cdcc61ece5dbc182fd6a905e2bd0fbacc9
+ *  @date         Fri Apr 25 22:35:01 2025 +0200
  *  @author       aotto1968 <aotto1968@t-online.de>
 -->
 
-readme {#theATL_readme}
-======
+# README:   Atl  {#theATL_readme}
 
-This is the **ATL 8.5.20** source distribution.
-    https://github.com/aotto1968/atlsh
-*ATL* is the continuation of the **tcl8.5.19** development with the goal of offering 
+The central goal of **atlsh** is to replace *bash* as the central system programming 
+tool for the **LINUX** operating system.
+
+    http://thedev.nhi1.de/theATL/main/index.htm
+
+*ATL* is the continuation of the **tcl8.5** development with the goal of offering 
 a fast, simple and complete language that is based on TCL but still enables new 
 innovative concepts.
 
@@ -37,7 +39,7 @@ site](https://sourceforge.net/projects/tcl/files/Tcl/).
  9. [Tracking Development](#watch)
  10. [Thank You](#thanks)
 
-## Introduction {#intro}
+## <a id="intro">1.</a> Introduction {#intro}
 Tcl provides a powerful platform for creating integration applications that
 tie together diverse applications, protocols, devices, and frameworks.
 When paired with the Tk toolkit, Tcl provides the fastest and most powerful
@@ -58,7 +60,7 @@ anything you like with it, such as modifying it, redistributing it,
 and selling it either in whole or in part.  See the file
 `license.terms` for complete information.
 
-## Documentation {#doc}
+## <a id="doc">2.</a> Documentation {#doc}
 Extensive documentation is available on our website.
 The home page for this release, including new features, is
 [here](https://www.tcl-lang.org/software/tcltk/8.5.html).
@@ -74,7 +76,7 @@ There have been many Tcl books on the market.  Many are mentioned in
 The complete set of reference manual entries for Tcl 8.5 is [online,
 here](https://www.tcl-lang.org/man/tcl8.5/).
 
-### Unix Documentation {#doc_unix}
+### <a id="doc.unix">2a.</a> Unix Documentation {#doc_unix}
 The `doc` subdirectory in this release contains a complete set of
 reference manual entries for Tcl.  Files with extension "`.1`" are for
 programs (for example, `tclsh.1`); files with extension "`.3`" are for C
@@ -92,20 +94,20 @@ normal "man" mechanisms, such as
 
 		man Tcl
 
-### Windows Documentation {#doc_win}
+### <a id="doc.win">2b.</a> Windows Documentation {#doc_win}
 The "doc" subdirectory in this release contains a complete set of Windows
 help files for Tcl.  Once you install this Tcl release, a shortcut to the
 Windows help Tcl documentation will appear in the "Start" menu:
 
 		Start | Programs | Tcl | Tcl Help
 
-## Compiling and installing Tcl {#build}
+## <a id="build">3.</a> Compiling and installing Tcl {#build}
 There are brief notes in the `unix/README`, `win/README`, and `macosx/README`
 about compiling on these different platforms.  There is additional information
 about building Tcl from sources
 [online](https://www.tcl-lang.org/doc/howto/compile.html).
 
-## Development tools {#devtools}
+## <a id="devtools">4.</a> Development tools {#devtools}
 ActiveState produces a high-quality set of commercial quality development
 tools that is available to accelerate your Tcl application development.
 Tcl Dev Kit builds on the earlier TclPro toolset and provides a debugger,
@@ -114,12 +116,13 @@ more.  More information can be found at
 
 	https://www.activestate.com/products/tcl/
 
-## Tcl newsgroup {#complangtcl}
+## <a id="complangtcl">5.</a> Tcl newsgroup {#complangtcl}
 There is a USENET newsgroup, "`comp.lang.tcl`", intended for the exchange of
 information about Tcl, Tk, and related applications.  The newsgroup is a
 great place to ask general information questions.  For bug reports, please
 see the "Support and bug fixes" section below.
 
+## <a id="wiki">6.</a> Tcl'ers Wiki
 ## Tcl'ers Wiki {#wiki}
 There is a [wiki-based open community site](https://wiki.tcl-lang.org/)
 covering all aspects of Tcl/Tk.
@@ -130,13 +133,13 @@ snippets, references to papers, books, and FAQs, as well as pointers to
 development tools, extensions, and applications.  You can also recommend
 additional URLs by editing the wiki yourself.
 
-## Mailing lists {#email}
+## <a id="email">7.</a> Mailing lists {#email}
 Several mailing lists are hosted at SourceForge to discuss development or use
 issues (like Macintosh and Windows topics).  For more information and to
 subscribe, visit [here](https://sourceforge.net/projects/tcl/) and go to the
 Mailing Lists page.
 
-## Support and Training {#support}
+## <a id="support">8.</a> Support and Training {#support}
 We are very interested in receiving bug reports, patches, and suggestions for
 improvements.  We prefer that you send this information to us as tickets
 entered into [our issue tracker](https://core.tcl-lang.org/tcl/reportlist).
@@ -156,11 +159,11 @@ newsgroup and will attempt to answer esoteric questions for which no one else
 is likely to know the answer.  In addition, see the wiki for [links to other
 organizations](https://wiki.tcl-lang.org/training) that offer Tcl/Tk training.
 
-## Tracking Development {#watch}
+## <a id="watch">9.</a> Tracking Development {#watch}
 Tcl is developed in public.  You can keep an eye on how Tcl is changing at
 [core.tcl-lang.org](https://core.tcl-lang.org/).
 
-## Thank You {#thanks}
+## <a id="thanks">10.</a> Thank You {#thanks}
 We'd like to express our thanks to the Tcl community for all the
 helpful suggestions, bug reports, and patches we have received.
 Tcl/Tk has improved vastly and will continue to do so with your help.
