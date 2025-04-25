@@ -1,0 +1,32 @@
+#+
+#:   @file         NHI1/theATL/docs/main/Doxyfile.main
+#:   @brief        Doxyfile.main - unknown - unknown
+#:   @copyright    (C) NHI - #1 - Project - Group
+#:                 This software has NO permission to copy,
+#:                 please contact AUTHOR for additional information
+#:   @version      unknown
+#:   @date         unknown
+#:   @author       unknown
+#:
+
+# This file describes the settings to be used by the documentation system
+# doxygen (www.doxygen.org) for a project
+#
+# All text after a hash (#) is considered a comment and will be ignored
+# The format is:
+#       TAG = value [value, ...]
+# For lists items can also be appended using:
+#       TAG += value [value, ...]
+# Values that contain spaces should be placed between quotes (" ")
+
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+
+FILE_PATTERNS +=  
+
+INPUT         +=                                                         \
+                  $(LNGDIR)                                              \
+                  $(SRCDIR)/atlsh 
+
+IMAGE_PATH    +=  $(SRCDIR)/docs/pics

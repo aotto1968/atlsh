@@ -1,3 +1,13 @@
+<!---
+ *  @file         NHI1/theATL/README.md
+ *  @brief        README.md - 23 Apr 2025 - aotto1968
+ *  @copyright    (C) NHI - #1 - Project - Group
+ *                This software has NO permission to copy,
+ *                please contact AUTHOR for additional information
+ *  @version      641e581745c29c8c1936b2f5b4b730fccd52c96d
+ *  @date         Wed Apr 23 13:17:02 2025 +0200
+ *  @author       aotto1968 <aotto1968@t-online.de>
+-->
 # README:  ATL
 This is the **ATL 8.5.20** source distribution.
     https://github.com/aotto1968/atlsh

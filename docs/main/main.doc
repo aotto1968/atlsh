@@ -1,0 +1,58 @@
+/**
+ @file         NHI1/theATL/docs/main/main.doc
+ @brief        main.doc - unknown - unknown
+ @copyright    (C) NHI - #1 - Project - Group
+               This software has NO permission to copy,
+               please contact AUTHOR for additional information
+ @version      unknown
+ @date         unknown
+ @author       unknown
+***
+
+\mainpage_top
+
+\noop Doxyfile.main
+
+<CENTER>
+\main_section
+
+<TABLE class="top">
+  \top_last
+  \top_summary{new: \ref atlsh}
+  \top_latest
+  <tr>  <td>  DETAILS      <td> 
+
+  \theLib is a collection of libraries used to support the \NHI1:
+
+  \par atlsh
+  \parblock
+
+The ATL 8.5.20 source distribution :
+
+\li https://github.com/aotto1968/atlsh
+
+is the continuation of the :
+
+\li https://www.tcl-lang.org/software/tcltk/8.5.html - \c tcl8.5.19
+
+development with the goal of offering a fast, simple and complete language that is based on \TCL but still 
+enables new innovative concepts.
+  \endparblock
+
+  <tr>  <td>  DEPENDENCIES <td>  \theLib has __no__ dependencies outside of \theLib.  </tr>
+
+</TABLE>
+
+
+\section theATL_details ...
+
+  target         | intro            | class           | instance           | performance           | compare |
+  -------------- | --------------   | --------------  | ------------------ | --------------------- | ------- |
+
+\main_Files
+
+</CENTER>
+
+*/
+
+/// vim: tabstop=8 nowrap

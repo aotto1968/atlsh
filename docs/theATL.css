@@ -1,0 +1,34 @@
+/**
+ *  @file         NHI1/theATL/docs/theATL.css
+ *  @brief        theATL.css - unknown - unknown
+ *  @copyright    (C) NHI - #1 - Project - Group
+ *                This software has NO permission to copy,
+ *                please contact AUTHOR for additional information
+ *  @version      unknown
+ *  @date         unknown
+ *  @author       unknown
+ */
+
+
+.iframe-container {
+    display: flex;
+    justify-content: space-between; /* oder space-around, space-evenly, je nach Präferenz */
+}
+
+.iframe-performance {
+    border; 1px;
+    width: 49%; /* oder eine feste Breite, z.B. 500px */
+    height: 50vh; /* oder eine andere Höhe, die zu deinem Layout passt */
+    margin: 0 5px; /* Ein kleiner Abstand zwischen den iframes */
+}
+
+.iframe-example {
+    border; 1px;
+    width: 49%; /* oder eine feste Breite, z.B. 500px */
+    height: 50vh; /* oder eine andere Höhe, die zu deinem Layout passt */
+    margin: 0 5px; /* Ein kleiner Abstand zwischen den iframes */
+    color:  var(--page-foreground-color);
+    background-color: var(--blockquote-background-color);
+}
+
+

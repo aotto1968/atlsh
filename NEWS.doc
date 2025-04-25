@@ -1,0 +1,25 @@
+/**
+ @file         NHI1/theATL/NEWS.doc
+ @brief        NEWS.doc - unknown - unknown
+ @copyright    (C) NHI - #1 - Project - Group
+               This software has NO permission to copy,
+               please contact AUTHOR for additional information
+ @version      unknown
+ @date         unknown
+ @author       unknown
+***
+
+\defgroup theATL_news  theATL news
+\{
+\hidegroupgraph
+\brief news summary of the \theATL project
+
+\defgroup theATL_news_latest 25 apr, 2025
+\{
+\hidegroupgraph
+\brief initial documentation setup
+
+\}
+
+*/
+

@@ -4,3 +4,4 @@ tags
 **/.vimrc
 **/*.sw*
 .vimdiff
+.test-result.txt
