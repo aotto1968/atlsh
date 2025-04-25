@@ -2,13 +2,13 @@ commit 2cb7bfa5dd79a1dca4f5b8d15b9cc390bc4b1c5f
 Author: aotto1968 <aotto1968@t-online.de>
 Date:   Thu Apr 24 19:20:30 2025 +0200
 
-    The porting tcl8.6.20 commands to ATL8.5.20
+    The porting tcl8.6.12 commands to atl8.5.20
     
-    The porting of the first tcl8.6.20 commands to ATL8.5.20 has been successfully completed.
+    The porting of the first tcl8.6.12 commands to atl8.5.20 has been successfully completed.
     The following commands have been ported: try/catch/finally, throw, lsearch, lsort, lassign...
     
-    ATL8.5.20 inherits the "tests" directory from tcl8.6.20, ensuring that all "possible" tcl8.6.20 commands
-    run identically under ATL8.5.20. The goal is maximum compatibility with an estimated 20% speed advantage
+    atl8.5.20 inherits the "tests" directory from tcl8.6.12, ensuring that all "possible" tcl8.6.12 commands
+    run identically under atl8.5.20. The goal is maximum compatibility with an estimated 20% speed advantage
     by eliminating the "dead end" of NRE and TCLOO.
 
 commit 58ff9554312a5941a7f7c07478c3a195b3244249

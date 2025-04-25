@@ -1,12 +1,12 @@
 /**
  @file         NHI1/theATL/docs/main/main.doc
- @brief        main.doc - unknown - unknown
+ @brief        main.doc - 25 Apr 2025 - aotto1968
  @copyright    (C) NHI - #1 - Project - Group
                This software has NO permission to copy,
                please contact AUTHOR for additional information
- @version      unknown
- @date         unknown
- @author       unknown
+ @version      26ad3d0c4db2580ec216e2a0f020c9441c51785e
+ @date         Fri Apr 25 12:09:06 2025 +0200
+ @author       aotto1968 <aotto1968@t-online.de>
 ***
 
 \mainpage_top
@@ -18,16 +18,12 @@
 
 <TABLE class="top">
   \top_last
-  \top_summary{new: \ref atlsh}
+  \top_summary{The central goal of @atlsh is to replace @bash as the central system programming tool 
+      for the @LINUX operating system.}
   \top_latest
   <tr>  <td>  DETAILS      <td> 
 
-  \theLib is a collection of libraries used to support the \NHI1:
-
-  \par atlsh
-  \parblock
-
-The ATL 8.5.20 source distribution :
+The \atl85 source distribution :
 
 \li https://github.com/aotto1968/atlsh
 
@@ -37,17 +33,10 @@ is the continuation of the :
 
 development with the goal of offering a fast, simple and complete language that is based on \TCL but still 
 enables new innovative concepts.
-  \endparblock
 
-  <tr>  <td>  DEPENDENCIES <td>  \theLib has __no__ dependencies outside of \theLib.  </tr>
+  <tr>  <td>  DEPENDENCIES <td>  \theATL is an \e independent part of the \NHI10 project.  </tr>
 
 </TABLE>
-
-
-\section theATL_details ...
-
-  target         | intro            | class           | instance           | performance           | compare |
-  -------------- | --------------   | --------------  | ------------------ | --------------------- | ------- |
 
 \main_Files
 

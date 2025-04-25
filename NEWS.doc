@@ -1,12 +1,12 @@
 /**
  @file         NHI1/theATL/NEWS.doc
- @brief        NEWS.doc - unknown - unknown
+ @brief        NEWS.doc - 25 Apr 2025 - aotto1968
  @copyright    (C) NHI - #1 - Project - Group
                This software has NO permission to copy,
                please contact AUTHOR for additional information
- @version      unknown
- @date         unknown
- @author       unknown
+ @version      26ad3d0c4db2580ec216e2a0f020c9441c51785e
+ @date         Fri Apr 25 12:09:06 2025 +0200
+ @author       aotto1968 <aotto1968@t-online.de>
 ***
 
 \defgroup theATL_news  theATL news
@@ -17,8 +17,16 @@
 \defgroup theATL_news_latest 25 apr, 2025
 \{
 \hidegroupgraph
-\brief initial documentation setup
+\brief porting from \tcl86 back to \atl85 → \ref atlsh
+    
+The porting of the first \tcl86 commands to \atl85 has been successfully completed.
+The following commands have been ported: `try/catch/finally, throw, lsearch, lsort, lassign`...
 
+\atl85 inherits the \c tests directory from \tcl86, ensuring that all "possible" \tcl86 commands
+run identically under \atl85. The goal is maximum compatibility with an estimated \b 20% speed advantage
+by eliminating the "dead end" of \NRE and \tclOO.
+
+\}
 \}
 
 */

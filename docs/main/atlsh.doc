@@ -1,0 +1,37 @@
+/**
+ @file         NHI1/theATL/docs/main/atlsh.doc
+ @brief        atlsh.doc - unknown - unknown
+ @copyright    (C) NHI - #1 - Project - Group
+               This software has NO permission to copy,
+               please contact AUTHOR for additional information
+ @version      unknown
+ @date         unknown
+ @author       unknown
+***
+
+\page atlsh   atlsh roadmap
+
+# roadmap
+
+> The central goal of @atlsh is to replace @bash as the central system programming tool for the @LINUX operating system.
+
+## initial setup
+
+- Splitting @atl85 from @tcl85 and porting all commands from @tcl86 to it.
+- Integrating into @NHI10 with suspension of the \e build environment and definition of the \e directory structure.
+- Updating the \e test cases to the \tcl86 standard with adoption of \tcltest v2.5.3.
+- The central goal is a \e lightweight shell that does not require \NRE or \tclOO.
+
+## advanced modification
+
+- Now that the @tcl86 level has been reached, @atlsh will be gradually expanded to include @theLib, which 
+  provides fast and easy @OOP support.
+- Then, the complete rebuild of @atlsh will begin with the integration of @theKernel and @theLink, which will involve 
+  an architectural change focused on @LINUX fork and \e process-management.
+
+## development goal
+
+- The end result of the development will be an AI operating system based on \theKernel, \theLink, \theLib and \theATL.
+
+
+**/
