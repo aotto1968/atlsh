@@ -6,5 +6,5 @@
 #:                 please contact AUTHOR for additional information
 #:
 
-SUBDIRS = docs tests atlsh 
+SUBDIRS = docs tests 
 
