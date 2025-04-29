@@ -1,0 +1,80 @@
+#!/bin/bash
+#+
+#:   @file         NHI1/theATL/bin/atltest
+#:   @brief        tag: nhi1-release-250425
+#:   @copyright    (C) NHI - #1 - Project - Group
+#:                 This software has NO permission to copy,
+#:                 please contact AUTHOR for additional information
+#:
+
+# atltest ..
+# 
+# This script is used to run the "tcltest" tool from the Makefile. 
+# The environment must be configured so that "tcltest" only has access 
+# to the data from the "build" and "source" directory.
+#
+# example :
+#
+# 1. options last   > atltest FILE-PATTERN options..
+# 2. options first  > atltest options.. FILE-PATTERN
+
+abs_local_path="$(realpath -- "$0")" || exit 1
+abs_local_dir="${abs_local_path%/*}"
+abs_atlsh_dir="${abs_local_dir%/*}/atlsh"
+
+# get "abs_top_builddir"
+if [[ -f "${NHI1_abs_top_builddir:-NHI1_abs_top_builddir_UNKNOWN}/theATL/atlsh/unix/tclBuild.sh" ]] ; then
+  # get it from the "NHI1" environment (only as subproject)
+  abs_atlsh_builddir="${NHI1_abs_top_builddir}/theATL/atlsh"
+elif [[ -f "$abs_atlsh_dir/unix/tclBuild.sh" ]] ; then
+  # get it from "in-source" build
+  abs_atlsh_builddir="$abs_atlsh_dir"
+else
+  echo "error: tclBuild.sh not found" 1>&2 ; exit 1
+fi
+
+# source build environment - setup with "configure"
+# set: TCL_TOP_SRC_DIR TCL_TOP_BUILD_DIR LD_LIBRARY_PATH TCLLIBPATH TCL_LIBRARY
+source "$abs_atlsh_builddir/unix/tclBuild.sh"
+
+# if "tcltest" not already build → build it
+if [[ ! -f "$TCL_TOP_BUILD_DIR/unix/tcltest" ]] ; then
+  make --directory "$TCL_TOP_BUILD_DIR/unix" tcltest || exit 2
+fi
+
+#set -x
+
+declare -i justone="$(( $# == 1 ))"
+
+# validate arguments
+while true ; do
+  first="$(realpath -- "$1")"
+  last="${@: -1}"
+
+  # check if test script is first - called by user
+  for a in $first ; do
+    [[ ! -f "$a" ]] && break
+    f="$first"
+    shift
+    set -- -file "${f##*/}" -testdir "${f%/*}" "$@"
+    if (( justone )) ; then
+      set -- "$@" -verbose bpt
+    fi
+    break 2
+  done
+    
+  # check if test script is last - called by 'make check'
+  for a in $last ; do
+    [[ ! -f "$a" ]] && break
+    f="$last"
+    set -- -file "${f##*/}" -testdir "${f%/*}" "${@:1:$(( $# - 1 ))}"
+    break 2
+  done
+
+  echo "error: unable to find test script in '$*'" 1>&2 ; exit 3
+
+done
+
+exec "$TCL_TOP_BUILD_DIR/unix/tcltest" "$TCL_TOP_SRC_DIR/../tests/all.tcl" "$@"
+
+# vim: path+=../tests

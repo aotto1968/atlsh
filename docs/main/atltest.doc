@@ -1,0 +1,42 @@
+/**
+ @file         NHI1/theATL/docs/main/atltest.doc
+ @brief        tag: nhi1-release-250425
+ @copyright    (C) NHI - #1 - Project - Group
+               This software has NO permission to copy,
+               please contact AUTHOR for additional information
+***
+
+\page atltest   atltest 
+\brief  @atltest is a tool for testing the `*.test` files from the `theATL/tests` directory.
+
+\tableofcontents
+
+- The test file (`*.test`) from the `theATL/atlsh/tests` directory is mirrored to the `theATL/tests` directory via a soft link.
+  - The @theATL test environment is created **without** changes to the @atlsh distribution.
+
+- Massive parallel testing with the @automake `make check` was implemented in the `theATL/tests` directory.
+  - An adaptation to the @tcltest tool and the `*.test` files was required.
+
+- The largest adaptation was made to the test cases (*.test) provided by @TCL.
+  - By default, @TCL only supports sequential testing.
+  - By default, @TCL uses the same **temporary** file name across different *test cases*.
+
+# atltest {#atltest_tool}
+@atltest is a wrapper around @tcltest and primarily serves to provide the correct environment from  
+the *build* and *source* directory, as well as an @automake-specific adjustment that affects the sequence of 
+*test-option* and *test-case*.
+\include{lineno} theATL/bin/atltest
+
+# Makefile.am {#atltest_make}
+@automake file to configure the local directory
+\include{lineno} theATL/tests/Makefile.am
+
+# tclBuild.sh {#atltest_config}
+The goal of `tclBuild.sh` is the same as for `tclConfig.sh` except that `tclBuild.sh` only configures 
+the *build environment* - using only paths from the *build directory* or the *source directory*.
+\include{lineno} theATL/atlsh/unix/tclBuild.sh.in
+
+# additional information
+- \ref README_TESTS
+
+**/

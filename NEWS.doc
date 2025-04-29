@@ -1,12 +1,9 @@
 /**
  @file         NHI1/theATL/NEWS.doc
- @brief        NEWS.doc - 25 Apr 2025 - aotto1968
+ @brief        tag: nhi1-release-250425
  @copyright    (C) NHI - #1 - Project - Group
                This software has NO permission to copy,
                please contact AUTHOR for additional information
- @version      6b7ff3cdcc61ece5dbc182fd6a905e2bd0fbacc9
- @date         Fri Apr 25 22:35:01 2025 +0200
- @author       aotto1968 <aotto1968@t-online.de>
 ***
 
 \defgroup theATL_news  theATL news
@@ -14,12 +11,30 @@
 \hidegroupgraph
 \brief news summary of the \theATL project
 
-\defgroup theATL_news_latest 25 apr, 2025
+\defgroup theATL_news_latest 29 apr, 2025
 \{
 \hidegroupgraph
-\brief porting from \tcl86 back to \atl85 → \ref atlsh
+\brief Create a massively parallel test environment that reduces **full** testing of @atlsh to less than 1 minute.
     
-The porting of the first \tcl86 commands to \atl85 has been successfully completed.
+\par atltest
+- @atltest is a wrapper around @tcltest and primarily serves to provide the correct environment from  
+  the *build* and *source* source, as well as an @automake-specific adjustment that affects the sequence of 
+  \e test-option and \e test-case.
+- Parallel testing under `make check` in `automake` requires the return code of a failed test.
+  However, @tcltest doesn't provide it, so `tcltest.2.3.8` has been patched.
+- A large number of files in the `tests` directory were parallelized, which was necessary because
+  @TCL itself only supports \e sequential-testing.
+
+
+\}
+
+\defgroup theATL_news_1 25 apr, 2025
+\{
+\hidegroupgraph
+\brief The goal of @atlsh is to replace @bash as the central tool for system programming 
+and system control with an AI-based tool.
+    
+Start \ref atlsh by porting of the first \tcl86 commands to \atl85 has been successfully completed.
 The following commands have been ported: `try/catch/finally, throw, lsearch, lsort, lassign`...
 
 \atl85 inherits the \c tests directory from \tcl86, ensuring that all "possible" \tcl86 commands
@@ -27,6 +42,7 @@ run identically under \atl85. The goal is maximum compatibility with an estimate
 by eliminating the "dead end" of \NRE and \tclOO.
 
 \}
+
 \}
 
 */

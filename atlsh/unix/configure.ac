@@ -972,9 +972,10 @@ dnl	Disable the automake-friendly normalization of LIBOBJS
 dnl	performed by autoconf 2.53 and later.  It's not correct for us.
 define([_AC_LIBOBJS_NORMALIZE],[])
 AC_CONFIG_FILES([
-    Makefile:../unix/Makefile.in
-    dltest/Makefile:../unix/dltest/Makefile.in
+    Makefile:../unix/Makefile.orig
+    dltest/Makefile:../unix/dltest/Makefile.orig
     tclConfig.sh:../unix/tclConfig.sh.in
+    tclBuild.sh:../unix/tclBuild.sh.in
     tcl.pc:../unix/tcl.pc.in
 ])
 AC_OUTPUT

@@ -166,17 +166,17 @@ append long $long
 
 test fCmd-1.1 {TclFileRenameCmd} {notRoot} {
     cleanup
-    createfile tf1
-    file rename tf1 tf2
+    createfile tfFCmd1
+    file rename tfFCmd1 tfFCmd2
     glob tf*
-} {tf2}
+} {tfFCmd2}
 
 test fCmd-2.1 {TclFileCopyCmd} {notRoot} {
     cleanup
-    createfile tf1
-    file copy tf1 tf2
+    createfile tfFCmd1
+    file copy tfFCmd1 tfFCmd2
     lsort [glob tf*]
-} {tf1 tf2}
+} {tfFCmd1 tfFCmd2}
 
 test fCmd-3.1 {FileCopyRename: FileForceOption fails} -constraints {notRoot} -body {
     file rename -xyz
@@ -190,107 +190,107 @@ test fCmd-3.3 {FileCopyRename: Tcl_TranslateFileName fails} -constraints {notRoo
 test fCmd-3.4 {FileCopyRename: Tcl_TranslateFileName passes} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file copy tf1 ~
-} -result {error copying "tf1": no such file or directory}
+    file copy tfFCmd1 ~
+} -result {error copying "tfFCmd1": no such file or directory}
 test fCmd-3.5 {FileCopyRename: target doesn't exist: stat(target) != 0} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file rename tf1 tf2 tf3
-} -result {error renaming: target "tf3" is not a directory}
-test fCmd-3.6 {FileCopyRename: target tf3 is not a dir: !S_ISDIR(target)} -setup {
+    file rename tfFCmd1 tfFCmd2 tfFCmd3
+} -result {error renaming: target "tfFCmd3" is not a directory}
+test fCmd-3.6 {FileCopyRename: target tfFCmd3 is not a dir: !S_ISDIR(target)} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf3
-    file rename tf1 tf2 tf3
-} -result {error renaming: target "tf3" is not a directory}
+    createfile tfFCmd3
+    file rename tfFCmd1 tfFCmd2 tfFCmd3
+} -result {error renaming: target "tfFCmd3" is not a directory}
 test fCmd-3.7 {FileCopyRename: target exists & is directory} -setup {
     cleanup
 } -constraints {notRoot} -body {
-    file mkdir td1
-    createfile tf1 tf1
-    file rename tf1 td1
-    contents [file join td1 tf1]
-} -result {tf1}
+    file mkdir tdFCmd1
+    createfile tfFCmd1 tfFCmd1
+    file rename tfFCmd1 tdFCmd1
+    contents [file join tdFCmd1 tfFCmd1]
+} -result {tfFCmd1}
 test fCmd-3.8 {FileCopyRename: too many arguments: argc - i > 2} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file rename tf1 tf2 tf3
-} -result {error renaming: target "tf3" is not a directory}
+    file rename tfFCmd1 tfFCmd2 tfFCmd3
+} -result {error renaming: target "tfFCmd3" is not a directory}
 test fCmd-3.9 {FileCopyRename: too many arguments: argc - i > 2} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file copy -force -- tf1 tf2 tf3
-} -result {error copying: target "tf3" is not a directory}
+    file copy -force -- tfFCmd1 tfFCmd2 tfFCmd3
+} -result {error copying: target "tfFCmd3" is not a directory}
 test fCmd-3.10 {FileCopyRename: just 2 arguments} {notRoot} {
     cleanup
-    createfile tf1 tf1
-    file rename tf1 tf2
-    contents tf2
-} {tf1}
+    createfile tfFCmd1 tfFCmd1
+    file rename tfFCmd1 tfFCmd2
+    contents tfFCmd2
+} {tfFCmd1}
 test fCmd-3.11 {FileCopyRename: just 2 arguments} {notRoot} {
     cleanup
-    createfile tf1 tf1
-    file rename -force -force -- tf1 tf2
-    contents tf2
-} {tf1}
+    createfile tfFCmd1 tfFCmd1
+    file rename -force -force -- tfFCmd1 tfFCmd2
+    contents tfFCmd2
+} {tfFCmd1}
 test fCmd-3.12 {FileCopyRename: move each source: 1 source} {notRoot} {
     cleanup
-    createfile tf1 tf1
-    file mkdir td1
-    file rename tf1 td1
-    contents [file join td1 tf1]
-} {tf1}
+    createfile tfFCmd1 tfFCmd1
+    file mkdir tdFCmd1
+    file rename tfFCmd1 tdFCmd1
+    contents [file join tdFCmd1 tfFCmd1]
+} {tfFCmd1}
 test fCmd-3.13 {FileCopyRename: move each source: multiple sources} {notRoot} {
     cleanup
-    createfile tf1 tf1
-    createfile tf2 tf2
-    createfile tf3 tf3
-    createfile tf4 tf4
-    file mkdir td1
-    file rename tf1 tf2 tf3 tf4 td1
-    list [contents [file join td1 tf1]] [contents [file join td1 tf2]] \
-	[contents [file join td1 tf3]] [contents [file join td1 tf4]]
-} {tf1 tf2 tf3 tf4}
+    createfile tfFCmd1 tfFCmd1
+    createfile tfFCmd2 tfFCmd2
+    createfile tfFCmd3 tfFCmd3
+    createfile tfFCmd4 tfFCmd4
+    file mkdir tdFCmd1
+    file rename tfFCmd1 tfFCmd2 tfFCmd3 tfFCmd4 tdFCmd1
+    list [contents [file join tdFCmd1 tfFCmd1]] [contents [file join tdFCmd1 tfFCmd2]] \
+	[contents [file join tdFCmd1 tfFCmd3]] [contents [file join tdFCmd1 tfFCmd4]]
+} {tfFCmd1 tfFCmd2 tfFCmd3 tfFCmd4}
 test fCmd-3.14 {FileCopyRename: FileBasename fails} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir td1
-    file rename ~_totally_bogus_user td1
+    file mkdir tdFCmd1
+    file rename ~_totally_bogus_user tdFCmd1
 } -result {user "_totally_bogus_user" doesn't exist}
 test fCmd-3.15 {FileCopyRename: source[0] == '\0'} -setup {
     cleanup
 } -constraints {notRoot unixOrPc} -returnCodes error -body {
-    file mkdir td1
-    file rename / td1
-} -result {error renaming "/" to "td1": file already exists}
+    file mkdir tdFCmd1
+    file rename / tdFCmd1
+} -result {error renaming "/" to "tdFCmd1": file already exists}
 test fCmd-3.16 {FileCopyRename: break on first error} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf1
-    createfile tf2
-    createfile tf3
-    createfile tf4
-    file mkdir td1
-    createfile [file join td1 tf3]
-    file rename tf1 tf2 tf3 tf4 td1
-} -result [subst {error renaming "tf3" to "[file join td1 tf3]": file already exists}]
+    createfile tfFCmd1
+    createfile tfFCmd2
+    createfile tfFCmd3
+    createfile tfFCmd4
+    file mkdir tdFCmd1
+    createfile [file join tdFCmd1 tfFCmd3]
+    file rename tfFCmd1 tfFCmd2 tfFCmd3 tfFCmd4 tdFCmd1
+} -result [subst {error renaming "tfFCmd3" to "[file join tdFCmd1 tfFCmd3]": file already exists}]
 
 test fCmd-4.1 {TclFileMakeDirsCmd: make each dir: 1 dir} {notRoot} {
     cleanup
-    file mkdir td1
+    file mkdir tdFCmd1
     glob td*
-} {td1}
+} {tdFCmd1}
 test fCmd-4.2 {TclFileMakeDirsCmd: make each dir: multiple dirs} {notRoot} {
     cleanup
-    file mkdir td1 td2 td3
+    file mkdir tdFCmd1 tdFCmd2 tdFCmd3
     lsort [glob td*]
-} {td1 td2 td3}
+} {tdFCmd1 tdFCmd2 tdFCmd3}
 test fCmd-4.3 {TclFileMakeDirsCmd: stops on first error} {notRoot} {
     cleanup
-    createfile tf1
-    catch {file mkdir td1 td2 tf1 td3 td4}
-    glob td1 td2 tf1 td3 td4
-} {td1 td2 tf1}
+    createfile tfFCmd1
+    catch {file mkdir tdFCmd1 tdFCmd2 tfFCmd1 tdFCmd3 tdFCmd4}
+    glob tdFCmd1 tdFCmd2 tfFCmd1 tdFCmd3 tdFCmd4
+} {tdFCmd1 tdFCmd2 tfFCmd1}
 test fCmd-4.4 {TclFileMakeDirsCmd: Tcl_TranslateFileName fails} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
@@ -303,50 +303,50 @@ test fCmd-4.5 {TclFileMakeDirsCmd: Tcl_SplitPath returns 0: *name == '\0'} -setu
 } -result {can't create directory "": no such file or directory}
 test fCmd-4.6 {TclFileMakeDirsCmd: one level deep} {notRoot} {
     cleanup
-    file mkdir td1
-    glob td1
-} {td1}
+    file mkdir tdFCmd1
+    glob tdFCmd1
+} {tdFCmd1}
 test fCmd-4.7 {TclFileMakeDirsCmd: multi levels deep} {notRoot} {
     cleanup
-    file mkdir [file join td1 td2 td3 td4]
-    glob td1 [file join td1 td2]
-} "td1 [file join td1 td2]"
+    file mkdir [file join tdFCmd1 tdFCmd2 tdFCmd3 tdFCmd4]
+    glob tdFCmd1 [file join tdFCmd1 tdFCmd2]
+} "tdFCmd1 [file join tdFCmd1 tdFCmd2]"
 test fCmd-4.8 {TclFileMakeDirsCmd: already exist: lstat(target) == 0} {notRoot} {
     cleanup
-    file mkdir td1
-    set x [file exists td1]
-    file mkdir td1
-    list $x [file exists td1]
+    file mkdir tdFCmd1
+    set x [file exists tdFCmd1]
+    file mkdir tdFCmd1
+    list $x [file exists tdFCmd1]
 } {1 1}
 test fCmd-4.9 {TclFileMakeDirsCmd: exists, not dir} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf1
-    file mkdir tf1
-} -result [subst {can't create directory "[file join tf1]": file already exists}]
+    createfile tfFCmd1
+    file mkdir tfFCmd1
+} -result [subst {can't create directory "[file join tfFCmd1]": file already exists}]
 test fCmd-4.10 {TclFileMakeDirsCmd: exists, is dir} {notRoot} {
     cleanup
-    file mkdir td1
-    set x [file exists td1]
-    file mkdir td1
-    list $x [file exists td1]
+    file mkdir tdFCmd1
+    set x [file exists tdFCmd1]
+    file mkdir tdFCmd1
+    list $x [file exists tdFCmd1]
 } {1 1}
 test fCmd-4.11 {TclFileMakeDirsCmd: doesn't exist: errno != ENOENT} -setup {
     cleanup
 } -constraints {unix notRoot testchmod} -returnCodes error -body {
-    file mkdir td1/td2/td3
-    testchmod 000 td1/td2
-    file mkdir td1/td2/td3/td4
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3
+    testchmod 000 tdFCmd1/tdFCmd2
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3/tdFCmd4
 } -cleanup {
-    testchmod 755 td1/td2
+    testchmod 755 tdFCmd1/tdFCmd2
     cleanup
-} -result {can't create directory "td1/td2/td3": permission denied}
+} -result {can't create directory "tdFCmd1/tdFCmd2/tdFCmd3": permission denied}
 test fCmd-4.13 {TclFileMakeDirsCmd: doesn't exist: errno == ENOENT} -setup {
     cleanup
 } -constraints {notRoot} -body {
-    set x [file exists td1]
-    file mkdir td1
-    list $x [file exists td1]
+    set x [file exists tdFCmd1]
+    file mkdir tdFCmd1
+    list $x [file exists tdFCmd1]
 } -result {0 1}
 test fCmd-4.14 {TclFileMakeDirsCmd: TclpCreateDirectory fails} -setup {
     cleanup
@@ -354,14 +354,14 @@ test fCmd-4.14 {TclFileMakeDirsCmd: TclpCreateDirectory fails} -setup {
 } -constraints {unix notRoot} -body {
     file mkdir foo
     file attr foo -perm 040000
-    file mkdir foo/tf1
+    file mkdir foo/tfFCmd1
 } -returnCodes error -cleanup {
     file delete -force foo
-} -result {can't create directory "foo/tf1": permission denied}
+} -result {can't create directory "foo/tfFCmd1": permission denied}
 test fCmd-4.16 {TclFileMakeDirsCmd: TclpCreateDirectory succeeds} {notRoot} {
     cleanup
-    file mkdir tf1
-    file exists tf1
+    file mkdir tfFCmd1
+    file exists tfFCmd1
 } {1}
 
 test fCmd-5.1 {TclFileDeleteCmd: FileForceOption fails} -constraints {notRoot} -body {
@@ -372,74 +372,74 @@ test fCmd-5.2 {TclFileDeleteCmd: not enough args} -constraints {notRoot} -body {
 } -returnCodes error -result {wrong # args: should be "file delete ?options? file ?file ...?"}
 test fCmd-5.3 {TclFileDeleteCmd: 1 file} {notRoot} {
     cleanup
-    createfile tf1
-    createfile tf2
-    file mkdir td1
-    file delete tf2
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file mkdir tdFCmd1
+    file delete tfFCmd2
     glob tf* td*
-} {tf1 td1}
+} {tfFCmd1 tdFCmd1}
 test fCmd-5.4 {TclFileDeleteCmd: multiple files} {notRoot} {
     cleanup
-    createfile tf1
-    createfile tf2
-    file mkdir td1
-    set x [list [file exists tf1] [file exists tf2] [file exists td1]]
-    file delete tf1 td1 tf2
-    lappend x [file exists tf1] [file exists tf2] [file exists tf3]
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file mkdir tdFCmd1
+    set x [list [file exists tfFCmd1] [file exists tfFCmd2] [file exists tdFCmd1]]
+    file delete tfFCmd1 tdFCmd1 tfFCmd2
+    lappend x [file exists tfFCmd1] [file exists tfFCmd2] [file exists tfFCmd3]
 } {1 1 1 0 0 0}
 test fCmd-5.5 {TclFileDeleteCmd: stop at first error} {notRoot unixOrPc} {
     cleanup
-    createfile tf1
-    createfile tf2
-    file mkdir td1
-    catch {file delete tf1 td1 $root tf2}
-    list [file exists tf1] [file exists tf2] [file exists td1]
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file mkdir tdFCmd1
+    catch {file delete tfFCmd1 tdFCmd1 $root tfFCmd2}
+    list [file exists tfFCmd1] [file exists tfFCmd2] [file exists tdFCmd1]
 } {0 1 0}
 test fCmd-5.6 {TclFileDeleteCmd: Tcl_TranslateFileName fails} -constraints {notRoot} -body {
     file delete ~_totally_bogus_user
 } -returnCodes error -result {user "_totally_bogus_user" doesn't exist}
 test fCmd-5.7 {TclFileDeleteCmd: Tcl_TranslateFileName succeeds} {notRoot} {
-    catch {file delete ~/tf1}
-    createfile ~/tf1
-    file delete ~/tf1
+    catch {file delete ~/tfFCmd1}
+    createfile ~/tfFCmd1
+    file delete ~/tfFCmd1
 } {}
 test fCmd-5.8 {TclFileDeleteCmd: file doesn't exist: lstat(name) != 0} {notRoot} {
     cleanup
-    set x [file exists tf1]
-    file delete tf1
-    list $x [file exists tf1]
+    set x [file exists tfFCmd1]
+    file delete tfFCmd1
+    list $x [file exists tfFCmd1]
 } {0 0}
 test fCmd-5.9 {TclFileDeleteCmd: is directory} {notRoot} {
     cleanup
-    file mkdir td1
-    file delete td1
-    file exists td1
+    file mkdir tdFCmd1
+    file delete tdFCmd1
+    file exists tdFCmd1
 } {0}
 test fCmd-5.10 {TclFileDeleteCmd: TclpRemoveDirectory fails} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir [file join td1 td2]
-    file delete td1
-} -result {error deleting "td1": directory not empty}
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    file delete tdFCmd1
+} -result {error deleting "tdFCmd1": directory not empty}
 test fCmd-5.11 {TclFileDeleteCmd: TclpRemoveDirectory with cwd inside} -setup {
     cleanup
     set dir [pwd]
 } -constraints {notRoot} -body {
-    file mkdir [file join td1 td2]
-    cd [file join td1 td2]
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    cd [file join tdFCmd1 tdFCmd2]
     set res [list [catch {file delete -force [file dirname [pwd]]} msg]]
     cd $dir
-    lappend res [file exists td1] $msg
+    lappend res [file exists tdFCmd1] $msg
 } -cleanup {
     cd $dir
 } -result {0 0 {}}
 test fCmd-5.12 {TclFileDeleteCmd: TclpRemoveDirectory with bad perms} {unix} {
     cleanup
-    file mkdir [file join td1 td2]
-    #exec chmod u-rwx [file join td1 td2]
-    file attributes [file join td1 td2] -permissions u+rwx
-    set res [list [catch {file delete -force td1} msg]]
-    lappend res [file exists td1] $msg
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    #exec chmod u-rwx [file join tdFCmd1 tdFCmd2]
+    file attributes [file join tdFCmd1 tdFCmd2] -permissions u+rwx
+    set res [list [catch {file delete -force tdFCmd1} msg]]
+    lappend res [file exists tdFCmd1] $msg
 } {0 0 {}}
 
 test fCmd-6.1 {CopyRenameOneFile: bad source} {notRoot emptyTest} {
@@ -451,116 +451,116 @@ test fCmd-6.2 {CopyRenameOneFile: bad target} {notRoot emptyTest} {
 test fCmd-6.3 {CopyRenameOneFile: lstat(source) != 0} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file rename tf1 tf2
-} -result {error renaming "tf1": no such file or directory}
+    file rename tfFCmd1 tfFCmd2
+} -result {error renaming "tfFCmd1": no such file or directory}
 test fCmd-6.4 {CopyRenameOneFile: lstat(source) == 0} {notRoot} {
     cleanup
-    createfile tf1
-    file rename tf1 tf2
+    createfile tfFCmd1
+    file rename tfFCmd1 tfFCmd2
     glob tf*
-} {tf2}
+} {tfFCmd2}
 test fCmd-6.5 {CopyRenameOneFile: lstat(target) != 0} {notRoot} {
     cleanup
-    createfile tf1
-    file rename tf1 tf2
+    createfile tfFCmd1
+    file rename tfFCmd1 tfFCmd2
     glob tf*
-} {tf2}
+} {tfFCmd2}
 test fCmd-6.6 {CopyRenameOneFile: errno != ENOENT} -setup {
     cleanup
 } -constraints {unix notRoot testchmod} -body {
-    file mkdir td1
-    testchmod 000 td1
-    createfile tf1
-    file rename tf1 td1
+    file mkdir tdFCmd1
+    testchmod 000 tdFCmd1
+    createfile tfFCmd1
+    file rename tfFCmd1 tdFCmd1
 } -returnCodes error -cleanup {
-    testchmod 755 td1
-} -result {error renaming "tf1" to "td1/tf1": permission denied}
+    testchmod 755 tdFCmd1
+} -result {error renaming "tfFCmd1" to "tdFCmd1/tfFCmd1": permission denied}
 test fCmd-6.7 {CopyRenameOneFile: errno != ENOENT} -setup {
     cleanup
 } -constraints {win 95} -returnCodes error -body {
-    createfile tf1
-    file rename tf1 $long
-} -result [subst {error renaming "tf1" to "$long": file name too long}]
+    createfile tfFCmd1
+    file rename tfFCmd1 $long
+} -result [subst {error renaming "tfFCmd1" to "$long": file name too long}]
 test fCmd-6.9 {CopyRenameOneFile: errno == ENOENT} {unix notRoot} {
     cleanup
-    createfile tf1
-    file rename tf1 tf2
+    createfile tfFCmd1
+    file rename tfFCmd1 tfFCmd2
     glob tf*
-} {tf2}
+} {tfFCmd2}
 test fCmd-6.10 {CopyRenameOneFile: lstat(target) == 0} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf1
-    createfile tf2
-    file rename tf1 tf2
-} -result {error renaming "tf1" to "tf2": file already exists}
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file rename tfFCmd1 tfFCmd2
+} -result {error renaming "tfFCmd1" to "tfFCmd2": file already exists}
 test fCmd-6.11 {CopyRenameOneFile: force == 0} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf1
-    createfile tf2
-    file rename tf1 tf2
-} -result {error renaming "tf1" to "tf2": file already exists}
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file rename tfFCmd1 tfFCmd2
+} -result {error renaming "tfFCmd1" to "tfFCmd2": file already exists}
 test fCmd-6.12 {CopyRenameOneFile: force != 0} {notRoot} {
     cleanup
-    createfile tf1
-    createfile tf2
-    file rename -force tf1 tf2
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file rename -force tfFCmd1 tfFCmd2
     glob tf*
-} {tf2}
+} {tfFCmd2}
 test fCmd-6.13 {CopyRenameOneFile: source is dir, target is file} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir td1
-    file mkdir td2
-    createfile [file join td2 td1]
-    file rename -force td1 td2
-} -result [subst {can't overwrite file "[file join td2 td1]" with directory "td1"}]
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    createfile [file join tdFCmd2 tdFCmd1]
+    file rename -force tdFCmd1 tdFCmd2
+} -result [subst {can't overwrite file "[file join tdFCmd2 tdFCmd1]" with directory "tdFCmd1"}]
 test fCmd-6.14 {CopyRenameOneFile: source is file, target is dir} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    createfile tf1
-    file mkdir [file join td1 tf1]
-    file rename -force tf1 td1
-} -result [subst {can't overwrite directory "[file join td1 tf1]" with file "tf1"}]
+    createfile tfFCmd1
+    file mkdir [file join tdFCmd1 tfFCmd1]
+    file rename -force tfFCmd1 tdFCmd1
+} -result [subst {can't overwrite directory "[file join tdFCmd1 tfFCmd1]" with file "tfFCmd1"}]
 test fCmd-6.15 {CopyRenameOneFile: TclpRenameFile succeeds} -setup {
     cleanup
 } -constraints {notRoot notNetworkFilesystem} -body {
-    file mkdir [file join td1 td2]
-    file mkdir td2
-    createfile [file join td2 tf1]
-    file rename -force td2 td1
-    file exists [file join td1 td2 tf1]
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    file mkdir tdFCmd2
+    createfile [file join tdFCmd2 tfFCmd1]
+    file rename -force tdFCmd2 tdFCmd1
+    file exists [file join tdFCmd1 tdFCmd2 tfFCmd1]
 } -result 1
 test fCmd-6.16 {CopyRenameOneFile: TclpCopyRenameOneFile fails} -setup {
     cleanup
 } -constraints {notRoot} -body {
-    file mkdir [file join td1 td2]
-    createfile [file join td1 td2 tf1]
-    file mkdir td2
-    file rename -force td2 td1
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    createfile [file join tdFCmd1 tdFCmd2 tfFCmd1]
+    file mkdir tdFCmd2
+    file rename -force tdFCmd2 tdFCmd1
 } -returnCodes error -match glob -result \
-    [subst {error renaming "td2" to "[file join td1 td2]": file *}]
+    [subst {error renaming "tdFCmd2" to "[file join tdFCmd1 tdFCmd2]": file *}]
 test fCmd-6.17 {CopyRenameOneFile: errno == EINVAL} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file rename -force $root tf1
-} -result [subst {error renaming "$root" to "tf1": trying to rename a volume or move a directory into itself}]
+    file rename -force $root tfFCmd1
+} -result [subst {error renaming "$root" to "tfFCmd1": trying to rename a volume or move a directory into itself}]
 test fCmd-6.18 {CopyRenameOneFile: errno != EXDEV} -setup {
     cleanup
 } -constraints {notRoot} -body {
-    file mkdir [file join td1 td2]
-    createfile [file join td1 td2 tf1]
-    file mkdir td2
-    file rename -force td2 td1
+    file mkdir [file join tdFCmd1 tdFCmd2]
+    createfile [file join tdFCmd1 tdFCmd2 tfFCmd1]
+    file mkdir tdFCmd2
+    file rename -force tdFCmd2 tdFCmd1
 } -returnCodes error -match glob -result \
-    [subst {error renaming "td2" to "[file join td1 td2]": file *}]
+    [subst {error renaming "tdFCmd2" to "[file join tdFCmd1 tdFCmd2]": file *}]
 test fCmd-6.19 {CopyRenameOneFile: errno == EXDEV} {xdev notRoot} {
     cleanup $tmpspace
-    createfile tf1
-    file rename tf1 $tmpspace
-    glob -nocomplain tf* [file join $tmpspace tf1]
-} [file join $tmpspace tf1]
+    createfile tfFCmd1
+    file rename tfFCmd1 $tmpspace
+    glob -nocomplain tf* [file join $tmpspace tfFCmd1]
+} [file join $tmpspace tfFCmd1]
 test fCmd-6.20 {CopyRenameOneFile: errno == EXDEV} -constraints {win} -setup {
     catch {file delete -force c:/tcl8975@ d:/tcl8975@}
 } -body {
@@ -576,86 +576,86 @@ test fCmd-6.20 {CopyRenameOneFile: errno == EXDEV} -constraints {win} -setup {
 test fCmd-6.21 {CopyRenameOneFile: copy/rename: S_ISDIR(source)} \
 	{xdev notRoot} {
     cleanup $tmpspace
-    file mkdir td1
-    file rename td1 $tmpspace
+    file mkdir tdFCmd1
+    file rename tdFCmd1 $tmpspace
     glob -nocomplain td* [file join $tmpspace td*]
-} [file join $tmpspace td1]
+} [file join $tmpspace tdFCmd1]
 test fCmd-6.22 {CopyRenameOneFile: copy/rename: !S_ISDIR(source)} \
 	{xdev notRoot} {
     cleanup $tmpspace
-    createfile tf1
-    file rename tf1 $tmpspace
+    createfile tfFCmd1
+    file rename tfFCmd1 $tmpspace
     glob -nocomplain tf* [file join $tmpspace tf*]
-} [file join $tmpspace tf1]
+} [file join $tmpspace tfFCmd1]
 test fCmd-6.23 {CopyRenameOneFile: TclpCopyDirectory failed} -setup {
     cleanup $tmpspace
 } -constraints {notRoot xdev} -body {
-    file mkdir td1/td2/td3
-    file attributes td1 -permissions 0000
-    file rename td1 $tmpspace
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3
+    file attributes tdFCmd1 -permissions 0000
+    file rename tdFCmd1 $tmpspace
 } -returnCodes error -cleanup {
-    file attributes td1 -permissions 0755
+    file attributes tdFCmd1 -permissions 0755
     cleanup
-} -match regexp -result {^error renaming "td1"( to "/tmp/tcl\d+/td1")?: permission denied$}
+} -match regexp -result {^error renaming "tdFCmd1"( to "/tmp/tcl\d+/tdFCmd1")?: permission denied$}
 test fCmd-6.24 {CopyRenameOneFile: error uses original name} -setup {
     cleanup
 } -constraints {unix notRoot} -body {
-    file mkdir ~/td1/td2
-    set td1name [file join [file dirname ~] [file tail ~] td1]
+    file mkdir ~/tdFCmd1/tdFCmd2
+    set td1name [file join [file dirname ~] [file tail ~] tdFCmd1]
     file attributes $td1name -permissions 0000
-    file copy ~/td1 td1
+    file copy ~/tdFCmd1 tdFCmd1
 } -returnCodes error -cleanup {
     file attributes $td1name -permissions 0755
-    file delete -force ~/td1
-} -result {error copying "~/td1": permission denied}
+    file delete -force ~/tdFCmd1
+} -result {error copying "~/tdFCmd1": permission denied}
 test fCmd-6.25 {CopyRenameOneFile: error uses original name} -setup {
     cleanup
 } -constraints {unix notRoot} -body {
-    file mkdir td2
-    file mkdir ~/td1
-    set td1name [file join [file dirname ~] [file tail ~] td1]
+    file mkdir tdFCmd2
+    file mkdir ~/tdFCmd1
+    set td1name [file join [file dirname ~] [file tail ~] tdFCmd1]
     file attributes $td1name -permissions 0000
-    file copy td2 ~/td1
+    file copy tdFCmd2 ~/tdFCmd1
 } -returnCodes error -cleanup {
     file attributes $td1name -permissions 0755
-    file delete -force ~/td1
-} -result {error copying "td2" to "~/td1/td2": permission denied}
+    file delete -force ~/tdFCmd1
+} -result {error copying "tdFCmd2" to "~/tdFCmd1/tdFCmd2": permission denied}
 test fCmd-6.26 {CopyRenameOneFile: doesn't use original name} -setup {
     cleanup
 } -constraints {unix notRoot} -body {
-    file mkdir ~/td1/td2
-    set td2name [file join [file dirname ~] [file tail ~] td1 td2]
+    file mkdir ~/tdFCmd1/tdFCmd2
+    set td2name [file join [file dirname ~] [file tail ~] tdFCmd1 tdFCmd2]
     file attributes $td2name -permissions 0000
-    file copy ~/td1 td1
+    file copy ~/tdFCmd1 tdFCmd1
 } -returnCodes error -cleanup {
     file attributes $td2name -permissions 0755
-    file delete -force ~/td1
-} -result "error copying \"~/td1\" to \"td1\": \"[file join $::env(HOME) td1 td2]\": permission denied"
+    file delete -force ~/tdFCmd1
+} -result "error copying \"~/tdFCmd1\" to \"tdFCmd1\": \"[file join $::env(HOME) tdFCmd1 tdFCmd2]\": permission denied"
 test fCmd-6.27 {CopyRenameOneFile: TclpCopyDirectory failed} -setup {
     cleanup $tmpspace
 } -constraints {notRoot xdev} -returnCodes error -body {
-    file mkdir td1/td2/td3
-    file mkdir [file join $tmpspace td1]
-    createfile [file join $tmpspace td1 tf1]
-    file rename -force td1 $tmpspace
-} -match glob -result {error renaming "td1" to "/tmp/tcl*/td1": file already exists}
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3
+    file mkdir [file join $tmpspace tdFCmd1]
+    createfile [file join $tmpspace tdFCmd1 tfFCmd1]
+    file rename -force tdFCmd1 $tmpspace
+} -match glob -result {error renaming "tdFCmd1" to "/tmp/tcl*/tdFCmd1": file already exists}
 test fCmd-6.28 {CopyRenameOneFile: TclpCopyDirectory failed} -setup {
     cleanup $tmpspace
 } -constraints {notRoot xdev} -body {
-    file mkdir td1/td2/td3
-    file attributes td1/td2/td3 -permissions 0000
-    file rename td1 $tmpspace
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3
+    file attributes tdFCmd1/tdFCmd2/tdFCmd3 -permissions 0000
+    file rename tdFCmd1 $tmpspace
 } -returnCodes error -cleanup {
-    file attributes td1/td2/td3 -permissions 0755
+    file attributes tdFCmd1/tdFCmd2/tdFCmd3 -permissions 0755
     cleanup $tmpspace
-} -match glob -result {error renaming "td1" to "/tmp/tcl*/td1": "td1/td2/td3": permission denied}
+} -match glob -result {error renaming "tdFCmd1" to "/tmp/tcl*/tdFCmd1": "tdFCmd1/tdFCmd2/tdFCmd3": permission denied}
 test fCmd-6.29 {CopyRenameOneFile: TclpCopyDirectory passed} -setup {
     cleanup $tmpspace
 } -constraints {notRoot xdev} -body {
-    file mkdir td1/td2/td3
-    file rename td1 $tmpspace
-    glob td* [file join $tmpspace td1 t*]
-} -result [file join $tmpspace td1 td2]
+    file mkdir tdFCmd1/tdFCmd2/tdFCmd3
+    file rename tdFCmd1 $tmpspace
+    glob td* [file join $tmpspace tdFCmd1 t*]
+} -result [file join $tmpspace tdFCmd1 tdFCmd2]
 test fCmd-6.30 {CopyRenameOneFile: TclpRemoveDirectory failed} -setup {
     cleanup $tmpspace
 } -constraints {xdev notRoot} -body {
@@ -670,39 +670,39 @@ test fCmd-6.30 {CopyRenameOneFile: TclpRemoveDirectory failed} -setup {
 test fCmd-6.31 {CopyRenameOneFile: TclpDeleteFile passed} -setup {
     cleanup $tmpspace
 } -constraints {notRoot xdev} -body {
-    file mkdir [file join $tmpspace td1]
-    createfile [file join $tmpspace td1 tf1]
-    file rename [file join $tmpspace td1 tf1] tf1
-    list [file exists [file join $tmpspace td1 tf1]] [file exists tf1]
+    file mkdir [file join $tmpspace tdFCmd1]
+    createfile [file join $tmpspace tdFCmd1 tfFCmd1]
+    file rename [file join $tmpspace tdFCmd1 tfFCmd1] tfFCmd1
+    list [file exists [file join $tmpspace tdFCmd1 tfFCmd1]] [file exists tfFCmd1]
 } -result {0 1}
 test fCmd-6.32 {CopyRenameOneFile: copy} -constraints {notRoot} -setup {
     cleanup
 } -returnCodes error -body {
-    file copy tf1 tf2
-} -result {error copying "tf1": no such file or directory}
+    file copy tfFCmd1 tfFCmd2
+} -result {error copying "tfFCmd1": no such file or directory}
 
 test fCmd-7.1 {FileForceOption: none} -constraints {notRoot} -setup {
     cleanup
 } -returnCodes error -body {
-    file mkdir [file join tf1 tf2]
-    file delete tf1
-} -result {error deleting "tf1": directory not empty}
+    file mkdir [file join tfFCmd1 tfFCmd2]
+    file delete tfFCmd1
+} -result {error deleting "tfFCmd1": directory not empty}
 test fCmd-7.2 {FileForceOption: -force} {notRoot} {
     cleanup
-    file mkdir [file join tf1 tf2]
-    file delete -force tf1
+    file mkdir [file join tfFCmd1 tfFCmd2]
+    file delete -force tfFCmd1
 } {}
 test fCmd-7.3 {FileForceOption: --} {notRoot} {
-    createfile -tf1
-    file delete -- -tf1
+    createfile -tfFCmd1
+    file delete -- -tfFCmd1
 } {}
 test fCmd-7.4 {FileForceOption: bad option} -constraints {notRoot} -setup {
-    createfile -tf1
+    createfile -tfFCmd1
 } -body {
-    file delete -tf1
+    file delete -tfFCmd1
 } -returnCodes error -cleanup {
-    file delete -- -tf1
-} -result {bad option "-tf1": should be -force or --}
+    file delete -- -tfFCmd1
+} -result {bad option "-tfFCmd1": should be -force or --}
 test fCmd-7.5 {FileForceOption: multiple times through loop} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
@@ -715,12 +715,12 @@ test fCmd-7.5 {FileForceOption: multiple times through loop} -setup {
 test fCmd-8.1 {FileBasename: basename of ~user: argc == 1 && *path == ~} \
     -constraints {unix notRoot knownBug} -body {
     # Labelled knownBug because it is dangerous [Bug: 3881]
-    file mkdir td1
-    file attr td1 -perm 040000
-    file rename ~$user td1
+    file mkdir tdFCmd1
+    file attr tdFCmd1 -perm 040000
+    file rename ~$user tdFCmd1
 } -returnCodes error -cleanup {
-    file delete -force td1
-} -result "error renaming \"~$user\" to \"td1/[file tail ~$user]\": permission denied"
+    file delete -force tdFCmd1
+} -result "error renaming \"~$user\" to \"tdFCmd1/[file tail ~$user]\": permission denied"
 test fCmd-8.2 {FileBasename: basename of ~user: argc == 1 && *path == ~} \
 	{unix notRoot} {
     string equal [file tail ~$user] ~$user
@@ -733,85 +733,85 @@ test fCmd-8.3 {file copy and path translation: ensure correct error} -body {
 test fCmd-9.1 {file rename: comprehensive: EACCES} -setup {
     cleanup
 } -constraints {unix notRoot} -body {
-    file mkdir td1
-    file mkdir td2
-    file attr td2 -perm 040000
-    file rename td1 td2/
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    file attr tdFCmd2 -perm 040000
+    file rename tdFCmd1 tdFCmd2/
 } -returnCodes error -cleanup {
-    file delete -force td2
-    file delete -force td1
-} -result {error renaming "td1" to "td2/td1": permission denied}
+    file delete -force tdFCmd2
+    file delete -force tdFCmd1
+} -result {error renaming "tdFCmd1" to "tdFCmd2/tdFCmd1": permission denied}
 test fCmd-9.2 {file rename: comprehensive: source doesn't exist} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file rename tf1 tf2
-} -result {error renaming "tf1": no such file or directory}
+    file rename tfFCmd1 tfFCmd2
+} -result {error renaming "tfFCmd1": no such file or directory}
 test fCmd-9.3 {file rename: comprehensive: file to new name} -setup {
     cleanup
 } -constraints {notRoot testchmod} -body {
-    createfile tf1
-    createfile tf2
-    testchmod 444 tf2
-    file rename tf1 tf3
-    file rename tf2 tf4
-    list [lsort [glob tf*]] [file writable tf3] [file writable tf4]
-} -result {{tf3 tf4} 1 0}
+    createfile tfFCmd1
+    createfile tfFCmd2
+    testchmod 444 tfFCmd2
+    file rename tfFCmd1 tfFCmd3
+    file rename tfFCmd2 tfFCmd4
+    list [lsort [glob tf*]] [file writable tfFCmd3] [file writable tfFCmd4]
+} -result {{tfFCmd3 tfFCmd4} 1 0}
 test fCmd-9.4.a {file rename: comprehensive: dir to new name} -setup {
     cleanup
 } -constraints {testchmod win2000orXP} -body {
-    file mkdir td1 td2
-    testchmod 555 td2
-    file rename td1 td3
-    file rename td2 td4
-    list [lsort [glob td*]] [file writable td3] [file writable td4]
+    file mkdir tdFCmd1 tdFCmd2
+    testchmod 555 tdFCmd2
+    file rename tdFCmd1 tdFCmd3
+    file rename tdFCmd2 tdFCmd4
+    list [lsort [glob td*]] [file writable tdFCmd3] [file writable tdFCmd4]
 } -cleanup {
     cleanup
-} -result {{td3 td4} 1 0}
+} -result {{tdFCmd3 tdFCmd4} 1 0}
 test fCmd-9.4.b {file rename: comprehensive: dir to new name} -setup {
     cleanup
 } -constraints {unix notRoot testchmod notDarwin9} -body {
-    file mkdir td1 td2
-    testchmod 555 td2
-    file rename td1 td3
-    file rename td2 td4
-    list [lsort [glob td*]] [file writable td3] [file writable td4]
+    file mkdir tdFCmd1 tdFCmd2
+    testchmod 555 tdFCmd2
+    file rename tdFCmd1 tdFCmd3
+    file rename tdFCmd2 tdFCmd4
+    list [lsort [glob td*]] [file writable tdFCmd3] [file writable tdFCmd4]
 } -cleanup {
     cleanup
-} -result {{td3 td4} 1 0}
+} -result {{tdFCmd3 tdFCmd4} 1 0}
 test fCmd-9.5 {file rename: comprehensive: file to self} {notRoot testchmod} {
     cleanup
-    createfile tf1 tf1
-    createfile tf2 tf2
-    testchmod 444 tf2
-    file rename -force tf1 tf1
-    file rename -force tf2 tf2
-    list [contents tf1] [contents tf2] [file writable tf1] [file writable tf2]
-} {tf1 tf2 1 0}
+    createfile tfFCmd1 tfFCmd1
+    createfile tfFCmd2 tfFCmd2
+    testchmod 444 tfFCmd2
+    file rename -force tfFCmd1 tfFCmd1
+    file rename -force tfFCmd2 tfFCmd2
+    list [contents tfFCmd1] [contents tfFCmd2] [file writable tfFCmd1] [file writable tfFCmd2]
+} {tfFCmd1 tfFCmd2 1 0}
 test fCmd-9.6.a {file rename: comprehensive: dir to self} -setup {
     cleanup
 } -constraints {testchmod win2000orXP} -body {
-    file mkdir td1
-    file mkdir td2
-    testchmod 555 td2
-    file rename -force td1 .
-    file rename -force td2 .
-    list [lsort [glob td*]] [file writable td1] [file writable td2]
-} -result {{td1 td2} 1 0}
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    testchmod 555 tdFCmd2
+    file rename -force tdFCmd1 .
+    file rename -force tdFCmd2 .
+    list [lsort [glob td*]] [file writable tdFCmd1] [file writable tdFCmd2]
+} -result {{tdFCmd1 tdFCmd2} 1 0}
 test fCmd-9.6.b {file rename: comprehensive: dir to self} -setup {
     cleanup
 } -constraints {notRoot unix testchmod} -body {
-    file mkdir td1
-    file mkdir td2
-    testchmod 555 td2
-    file rename -force td1 .
-    file rename -force td2 .
-    list [lsort [glob td*]] [file writable td1] [file writable td2]
-} -result {{td1 td2} 1 0}
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    testchmod 555 tdFCmd2
+    file rename -force tdFCmd1 .
+    file rename -force tdFCmd2 .
+    list [lsort [glob td*]] [file writable tdFCmd1] [file writable tdFCmd2]
+} -result {{tdFCmd1 tdFCmd2} 1 0}
 test fCmd-9.7 {file rename: comprehensive: file to existing file} -setup {
     cleanup
 } -constraints {notRoot testchmod} -body {
-    createfile tf1
-    createfile tf2
+    createfile tfFCmd1
+    createfile tfFCmd2
     createfile tfs1
     createfile tfs2
     createfile tfs3
@@ -824,21 +824,21 @@ test fCmd-9.7 {file rename: comprehensive: file to existing file} -setup {
     testchmod 444 tfs4
     testchmod 444 tfd2
     testchmod 444 tfd4
-    set msg [list [catch {file rename tf1 tf2} msg] $msg]
+    set msg [list [catch {file rename tfFCmd1 tfFCmd2} msg] $msg]
     file rename -force tfs1 tfd1
     file rename -force tfs2 tfd2
     file rename -force tfs3 tfd3
     file rename -force tfs4 tfd4
     list [lsort [glob tf*]] $msg [file writable tfd1] [file writable tfd2] [file writable tfd3] [file writable tfd4]
-} -result {{tf1 tf2 tfd1 tfd2 tfd3 tfd4} {1 {error renaming "tf1" to "tf2": file already exists}} 1 1 0 0}
+} -result {{tfFCmd1 tfFCmd2 tfd1 tfd2 tfd3 tfd4} {1 {error renaming "tfFCmd1" to "tfFCmd2": file already exists}} 1 1 0 0}
 test fCmd-9.8 {file rename: comprehensive: dir to empty dir} -setup {
     cleanup
 } -constraints {notRoot testchmod notNetworkFilesystem} -body {
     # Under unix, you can rename a read-only directory, but you can't
     # move it into another directory.
 
-    file mkdir td1
-    file mkdir [file join td2 td1]
+    file mkdir tdFCmd1
+    file mkdir [file join tdFCmd2 tdFCmd1]
     file mkdir tds1
     file mkdir tds2
     file mkdir tds3
@@ -853,7 +853,7 @@ test fCmd-9.8 {file rename: comprehensive: dir to empty dir} -setup {
     }
     testchmod 555 [file join tdd2 tds2]
     testchmod 555 [file join tdd4 tds4]
-    set msg [list [catch {file rename td1 td2} msg] $msg]
+    set msg [list [catch {file rename tdFCmd1 tdFCmd2} msg] $msg]
     file rename -force tds1 tdd1
     file rename -force tds2 tdd2
     file rename -force tds3 tdd3
@@ -867,7 +867,7 @@ test fCmd-9.8 {file rename: comprehensive: dir to empty dir} -setup {
     }
     list [lsort [glob td*]] $msg [file writable [file join tdd1 tds1]] \
     [file writable [file join tdd2 tds2]] $w3 $w4
-} -result [subst {{td1 td2 tdd1 tdd2 tdd3 tdd4} {1 {error renaming "td1" to "[file join td2 td1]": file already exists}} 1 1 0 0}]
+} -result [subst {{tdFCmd1 tdFCmd2 tdd1 tdd2 tdd3 tdd4} {1 {error renaming "tdFCmd1" to "[file join tdFCmd2 tdFCmd1]": file already exists}} 1 1 0 0}]
 # Test can hit EEXIST or EBUSY, depending on underlying filesystem
 test fCmd-9.9 {file rename: comprehensive: dir to non-empty dir} -setup {
     cleanup
@@ -891,150 +891,150 @@ test fCmd-9.9 {file rename: comprehensive: dir to non-empty dir} -setup {
     [subst {{tdd1 tdd2 tds1 tds2} {1 {error renaming "tds1" to "[file join tdd1 tds1]": file *}} {1 {error renaming "tds2" to "[file join tdd2 tds2]": file *}} 1 0}]
 test fCmd-9.10 {file rename: comprehensive: file to new name and dir} {notRoot testchmod} {
     cleanup
-    createfile tf1
-    createfile tf2
-    file mkdir td1
-    testchmod 444 tf2
-    file rename tf1 [file join td1 tf3]
-    file rename tf2 [file join td1 tf4]
-    list [catch {glob tf*}] [lsort [glob -directory td1 t*]] \
-    [file writable [file join td1 tf3]] [file writable [file join td1 tf4]]
-} [subst {1 {[file join td1 tf3] [file join td1 tf4]} 1 0}]
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file mkdir tdFCmd1
+    testchmod 444 tfFCmd2
+    file rename tfFCmd1 [file join tdFCmd1 tfFCmd3]
+    file rename tfFCmd2 [file join tdFCmd1 tfFCmd4]
+    list [catch {glob tf*}] [lsort [glob -directory tdFCmd1 t*]] \
+    [file writable [file join tdFCmd1 tfFCmd3]] [file writable [file join tdFCmd1 tfFCmd4]]
+} [subst {1 {[file join tdFCmd1 tfFCmd3] [file join tdFCmd1 tfFCmd4]} 1 0}]
 test fCmd-9.11 {file rename: comprehensive: dir to new name and dir} {notRoot testchmod} {
     cleanup
-    file mkdir td1
-    file mkdir td2
-    file mkdir td3
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    file mkdir tdFCmd3
     if {!([testConstraint unix] || [testConstraint winVista])} {
-	testchmod 555 td2
+	testchmod 555 tdFCmd2
     }
-    file rename td1 [file join td3 td3]
-    file rename td2 [file join td3 td4]
+    file rename tdFCmd1 [file join tdFCmd3 tdFCmd3]
+    file rename tdFCmd2 [file join tdFCmd3 tdFCmd4]
     if {[testConstraint unix] || [testConstraint winVista]} {
         set w4 0
     } else {
-	set w4 [file writable [file join td3 td4]]
+	set w4 [file writable [file join tdFCmd3 tdFCmd4]]
     }
-    list [lsort [glob td*]] [lsort [glob -directory td3 t*]] \
-    [file writable [file join td3 td3]] $w4
-} [subst {td3 {[file join td3 td3] [file join td3 td4]} 1 0}]
+    list [lsort [glob td*]] [lsort [glob -directory tdFCmd3 t*]] \
+    [file writable [file join tdFCmd3 tdFCmd3]] $w4
+} [subst {tdFCmd3 {[file join tdFCmd3 tdFCmd3] [file join tdFCmd3 tdFCmd4]} 1 0}]
 test fCmd-9.12 {file rename: comprehensive: target exists} -setup {
     cleanup
 } -constraints {notRoot testchmod notNetworkFilesystem} -body {
-    file mkdir [file join td1 td2] [file join td2 td1]
-    testchmod 555 [file join td2 td1]
-    file mkdir [file join td3 td4] [file join td4 td3]
-    file rename -force td3 td4
-    list [file exists td3] [file exists [file join td4 td3 td4]] \
-	[catch {file rename td1 td2} msg] $msg
+    file mkdir [file join tdFCmd1 tdFCmd2] [file join tdFCmd2 tdFCmd1]
+    testchmod 555 [file join tdFCmd2 tdFCmd1]
+    file mkdir [file join tdFCmd3 tdFCmd4] [file join tdFCmd4 tdFCmd3]
+    file rename -force tdFCmd3 tdFCmd4
+    list [file exists tdFCmd3] [file exists [file join tdFCmd4 tdFCmd3 tdFCmd4]] \
+	[catch {file rename tdFCmd1 tdFCmd2} msg] $msg
 } -cleanup {
-    testchmod 755 [file join td2 td1]
-} -result [subst {0 1 1 {error renaming "td1" to "[file join td2 td1]": file already exists}}]
+    testchmod 755 [file join tdFCmd2 tdFCmd1]
+} -result [subst {0 1 1 {error renaming "tdFCmd1" to "[file join tdFCmd2 tdFCmd1]": file already exists}}]
 # Test can hit EEXIST or EBUSY, depending on underlying filesystem
 test fCmd-9.13 {file rename: comprehensive: can't overwrite target} -setup {
     cleanup
 } -constraints {notRoot} -body {
-    file mkdir [file join td1 td2] [file join td2 td1 td4]
-    file rename -force td1 td2
+    file mkdir [file join tdFCmd1 tdFCmd2] [file join tdFCmd2 tdFCmd1 tdFCmd4]
+    file rename -force tdFCmd1 tdFCmd2
 } -returnCodes error -match glob -result \
-    [subst {error renaming "td1" to "[file join td2 td1]": file *}]
+    [subst {error renaming "tdFCmd1" to "[file join tdFCmd2 tdFCmd1]": file *}]
 test fCmd-9.14 {file rename: comprehensive: dir into self} {notRoot} {
     cleanup
-    file mkdir td1
-    list [glob td*] [list [catch {file rename td1 td1} msg] $msg]
-} [subst {td1 {1 {error renaming "td1" to "[file join td1 td1]": trying to rename a volume or move a directory into itself}}}]
+    file mkdir tdFCmd1
+    list [glob td*] [list [catch {file rename tdFCmd1 tdFCmd1} msg] $msg]
+} [subst {tdFCmd1 {1 {error renaming "tdFCmd1" to "[file join tdFCmd1 tdFCmd1]": trying to rename a volume or move a directory into itself}}}]
 test fCmd-9.14.1 {file rename: comprehensive: dir into self} {notRoot} {
     cleanup
-    file mkdir td1
-    file rename td1 td1x
-    file rename td1x td1
+    file mkdir tdFCmd1
+    file rename tdFCmd1 td1x
+    file rename td1x tdFCmd1
     set msg "ok"
 } {ok}
 test fCmd-9.14.2 {file rename: comprehensive: dir into self} -setup {
     cleanup
     set dir [pwd]
 } -constraints {nonPortable notRoot} -body {
-    file mkdir td1
-    cd td1
-    file rename [file join .. td1] [file join .. td1x]
+    file mkdir tdFCmd1
+    cd tdFCmd1
+    file rename [file join .. tdFCmd1] [file join .. td1x]
 } -returnCodes error -cleanup {
     cd $dir
-} -result [subst {error renaming "[file join .. td1]" to "[file join .. td1x]": permission denied}]
+} -result [subst {error renaming "[file join .. tdFCmd1]" to "[file join .. td1x]": permission denied}]
 test fCmd-9.14.3 {file rename: comprehensive: dir into self} -setup {
     cleanup
     set dir [pwd]
 } -constraints {notRoot} -body {
-    file mkdir td1
-    cd td1
-    file rename [file join .. td1] [file join .. td1 foo]
+    file mkdir tdFCmd1
+    cd tdFCmd1
+    file rename [file join .. tdFCmd1] [file join .. tdFCmd1 foo]
 } -returnCodes error -cleanup {
     cd $dir
-} -result [subst {error renaming "[file join .. td1]" to "[file join .. td1 foo]": trying to rename a volume or move a directory into itself}]
+} -result [subst {error renaming "[file join .. tdFCmd1]" to "[file join .. tdFCmd1 foo]": trying to rename a volume or move a directory into itself}]
 test fCmd-9.15 {file rename: comprehensive: source and target incompatible} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir td1
-    createfile tf1
-    file rename -force td1 tf1
+    file mkdir tdFCmd1
+    createfile tfFCmd1
+    file rename -force tdFCmd1 tfFCmd1
 } -cleanup {
     cleanup
-} -result {can't overwrite file "tf1" with directory "td1"}
+} -result {can't overwrite file "tfFCmd1" with directory "tdFCmd1"}
 test fCmd-9.16 {file rename: comprehensive: source and target incompatible} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir td1/tf1
-    createfile tf1
-    file rename -force tf1 td1
-} -result [subst {can't overwrite directory "[file join td1 tf1]" with file "tf1"}]
+    file mkdir tdFCmd1/tfFCmd1
+    createfile tfFCmd1
+    file rename -force tfFCmd1 tdFCmd1
+} -result [subst {can't overwrite directory "[file join tdFCmd1 tfFCmd1]" with file "tfFCmd1"}]
 
 test fCmd-10.1 {file copy: comprehensive: source doesn't exist} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file copy tf1 tf2
-} -result {error copying "tf1": no such file or directory}
+    file copy tfFCmd1 tfFCmd2
+} -result {error copying "tfFCmd1": no such file or directory}
 test fCmd-10.2 {file copy: comprehensive: file to new name} {notRoot testchmod} {
     cleanup
-    createfile tf1 tf1
-    createfile tf2 tf2
-    testchmod 444 tf2
-    file copy tf1 tf3
-    file copy tf2 tf4
-    list [lsort [glob tf*]] [contents tf3] [contents tf4] [file writable tf3] [file writable tf4]
-} {{tf1 tf2 tf3 tf4} tf1 tf2 1 0}
+    createfile tfFCmd1 tfFCmd1
+    createfile tfFCmd2 tfFCmd2
+    testchmod 444 tfFCmd2
+    file copy tfFCmd1 tfFCmd3
+    file copy tfFCmd2 tfFCmd4
+    list [lsort [glob tf*]] [contents tfFCmd3] [contents tfFCmd4] [file writable tfFCmd3] [file writable tfFCmd4]
+} {{tfFCmd1 tfFCmd2 tfFCmd3 tfFCmd4} tfFCmd1 tfFCmd2 1 0}
 test fCmd-10.3 {file copy: comprehensive: dir to new name} -setup {
     cleanup
 } -constraints {notRoot unix testchmod} -body {
-    file mkdir [file join td1 tdx]
-    file mkdir [file join td2 tdy]
-    testchmod 555 td2
-    file copy td1 td3
-    file copy td2 td4
-    list [lsort [glob td*]] [glob -directory td3 t*] \
-	    [glob -directory td4 t*] [file writable td3] [file writable td4]
+    file mkdir [file join tdFCmd1 tdx]
+    file mkdir [file join tdFCmd2 tdy]
+    testchmod 555 tdFCmd2
+    file copy tdFCmd1 tdFCmd3
+    file copy tdFCmd2 tdFCmd4
+    list [lsort [glob td*]] [glob -directory tdFCmd3 t*] \
+	    [glob -directory tdFCmd4 t*] [file writable tdFCmd3] [file writable tdFCmd4]
 } -cleanup {
-    testchmod 755 td2
-    testchmod 755 td4
-} -result [list {td1 td2 td3 td4} [file join td3 tdx] [file join td4 tdy] 1 0]
+    testchmod 755 tdFCmd2
+    testchmod 755 tdFCmd4
+} -result [list {tdFCmd1 tdFCmd2 tdFCmd3 tdFCmd4} [file join tdFCmd3 tdx] [file join tdFCmd4 tdy] 1 0]
 test fCmd-10.3.1 {file copy: comprehensive: dir to new name} -setup {
     cleanup
 } -constraints {notRoot win 2000orNewer testchmod} -body {
     # On Windows with ACLs, copying a directory is defined like this
-    file mkdir [file join td1 tdx]
-    file mkdir [file join td2 tdy]
-    testchmod 555 td2
-    file copy td1 td3
-    file copy td2 td4
-    list [lsort [glob td*]] [glob -directory td3 t*] \
-	    [glob -directory td4 t*] [file writable td3] [file writable td4]
+    file mkdir [file join tdFCmd1 tdx]
+    file mkdir [file join tdFCmd2 tdy]
+    testchmod 555 tdFCmd2
+    file copy tdFCmd1 tdFCmd3
+    file copy tdFCmd2 tdFCmd4
+    list [lsort [glob td*]] [glob -directory tdFCmd3 t*] \
+	    [glob -directory tdFCmd4 t*] [file writable tdFCmd3] [file writable tdFCmd4]
 } -cleanup {
-    testchmod 755 td2
-    testchmod 755 td4
-} -result [list {td1 td2 td3 td4} [file join td3 tdx] [file join td4 tdy] 1 1]
+    testchmod 755 tdFCmd2
+    testchmod 755 tdFCmd4
+} -result [list {tdFCmd1 tdFCmd2 tdFCmd3 tdFCmd4} [file join tdFCmd3 tdx] [file join tdFCmd4 tdy] 1 1]
 test fCmd-10.4 {file copy: comprehensive: file to existing file} -setup {
     cleanup
 } -constraints {notRoot testchmod} -body {
-    createfile tf1
-    createfile tf2
+    createfile tfFCmd1
+    createfile tfFCmd2
     createfile tfs1
     createfile tfs2
     createfile tfs3
@@ -1047,18 +1047,18 @@ test fCmd-10.4 {file copy: comprehensive: file to existing file} -setup {
     testchmod 444 tfs4
     testchmod 444 tfd2
     testchmod 444 tfd4
-    set msg [list [catch {file copy tf1 tf2} msg] $msg]
+    set msg [list [catch {file copy tfFCmd1 tfFCmd2} msg] $msg]
     file copy -force tfs1 tfd1
     file copy -force tfs2 tfd2
     file copy -force tfs3 tfd3
     file copy -force tfs4 tfd4
     list [lsort [glob tf*]] $msg [file writable tfd1] [file writable tfd2] [file writable tfd3] [file writable tfd4]
-} -result {{tf1 tf2 tfd1 tfd2 tfd3 tfd4 tfs1 tfs2 tfs3 tfs4} {1 {error copying "tf1" to "tf2": file already exists}} 1 1 0 0}
+} -result {{tfFCmd1 tfFCmd2 tfd1 tfd2 tfd3 tfd4 tfs1 tfs2 tfs3 tfs4} {1 {error copying "tfFCmd1" to "tfFCmd2": file already exists}} 1 1 0 0}
 test fCmd-10.5 {file copy: comprehensive: dir to empty dir} -setup {
     cleanup
 } -constraints {notRoot testchmod} -body {
-    file mkdir td1
-    file mkdir [file join td2 td1]
+    file mkdir tdFCmd1
+    file mkdir [file join tdFCmd2 tdFCmd1]
     file mkdir tds1
     file mkdir tds2
     file mkdir tds3
@@ -1071,13 +1071,13 @@ test fCmd-10.5 {file copy: comprehensive: dir to empty dir} -setup {
     testchmod 555 tds4
     testchmod 555 [file join tdd2 tds2]
     testchmod 555 [file join tdd4 tds4]
-    set a1 [list [catch {file copy td1 td2} msg] $msg]
+    set a1 [list [catch {file copy tdFCmd1 tdFCmd2} msg] $msg]
     set a2 [list [catch {file copy -force tds1 tdd1} msg] $msg]
     set a3 [catch {file copy -force tds2 tdd2}]
     set a4 [catch {file copy -force tds3 tdd3}]
     set a5 [catch {file copy -force tds4 tdd4}]
     list [lsort [glob td*]] $a1 $a2 $a3 $a4 $a5
-} -result [subst {{td1 td2 tdd1 tdd2 tdd3 tdd4 tds1 tds2 tds3 tds4} {1 {error copying "td1" to "[file join td2 td1]": file already exists}} {1 {error copying "tds1" to "[file join tdd1 tds1]": file already exists}} 1 1 1}]
+} -result [subst {{tdFCmd1 tdFCmd2 tdd1 tdd2 tdd3 tdd4 tds1 tds2 tds3 tds4} {1 {error copying "tdFCmd1" to "[file join tdFCmd2 tdFCmd1]": file already exists}} {1 {error copying "tds1" to "[file join tdd1 tds1]": file already exists}} 1 1 1}]
 test fCmd-10.6 {file copy: comprehensive: dir to non-empty dir} -setup {
     cleanup
 } -constraints {notRoot unixOrPc testchmod} -body {
@@ -1093,66 +1093,66 @@ test fCmd-10.6 {file copy: comprehensive: dir to non-empty dir} -setup {
 test fCmd-10.7 {file rename: comprehensive: file to new name and dir} -setup {
     cleanup
 } -constraints {notRoot testchmod} -body {
-    createfile tf1
-    createfile tf2
-    file mkdir td1
-    testchmod 444 tf2
-    file copy tf1 [file join td1 tf3]
-    file copy tf2 [file join td1 tf4]
-    list [lsort [glob tf*]] [lsort [glob -directory td1 t*]] \
-    [file writable [file join td1 tf3]] [file writable [file join td1 tf4]]
-} -result [subst {{tf1 tf2} {[file join td1 tf3] [file join td1 tf4]} 1 0}]
+    createfile tfFCmd1
+    createfile tfFCmd2
+    file mkdir tdFCmd1
+    testchmod 444 tfFCmd2
+    file copy tfFCmd1 [file join tdFCmd1 tfFCmd3]
+    file copy tfFCmd2 [file join tdFCmd1 tfFCmd4]
+    list [lsort [glob tf*]] [lsort [glob -directory tdFCmd1 t*]] \
+    [file writable [file join tdFCmd1 tfFCmd3]] [file writable [file join tdFCmd1 tfFCmd4]]
+} -result [subst {{tfFCmd1 tfFCmd2} {[file join tdFCmd1 tfFCmd3] [file join tdFCmd1 tfFCmd4]} 1 0}]
 test fCmd-10.8 {file rename: comprehensive: dir to new name and dir} -setup {
     cleanup
 } -constraints {notRoot unix testchmod} -body {
-    file mkdir td1
-    file mkdir td2
-    file mkdir td3
-    testchmod 555 td2
-    file copy td1 [file join td3 td3]
-    file copy td2 [file join td3 td4]
-    list [lsort [glob td*]] [lsort [glob -directory td3 t*]] \
-    [file writable [file join td3 td3]] [file writable [file join td3 td4]]
-} -result [subst {{td1 td2 td3} {[file join td3 td3] [file join td3 td4]} 1 0}]
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    file mkdir tdFCmd3
+    testchmod 555 tdFCmd2
+    file copy tdFCmd1 [file join tdFCmd3 tdFCmd3]
+    file copy tdFCmd2 [file join tdFCmd3 tdFCmd4]
+    list [lsort [glob td*]] [lsort [glob -directory tdFCmd3 t*]] \
+    [file writable [file join tdFCmd3 tdFCmd3]] [file writable [file join tdFCmd3 tdFCmd4]]
+} -result [subst {{tdFCmd1 tdFCmd2 tdFCmd3} {[file join tdFCmd3 tdFCmd3] [file join tdFCmd3 tdFCmd4]} 1 0}]
 test fCmd-10.8.1 {file rename: comprehensive: dir to new name and dir} -setup {
     cleanup
 } -constraints {notRoot win 2000orNewer testchmod} -body {
     # On Windows with ACLs, copying a directory is defined like this
-    file mkdir td1
-    file mkdir td2
-    file mkdir td3
-    testchmod 555 td2
-    file copy td1 [file join td3 td3]
-    file copy td2 [file join td3 td4]
-    list [lsort [glob td*]] [lsort [glob -directory td3 t*]] \
-    [file writable [file join td3 td3]] [file writable [file join td3 td4]]
-} -result [subst {{td1 td2 td3} {[file join td3 td3] [file join td3 td4]} 1 1}]
+    file mkdir tdFCmd1
+    file mkdir tdFCmd2
+    file mkdir tdFCmd3
+    testchmod 555 tdFCmd2
+    file copy tdFCmd1 [file join tdFCmd3 tdFCmd3]
+    file copy tdFCmd2 [file join tdFCmd3 tdFCmd4]
+    list [lsort [glob td*]] [lsort [glob -directory tdFCmd3 t*]] \
+    [file writable [file join tdFCmd3 tdFCmd3]] [file writable [file join tdFCmd3 tdFCmd4]]
+} -result [subst {{tdFCmd1 tdFCmd2 tdFCmd3} {[file join tdFCmd3 tdFCmd3] [file join tdFCmd3 tdFCmd4]} 1 1}]
 test fCmd-10.9 {file copy: comprehensive: source and target incompatible} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir td1
-    createfile tf1
-    file copy -force td1 tf1
-} -result {can't overwrite file "tf1" with directory "td1"}
+    file mkdir tdFCmd1
+    createfile tfFCmd1
+    file copy -force tdFCmd1 tfFCmd1
+} -result {can't overwrite file "tfFCmd1" with directory "tdFCmd1"}
 test fCmd-10.10 {file copy: comprehensive: source and target incompatible} -setup {
     cleanup
 } -constraints {notRoot} -returnCodes error -body {
-    file mkdir [file join td1 tf1]
-    createfile tf1
-    file copy -force tf1 td1
-} -result [subst {can't overwrite directory "[file join td1 tf1]" with file "tf1"}]
+    file mkdir [file join tdFCmd1 tfFCmd1]
+    createfile tfFCmd1
+    file copy -force tfFCmd1 tdFCmd1
+} -result [subst {can't overwrite directory "[file join tdFCmd1 tfFCmd1]" with file "tfFCmd1"}]
 test fCmd-10.11 {file copy: copy to empty file name} -setup {
     cleanup
 } -returnCodes error -body {
-    createfile tf1
-    file copy tf1 ""
-} -result {error copying "tf1" to "": no such file or directory}
+    createfile tfFCmd1
+    file copy tfFCmd1 ""
+} -result {error copying "tfFCmd1" to "": no such file or directory}
 test fCmd-10.12 {file rename: rename to empty file name} -setup {
     cleanup
 } -returnCodes error -body {
-    createfile tf1
-    file rename tf1 ""
-} -result {error renaming "tf1" to "": no such file or directory}
+    createfile tfFCmd1
+    file rename tfFCmd1 ""
+} -result {error renaming "tfFCmd1" to "": no such file or directory}
 cleanup
 
 # old tests

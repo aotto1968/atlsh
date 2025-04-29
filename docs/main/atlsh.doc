@@ -1,19 +1,34 @@
 /**
  @file         NHI1/theATL/docs/main/atlsh.doc
- @brief        atlsh.doc - 25 Apr 2025 - aotto1968
+ @brief        tag: nhi1-release-250425
  @copyright    (C) NHI - #1 - Project - Group
                This software has NO permission to copy,
                please contact AUTHOR for additional information
- @version      6b7ff3cdcc61ece5dbc182fd6a905e2bd0fbacc9
- @date         Fri Apr 25 22:35:01 2025 +0200
- @author       aotto1968 <aotto1968@t-online.de>
 ***
 
-\page atlsh   atlsh roadmap
+\page atlsh   atlsh
+\brief the new shell for system-administration and system-programming …
+
+# goal
+
+\noop [[atlsh-goal]]
+The goal of @atlsh is to replace @bash as the central tool for system programming 
+and system control with an AI-based tool.
+\noop [[atlsh-goal]]
+
+# details
+
+\noop [atlsh-details]
+The @atlsh combines @theATL, @theKernel, @theLink, @theLib into one tool for @LINUX system administration.
+
+- The @atl85 source distribution is available on @github and is the continuation of the @tcl85 development.
+- Capabilities from @tcl86 will be gradually ported to @atl85 in order to get the maximum benefit from the 
+  current @tcl86 development.
+- The aim of @atlsh is to offer a **local** AI integration in order to provide the administrator and 
+  the programmer with an environment that works **without** external dependencies.
+\noop [atlsh-details]
 
 # roadmap
-
-> The central goal of @atlsh is to replace @bash as the central system programming tool for the @LINUX operating system.
 
 ## initial setup
 
@@ -28,10 +43,6 @@
   provides fast and easy @OOP support.
 - Then, the complete rebuild of @atlsh will begin with the integration of @theKernel and @theLink, which will involve 
   an architectural change focused on @LINUX fork and \e process-management.
-
-## development goal
-
-- The end result of the development will be an AI operating system based on \theKernel, \theLink, \theLib and \theATL.
 
 
 **/

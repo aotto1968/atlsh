@@ -427,7 +427,7 @@ test basic-26.1 {Tcl_EvalObj: preserve object while evaling it} -setup {
     }
     set handler [interp bgerror {}]
     interp bgerror {} [namespace which myHandler]
-    set fName [makeFile {} test1]
+    set fName [makeFile {} test1Basic]
 } -body {
     # If object isn't preserved, errorInfo would be set to
     # "foo\n    while executing\n\"garbage bytes\"" because the object's
@@ -440,7 +440,7 @@ test basic-26.1 {Tcl_EvalObj: preserve object while evaling it} -setup {
     close $f
     set x
 } -cleanup {
-    removeFile test1
+    removeFile test1Basic
     interp bgerror {} $handler
     rename myHandler {}
 } -result "foo\n    while executing\n\"error foo\""

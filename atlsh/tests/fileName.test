@@ -46,15 +46,15 @@ test filename-1.1 {Tcl_GetPathType: unix} {testsetplatform} {
 } absolute
 test filename-1.2 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype /foo
+    file pathtype /fooFileName
 } absolute
 test filename-1.3 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype foo
+    file pathtype fooFileName
 } relative
 test filename-1.4 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype c:/foo
+    file pathtype c:/fooFileName
 } relative
 test filename-1.5 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
@@ -62,15 +62,15 @@ test filename-1.5 {Tcl_GetPathType: unix} {testsetplatform} {
 } absolute
 test filename-1.6 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype ~/foo
+    file pathtype ~/fooFileName
 } absolute
 test filename-1.7 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype ~foo
+    file pathtype ~fooFileName
 } absolute
 test filename-1.8 {Tcl_GetPathType: unix} {testsetplatform} {
     testsetplatform unix
-    file pathtype ./~foo
+    file pathtype ./~fooFileName
 } relative
 
 test filename-3.1 {Tcl_GetPathType: windows} {testsetplatform} {
@@ -83,11 +83,11 @@ test filename-3.2 {Tcl_GetPathType: windows} {testsetplatform} {
 } volumerelative
 test filename-3.3 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype /foo
+    file pathtype /fooFileName
 } volumerelative
 test filename-3.4 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype \\foo
+    file pathtype \\fooFileName
 } volumerelative
 test filename-3.5 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
@@ -99,11 +99,11 @@ test filename-3.6 {Tcl_GetPathType: windows} {testsetplatform} {
 } absolute
 test filename-3.7 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype c:/foo
+    file pathtype c:/fooFileName
 } absolute
 test filename-3.8 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype c:\\foo
+    file pathtype c:\\fooFileName
 } absolute
 test filename-3.9 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
@@ -111,19 +111,19 @@ test filename-3.9 {Tcl_GetPathType: windows} {testsetplatform} {
 } volumerelative
 test filename-3.10 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype c:foo
+    file pathtype c:fooFileName
 } volumerelative
 test filename-3.11 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype foo
+    file pathtype fooFileName
 } relative
 test filename-3.12 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype //foo/bar
+    file pathtype //fooFileName/bar
 } absolute
 test filename-3.13 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype ~foo
+    file pathtype ~fooFileName
 } absolute
 test filename-3.14 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
@@ -131,11 +131,11 @@ test filename-3.14 {Tcl_GetPathType: windows} {testsetplatform} {
 } absolute
 test filename-3.15 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype ~/foo
+    file pathtype ~/fooFileName
 } absolute
 test filename-3.16 {Tcl_GetPathType: windows} {testsetplatform} {
     testsetplatform windows
-    file pathtype ./~foo
+    file pathtype ./~fooFileName
 } relative
 
 test filename-4.1 {Tcl_SplitPath: unix} {testsetplatform} {
@@ -144,32 +144,32 @@ test filename-4.1 {Tcl_SplitPath: unix} {testsetplatform} {
 } {/}
 test filename-4.2 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split /foo
-} {/ foo}
+    file split /fooFileName
+} {/ fooFileName}
 test filename-4.3 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split /foo/bar
-} {/ foo bar}
+    file split /fooFileName/bar
+} {/ fooFileName bar}
 test filename-4.4 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split /foo/bar/baz
-} {/ foo bar baz}
+    file split /fooFileName/bar/baz
+} {/ fooFileName bar baz}
 test filename-4.5 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split foo/bar
-} {foo bar}
+    file split fooFileName/bar
+} {fooFileName bar}
 test filename-4.6 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split ./foo/bar
-} {. foo bar}
+    file split ./fooFileName/bar
+} {. fooFileName bar}
 test filename-4.7 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split /foo/../././foo/bar
-} {/ foo .. . . foo bar}
+    file split /fooFileName/../././fooFileName/bar
+} {/ fooFileName .. . . fooFileName bar}
 test filename-4.8 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split ../foo/bar
-} {.. foo bar}
+    file split ../fooFileName/bar
+} {.. fooFileName bar}
 test filename-4.9 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
     file split {}
@@ -188,28 +188,28 @@ test filename-4.12 {Tcl_SplitPath: unix} {testsetplatform} {
 } {.. ..}
 test filename-4.13 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split //foo
-} "/ foo"
+    file split //fooFileName
+} "/ fooFileName"
 test filename-4.14 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split foo//bar
-} {foo bar}
+    file split fooFileName//bar
+} {fooFileName bar}
 test filename-4.15 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split ~foo
-} {~foo}
+    file split ~fooFileName
+} {~fooFileName}
 test filename-4.16 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split ~foo/~bar
-} {~foo ./~bar}
+    file split ~fooFileName/~bar
+} {~fooFileName ./~bar}
 test filename-4.17 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split ~foo/~bar/~baz
-} {~foo ./~bar ./~baz}
+    file split ~fooFileName/~bar/~baz
+} {~fooFileName ./~bar ./~baz}
 test filename-4.18 {Tcl_SplitPath: unix} {testsetplatform} {
     testsetplatform unix
-    file split foo/bar~/baz
-} {foo bar~ baz}
+    file split fooFileName/bar~/baz
+} {fooFileName bar~ baz}
 
 if {[testConstraint testsetplatform]} {
     testsetplatform $platform
@@ -247,32 +247,32 @@ test filename-6.1 {Tcl_SplitPath: win} {testsetplatform} {
 } {/}
 test filename-6.2 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /foo
-} {/ foo}
+    file split /fooFileName
+} {/ fooFileName}
 test filename-6.3 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /foo/bar
-} {/ foo bar}
+    file split /fooFileName/bar
+} {/ fooFileName bar}
 test filename-6.4 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /foo/bar/baz
-} {/ foo bar baz}
+    file split /fooFileName/bar/baz
+} {/ fooFileName bar baz}
 test filename-6.5 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split foo/bar
-} {foo bar}
+    file split fooFileName/bar
+} {fooFileName bar}
 test filename-6.6 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split ./foo/bar
-} {. foo bar}
+    file split ./fooFileName/bar
+} {. fooFileName bar}
 test filename-6.7 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /foo/../././foo/bar
-} {/ foo .. . . foo bar}
+    file split /fooFileName/../././fooFileName/bar
+} {/ fooFileName .. . . fooFileName bar}
 test filename-6.8 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split ../foo/bar
-} {.. foo bar}
+    file split ../fooFileName/bar
+} {.. fooFileName bar}
 test filename-6.9 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
     file split {}
@@ -291,40 +291,40 @@ test filename-6.12 {Tcl_SplitPath: win} {testsetplatform} {
 } {.. ..}
 test filename-6.13 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split //foo
-} {/ foo}
+    file split //fooFileName
+} {/ fooFileName}
 test filename-6.14 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split foo//bar
-} {foo bar}
+    file split fooFileName//bar
+} {fooFileName bar}
 test filename-6.15 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /\\/foo//bar
-} {//foo/bar}
+    file split /\\/fooFileName//bar
+} {//fooFileName/bar}
 test filename-6.16 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /\\/foo//bar
-} {//foo/bar}
+    file split /\\/fooFileName//bar
+} {//fooFileName/bar}
 test filename-6.17 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split /\\/foo//bar
-} {//foo/bar}
+    file split /\\/fooFileName//bar
+} {//fooFileName/bar}
 test filename-6.18 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split \\\\foo\\bar
-} {//foo/bar}
+    file split \\\\fooFileName\\bar
+} {//fooFileName/bar}
 test filename-6.19 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split \\\\foo\\bar/baz
-} {//foo/bar baz}
+    file split \\\\fooFileName\\bar/baz
+} {//fooFileName/bar baz}
 test filename-6.20 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split c:/foo
-} {c:/ foo}
+    file split c:/fooFileName
+} {c:/ fooFileName}
 test filename-6.21 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split c:foo
-} {c: foo}
+    file split c:fooFileName
+} {c: fooFileName}
 test filename-6.22 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
     file split c:
@@ -343,24 +343,24 @@ test filename-6.25 {Tcl_SplitPath: win} {testsetplatform} {
 } {c:/ . ..}
 test filename-6.26 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split ~foo
-} {~foo}
+    file split ~fooFileName
+} {~fooFileName}
 test filename-6.27 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split ~foo/~bar
-} {~foo ./~bar}
+    file split ~fooFileName/~bar
+} {~fooFileName ./~bar}
 test filename-6.28 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split ~foo/~bar/~baz
-} {~foo ./~bar ./~baz}
+    file split ~fooFileName/~bar/~baz
+} {~fooFileName ./~bar ./~baz}
 test filename-6.29 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split foo/bar~/baz
-} {foo bar~ baz}
+    file split fooFileName/bar~/baz
+} {fooFileName bar~ baz}
 test filename-6.30 {Tcl_SplitPath: win} {testsetplatform} {
     testsetplatform win
-    file split c:~foo
-} {c: ./~foo}
+    file split c:~fooFileName
+} {c: ./~fooFileName}
 
 test filename-7.1 {Tcl_JoinPath: unix} {testsetplatform} {
     testsetplatform unix
@@ -450,19 +450,19 @@ test filename-9.3 {Tcl_JoinPath: win} {testsetplatform} {
 } {/b}
 test filename-9.4 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join c: foo
-} {c:foo}
+    file join c: fooFileName
+} {c:fooFileName}
 test filename-9.5 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join c:/ foo
-} {c:/foo}
+    file join c:/ fooFileName
+} {c:/fooFileName}
 test filename-9.6 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join c:\\bar foo
-} {c:/bar/foo}
+    file join c:\\bar fooFileName
+} {c:/bar/fooFileName}
 test filename-9.7 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join /foo c:bar
+    file join /fooFileName c:bar
 } {c:bar}
 test filename-9.8 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
@@ -470,20 +470,20 @@ test filename-9.8 {Tcl_JoinPath: win} {testsetplatform} {
 } {//host/share/dir}
 test filename-9.9 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join ~ foo
-} {~/foo}
+    file join ~ fooFileName
+} {~/fooFileName}
 test filename-9.10 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join ~/~foo
-} {~/~foo}
+    file join ~/~fooFileName
+} {~/~fooFileName}
 test filename-9.11 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join ~ ./~foo
-} {~/~foo}
+    file join ~ ./~fooFileName
+} {~/~fooFileName}
 test filename-9.12 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join / ~foo
-} {~foo}
+    file join / ~fooFileName
+} {~fooFileName}
 test filename-9.13 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
     file join ./a/ b c
@@ -498,84 +498,84 @@ test filename-9.15 {Tcl_JoinPath: win} {testsetplatform} {
 } {/host/share/path}
 test filename-9.16 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join foo . bar
-} {foo/./bar}
+    file join fooFileName . bar
+} {fooFileName/./bar}
 test filename-9.17 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join foo .. bar
-} {foo/../bar}
+    file join fooFileName .. bar
+} {fooFileName/../bar}
 test filename-9.18 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
-    file join foo/./bar
-} {foo/./bar}
+    file join fooFileName/./bar
+} {fooFileName/./bar}
 test filename-9.19 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
     set res {}
     lappend res \
-      [file join {C:\foo\bar}] \
-      [file join C:/blah {C:\foo\bar}] \
-      [file join C:/blah C:/blah {C:\foo\bar}]
-} {C:/foo/bar C:/foo/bar C:/foo/bar}
+      [file join {C:\fooFileName\bar}] \
+      [file join C:/blah {C:\fooFileName\bar}] \
+      [file join C:/blah C:/blah {C:\fooFileName\bar}]
+} {C:/fooFileName/bar C:/fooFileName/bar C:/fooFileName/bar}
 test filename-9.19.1 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
     set res {}
     lappend res \
-      [file join {foo\bar}] \
-      [file join C:/blah {foo\bar}] \
-      [file join C:/blah C:/blah {foo\bar}]
-} {foo/bar C:/blah/foo/bar C:/blah/foo/bar}
+      [file join {fooFileName\bar}] \
+      [file join C:/blah {fooFileName\bar}] \
+      [file join C:/blah C:/blah {fooFileName\bar}]
+} {fooFileName/bar C:/blah/fooFileName/bar C:/blah/fooFileName/bar}
 test filename-9.19.2 {Tcl_JoinPath: win} {testsetplatform win} {
     testsetplatform win
     set res {}
     lappend res \
-      [file join {foo\bar}] \
-      [file join [pwd] {foo\bar}] \
-      [file join [pwd] [pwd] {foo\bar}]
+      [file join {fooFileName\bar}] \
+      [file join [pwd] {fooFileName\bar}] \
+      [file join [pwd] [pwd] {fooFileName\bar}]
     set nres {}
     foreach elt $res {
 	lappend nres [string map [list [pwd] pwd] $elt]
     }
     set nres
-} {foo/bar pwd/foo/bar pwd/foo/bar}
+} {fooFileName/bar pwd/fooFileName/bar pwd/fooFileName/bar}
 test filename-9.20 {Tcl_JoinPath: unix} {testsetplatform} {
     testsetplatform unix
     set res {}
     lappend res \
-      [file join {/foo/bar}] \
-      [file join /x {/foo/bar}] \
-      [file join /x /x {/foo/bar}]
-} {/foo/bar /foo/bar /foo/bar}
+      [file join {/fooFileName/bar}] \
+      [file join /x {/fooFileName/bar}] \
+      [file join /x /x {/fooFileName/bar}]
+} {/fooFileName/bar /fooFileName/bar /fooFileName/bar}
 test filename-9.23 {Tcl_JoinPath: win} {testsetplatform} {
     testsetplatform win
     set res {}
     lappend res \
-      [file join {foo\bar}] \
-      [file join C:/blah {foo\bar}] \
-      [file join C:/blah C:/blah {foo\bar}]
+      [file join {fooFileName\bar}] \
+      [file join C:/blah {fooFileName\bar}] \
+      [file join C:/blah C:/blah {fooFileName\bar}]
     string map [list C:/blah ""] $res
-} {foo/bar /foo/bar /foo/bar}
+} {fooFileName/bar /fooFileName/bar /fooFileName/bar}
 test filename-9.24 {Tcl_JoinPath: unix} {testsetplatform} {
     testsetplatform unix
     set res {}
     lappend res \
-      [file join {foo/bar}] \
-      [file join /x {foo/bar}] \
-      [file join /x /x {foo/bar}]
+      [file join {fooFileName/bar}] \
+      [file join /x {fooFileName/bar}] \
+      [file join /x /x {fooFileName/bar}]
     string map [list /x ""] $res
-} {foo/bar /foo/bar /foo/bar}
+} {fooFileName/bar /fooFileName/bar /fooFileName/bar}
 
 test filename-10.1 {Tcl_TranslateFileName} {testsetplatform} {
     testsetplatform unix
-    list [catch {testtranslatefilename foo} msg] $msg
-} {0 foo}
+    list [catch {testtranslatefilename fooFileName} msg] $msg
+} {0 fooFileName}
 test filename-10.2 {Tcl_TranslateFileName} {testsetplatform} {
     testsetplatform windows
-    list [catch {testtranslatefilename {c:/foo}} msg] $msg
-} {0 {c:\foo}}
+    list [catch {testtranslatefilename {c:/fooFileName}} msg] $msg
+} {0 {c:\fooFileName}}
 test filename-10.3 {Tcl_TranslateFileName} {testsetplatform} {
     testsetplatform windows
-    list [catch {testtranslatefilename {c:/\\foo/}} msg] $msg
-} {0 {c:\foo}}
+    list [catch {testtranslatefilename {c:/\\fooFileName/}} msg] $msg
+} {0 {c:\fooFileName}}
 test filename-10.3.1 {Tcl_TranslateFileName} {testsetplatform} {
     testsetplatform windows
     list [catch {testtranslatefilename {c://///}} msg] $msg
@@ -585,16 +585,16 @@ test filename-10.6 {Tcl_TranslateFileName} {testsetplatform} {
     set temp $env(HOME)
     set env(HOME) "/home/test"
     testsetplatform unix
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 /home/test/foo}
+} {0 /home/test/fooFileName}
 test filename-10.7 {Tcl_TranslateFileName} {testsetplatform} {
     global env
     set temp $env(HOME)
     unset env(HOME)
     testsetplatform unix
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
 } {1 {couldn't find HOME environment variable to expand path}}
@@ -621,53 +621,53 @@ test filename-10.10 {Tcl_TranslateFileName} {testsetplatform} {
     set temp $env(HOME)
     set env(HOME) "/home/test/"
     testsetplatform unix
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 /home/test/foo}
+} {0 /home/test/fooFileName}
 test filename-10.17 {Tcl_TranslateFileName} {testsetplatform} {
     global env
     set temp $env(HOME)
     set env(HOME) "\\home\\"
     testsetplatform windows
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 {\home\foo}}
+} {0 {\home\fooFileName}}
 test filename-10.18 {Tcl_TranslateFileName} {testsetplatform} {
     global env
     set temp $env(HOME)
     set env(HOME) "\\home\\"
     testsetplatform windows
-    set result [list [catch {testtranslatefilename ~/foo\\bar} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName\\bar} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 {\home\foo\bar}}
+} {0 {\home\fooFileName\bar}}
 test filename-10.19 {Tcl_TranslateFileName} {testsetplatform} {
     global env
     set temp $env(HOME)
     set env(HOME) "c:"
     testsetplatform windows
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 c:foo}
+} {0 c:fooFileName}
 test filename-10.20 {Tcl_TranslateFileName} {testtranslatefilename} {
-    list [catch {testtranslatefilename ~blorp/foo} msg] $msg
+    list [catch {testtranslatefilename ~blorp/fooFileName} msg] $msg
 } {1 {user "blorp" doesn't exist}}
 test filename-10.21 {Tcl_TranslateFileName} {testsetplatform} {
     global env
     set temp $env(HOME)
     set env(HOME) "c:\\"
     testsetplatform windows
-    set result [list [catch {testtranslatefilename ~/foo} msg] $msg]
+    set result [list [catch {testtranslatefilename ~/fooFileName} msg] $msg]
     set env(HOME) $temp
     set result
-} {0 {c:\foo}}
+} {0 {c:\fooFileName}}
 test filename-10.22 {Tcl_TranslateFileName} {testsetplatform} {
     testsetplatform windows
-    list [catch {testtranslatefilename foo//bar} msg] $msg
-} {0 {foo\bar}}
+    list [catch {testtranslatefilename fooFileName//bar} msg] $msg
+} {0 {fooFileName\bar}}
 
 if {[testConstraint testsetplatform]} {
     testsetplatform $platform
@@ -679,8 +679,8 @@ test filename-10.23 {Tcl_TranslateFileName} {nonPortable} {
 } {0 /home/ouster}
 test filename-10.24 {Tcl_TranslateFileName} {nonPortable} {
     # this test fails if ~ouster is not /home/ouster
-    list [catch {testtranslatefilename ~ouster/foo} msg] $msg
-} {0 /home/ouster/foo}
+    list [catch {testtranslatefilename ~ouster/fooFileName} msg] $msg
+} {0 /home/ouster/fooFileName}
 
 
 test filename-11.1 {Tcl_GlobCmd} {
@@ -1055,13 +1055,13 @@ test filename-11.38 {Tcl_GlobCmd} {
 test filename-11.39 {Tcl_GlobCmd} {
     list [catch {glob -tails -join -path $globname *} msg] $msg
 } [list 0 [list $globname]]
-test filename-11.40 {Tcl_GlobCmd} {
+test filename-11.40 {Tcl_GlobCmd} { !parallel } {
     expr {[glob -dir [pwd] -tails *] == [glob *]}
 } {1}
 test filename-11.41 {Tcl_GlobCmd} {
     expr {[glob -dir [pwd] -tails *] != [glob -dir [pwd] *]}
 } {1}
-test filename-11.42 {Tcl_GlobCmd} {
+test filename-11.42 {Tcl_GlobCmd} { !parallel } {
     set res [list]
     foreach f [glob -dir [pwd] *] {
 	lappend res [file tail $f]
@@ -1093,16 +1093,16 @@ test filename-11.45 {Tcl_GlobCmd on root volume} {
     set res
 } {1}
 test filename-11.46 {Tcl_GlobCmd} {
-    list [catch {glob -types abcde -dir foo *} msg] $msg
+    list [catch {glob -types abcde -dir fooFileName *} msg] $msg
 } {1 {bad argument to "-types": abcde}}
 test filename-11.47 {Tcl_GlobCmd} {
-    list [catch {glob -types abcde -path foo *} msg] $msg
+    list [catch {glob -types abcde -path fooFileName *} msg] $msg
 } {1 {bad argument to "-types": abcde}}
 test filename-11.48 {Tcl_GlobCmd} {
-    list [catch {glob -types abcde -dir foo -join * *} msg] $msg
+    list [catch {glob -types abcde -dir fooFileName -join * *} msg] $msg
 } {1 {bad argument to "-types": abcde}}
 test filename-11.49 {Tcl_GlobCmd} {
-    list [catch {glob -types abcde -path foo -join * *} msg] $msg
+    list [catch {glob -types abcde -path fooFileName -join * *} msg] $msg
 } {1 {bad argument to "-types": abcde}}
 
 file rename $horribleglobname globTest
@@ -1138,7 +1138,7 @@ set globPreResult globTest/
 set x1 x1.c
 set y1 y1.c
 test filename-12.4 {simple globbing} {unixOrPc} {
-    lsort [glob globTest/x1.c globTest/y1.c globTest/foo]
+    lsort [glob globTest/x1.c globTest/y1.c globTest/fooFileName]
 } "$globPreResult$x1 $globPreResult$y1"
 test filename-12.5 {simple globbing} {
     list [catch {glob globTest\\/x1.c} msg] $msg
@@ -1304,8 +1304,8 @@ test filename-14.21 {asterisks, question marks, and brackets} {
     list [catch {glob globTest/*/gorp} msg] $msg
 } {1 {no files matched glob pattern "globTest/*/gorp"}}
 test filename-14.22 {asterisks, question marks, and brackets} {
-    list [catch {glob goo/* x*z foo?q} msg] $msg
-} {1 {no files matched glob patterns "goo/* x*z foo?q"}}
+    list [catch {glob goo/* x*z fooFileName?q} msg] $msg
+} {1 {no files matched glob patterns "goo/* x*z fooFileName?q"}}
 test filename-14.23 {slash globbing} {unix} {
     glob /
 } /
@@ -1347,7 +1347,7 @@ test filename-14.30 {Bug 2710920} {unixOrPc} {
 } globTest/a1/
 
 test filename-14.31 {Bug 2918610} -setup {
-    set d [makeDirectory foo]
+    set d [makeDirectory fooFileName]
     makeFile {} bar.soom $d
 } -body {
     foreach fn [glob $d/bar.soom] {
@@ -1358,7 +1358,7 @@ test filename-14.31 {Bug 2918610} -setup {
 } -cleanup {
     file delete -force $d/bar
     removeFile bar.soom $d
-    removeDirectory foo
+    removeDirectory fooFileName
 } -result 2
 
 unset globname
@@ -1387,7 +1387,7 @@ test filename-15.4 {unix specific no complain: no errors, good result} \
     # test fails because if an error occurs, the interp's result
     # is reset... or you don't run at scriptics where the
     # outser and welch users exists
-    glob -nocomplain ~ouster ~foo ~welch
+    glob -nocomplain ~ouster ~fooFileName ~welch
 } {/home/ouster /home/welch}
 test filename-15.4.1 {no complain: errors, sequencing} {
     # test used to fail because if an error occurs, the interp's result
@@ -1534,7 +1534,7 @@ test filename-17.1 {windows specific special files} {testsetplatform} {
     testsetplatform win
     list [file pathtype com1] [file pathtype con] [file pathtype lpt3] \
       [file pathtype prn] [file pathtype nul] [file pathtype aux] \
-      [file pathtype foo]
+      [file pathtype fooFileName]
 } {absolute absolute absolute absolute absolute absolute relative}
 if {[testConstraint testsetplatform]} {
     testsetplatform $platform
@@ -1571,45 +1571,45 @@ test fileName-19.1 {ensure that [Bug 1325099] stays fixed} {
 } {0 0}
 
 test fileName-20.1 {Bug 1750300} -setup {
-    set d [makeDirectory foo]
+    set d [makeDirectory fooFileName]
     makeFile {} TAGS $d
 } -body {
     llength [glob -nocomplain -directory $d -- TAGS one two]
 } -cleanup {
     removeFile TAGS $d
-    removeDirectory foo
+    removeDirectory fooFileName
 } -result 1
 test fileName-20.2 {Bug 1750300} -setup {
-    set d [makeDirectory foo]
+    set d [makeDirectory fooFileName]
     makeFile {} TAGS $d
 } -body {
     llength [glob -nocomplain -directory $d -types {} -- TAGS one two]
 } -cleanup {
     removeFile TAGS $d
-    removeDirectory foo
+    removeDirectory fooFileName
 } -result 1
 test fileName-20.3 {Bug 1750300} -setup {
-    set d [makeDirectory foo]
+    set d [makeDirectory fooFileName]
     makeFile {} TAGS $d
 } -body {
     llength [glob -nocomplain -directory $d -types {} -- *U*]
 } -cleanup {
     removeFile TAGS $d
-    removeDirectory foo
+    removeDirectory fooFileName
 } -result 0
 test fileName-20.4 {Bug 1750300} -setup {
-    set d [makeDirectory foo]
+    set d [makeDirectory fooFileName]
     makeFile {} TAGS $d
 } -body {
     llength [glob -nocomplain -directory $d -types {} -- URGENT Urkle]
 } -cleanup {
     removeFile TAGS $d
-    removeDirectory foo
+    removeDirectory fooFileName
 } -result 0
 
 test fileName-20.5 {Bug 2837800} -setup {
     set dd [makeDirectory isolate]
-    set d [makeDirectory ./~foo $dd]
+    set d [makeDirectory ./~fooFileName $dd]
     makeFile {} test $d
     set savewd [pwd]
     cd $dd
@@ -1618,9 +1618,9 @@ test fileName-20.5 {Bug 2837800} -setup {
 } -cleanup {
     cd $savewd
     removeFile test $d
-    removeDirectory ./~foo $dd
+    removeDirectory ./~fooFileName $dd
     removeDirectory isolate
-} -result ~foo/test
+} -result ~fooFileName/test
 
 test fileName-20.6 {Bug 2837800} -setup {
     # Recall that we have $env(HOME) set so that references

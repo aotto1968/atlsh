@@ -518,7 +518,7 @@ foreach i [after info] {
 }
 
 test event-11.5 {Tcl_VwaitCmd procedure: round robin scheduling, 2 sources} {socket} {
-    set test1file [makeFile "" test1]
+    set test1file [makeFile "" test1Event]
     set f1 [open $test1file w]
     proc accept {s args} {
 	puts $s foobar
@@ -542,8 +542,8 @@ test event-11.5 {Tcl_VwaitCmd procedure: round robin scheduling, 2 sources} {soc
     list $x $y $z
 } {3 3 done}
 test event-11.6 {Tcl_VwaitCmd procedure: round robin scheduling, same source} {
-    set test1file [makeFile "" test1]
-    set test2file [makeFile "" test2]
+    set test1file [makeFile "" test1Event]
+    set test2file [makeFile "" test2Event]
     set f1 [open $test1file w]
     set f2 [open $test2file w]
     set x 0

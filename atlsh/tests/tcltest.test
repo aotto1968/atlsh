@@ -307,7 +307,7 @@ test tcltest-5.3 {testConstraint - constraint empty (tcltest::safeFetch)}  {
 test tcltest-5.5 {InitConstraints: list of built-in constraints} \
 	-constraints {!singleTestInterp} \
 	-setup {tcltest::InitConstraints} \
-	-body { lsort [array names ::tcltest::testConstraints] } \
+	-body { lsort [lsearch -not -all -inline [array names ::tcltest::testConstraints] parallel]} \
 	-result [lsort {
     95 98 asyncPipeClose eformat emptyTest exec hasIsoLocale interactive
     knownBug mac macCrash macOnly macOrPc macOrUnix macOrWin nonBlockFiles

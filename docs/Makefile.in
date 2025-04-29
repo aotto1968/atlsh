@@ -16,24 +16,18 @@
 
 #+
 #:   @file         NHI1/theATL/docs/Makefile.am
-#:   @brief        Makefile.am - 25 Apr 2025 - aotto1968
+#:   @brief        tag: nhi1-release-250425
 #:   @copyright    (C) NHI - #1 - Project - Group
 #:                 This software has NO permission to copy,
 #:                 please contact AUTHOR for additional information
-#:   @version      6b7ff3cdcc61ece5dbc182fd6a905e2bd0fbacc9
-#:   @date         Fri Apr 25 22:35:01 2025 +0200
-#:   @author       aotto1968 <aotto1968@t-online.de>
 #:
 
 #+
 #:   @file         NHI1/docs/docs.mk
-#:   @brief        docs.mk - 17 Apr 2025 - aotto1968
+#:   @brief        tag: nhi1-release-250425
 #:   @copyright    (C) NHI - #1 - Project - Group
 #:                 This software has NO permission to copy,
 #:                 please contact AUTHOR for additional information
-#:   @version      94486eaaa48431d85fd346f26b604ead9fc893a5
-#:   @date         Thu Apr 17 12:31:54 2025 +0200
-#:   @author       aotto1968 <aotto1968@t-online.de>
 #:
 VPATH = @srcdir@
 am__is_gnu_make = { \

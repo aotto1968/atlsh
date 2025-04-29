@@ -336,7 +336,7 @@ test compile-12.2 {testing error on literal deletion} -constraints {memory exec}
 	    namespace delete bar
 	}
 	puts 0
-    } source.file]
+    } sourceCompile.file]
     exec [interpreter] $sourceFile 
 } -cleanup {
     catch {removeFile $sourceFile}

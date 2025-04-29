@@ -32,4 +32,9 @@ AC_SUBST(TCL_PATCH_LEVEL)
 AC_SUBST(TCL_SRC_DIR)
 AC_SUBST(TCL_BIN_DIR)
 
-AC_OUTPUT(Makefile tcl.hpj)
+AC_CONFIG_FILES([
+    Makefile:Makefile.orig
+    tcl.hpj:tcl.hpj.in
+])
+
+AC_OUTPUT()

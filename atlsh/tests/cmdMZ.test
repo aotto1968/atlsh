@@ -245,9 +245,9 @@ test cmdMZ-3.5 {Tcl_SourceObjCmd: error in script} -body {
 	set x 146
 	error "error in sourced file"
 	set y $x
-    } source.file]
+    } sourceCmdMZ.file]
     set result [list [catch {source $file} msg] $msg $::errorInfo]
-    removeFile source.file
+    removeFile sourceCmdMZ.file
     set result
 } -match listGlob -result {1 {error in sourced file} {error in sourced file
     while executing
@@ -256,9 +256,9 @@ test cmdMZ-3.5 {Tcl_SourceObjCmd: error in script} -body {
     invoked from within
 "source $file"}}
 test cmdMZ-3.6 {Tcl_SourceObjCmd: simple script} {
-    set file [makeFile {list result} source.file]
+    set file [makeFile {list result} sourceCmdMZ.file]
     set result [source $file]
-    removeFile source.file
+    removeFile sourceCmdMZ.file
     set result
 } result
 

@@ -25,7 +25,7 @@ testConstraint testsetplatform 	    [llength [info commands ::testsetplatform]]
 testConstraint testsimplefilesystem [llength [info commands ::testsimplefilesystem]]
 
 cd [tcltest::temporaryDirectory]
-makeFile "test file" gorp.file
+makeFile "test file" gorpFileSystem.file
 makeDirectory dir.dir
 makeDirectory [file join dir.dir dirinside.dir]
 makeFile "test file in directory" [file join dir.dir inside.file]
@@ -72,7 +72,7 @@ proc testPathEqual {one two} {
 }
 
 testConstraint hasLinks [expr {![catch {
-    file link link.file gorp.file
+    file link link.file gorpFileSystem.file
     cd dir.dir
     file link \
 	[file join linkinside.file] \
@@ -90,13 +90,13 @@ if {[testConstraint testsetplatform]} {
 }
 
 test filesystem-1.0 {link normalisation} {hasLinks} {
-   string equal [file normalize gorp.file] [file normalize link.file]
+   string equal [file normalize gorpFileSystem.file] [file normalize link.file]
 } {0}
 test filesystem-1.1 {link normalisation} {hasLinks} {
    string equal [file normalize dir.dir] [file normalize dir.link]
 } {0}
 test filesystem-1.2 {link normalisation} {hasLinks unix} {
-    testPathEqual [file normalize [file join gorp.file foo]] \
+    testPathEqual [file normalize [file join gorpFileSystem.file foo]] \
 	[file normalize [file join link.file foo]]
 } {1}
 test filesystem-1.3 {link normalisation} {hasLinks} {
@@ -735,12 +735,12 @@ test filesystem-7.2 {cross-filesystem copy from vfs maintains mtime} \
     set dir [pwd]
     cd [tcltest::temporaryDirectory]
     # We created this file several tests ago.
-    set origtime [file mtime gorp.file]
-    set res [file exists gorp.file]
+    set origtime [file mtime gorpFileSystem.file]
+    set res [file exists gorpFileSystem.file]
     if {[catch {
 	testsimplefilesystem 1
 	file delete -force theCopy
-	file copy simplefs:/gorp.file theCopy
+	file copy simplefs:/gorpFileSystem.file theCopy
 	testsimplefilesystem 0
 	set newtime [file mtime theCopy]
 	file delete theCopy
@@ -912,7 +912,7 @@ test filesystem-7.7 {cross-filesystem dir copy with -force} {testsimplefilesyste
     cd $dir
     set res
 } {0 {} 1 {error copying "simplefs:/simpledir" to "dir2/simpledir": file already exists} 0 {} 1 1}
-removeFile gorp.file
+removeFile gorpFileSystem.file
 test filesystem-7.8 {vfs cd} testsimplefilesystem {
     set dir [pwd]
     cd [tcltest::temporaryDirectory]

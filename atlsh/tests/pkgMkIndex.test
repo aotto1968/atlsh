@@ -11,7 +11,9 @@
 package require tcltest 2.3
 namespace import ::tcltest::*
 
-set fullPkgPath [makeDirectory pkg]
+set fullPkgPath [makeDirectory pkgMkIndexDir]
+
+puts fullPkgPath=$fullPkgPath
 
 
 namespace eval pkgtest {
@@ -267,7 +269,7 @@ proc simple::lower { stg } {
 proc simple::upper { stg } {
     return [string toupper $stg]
 }
-} [file join pkg simple.tcl]
+} [file join pkgMkIndexDir simple.tcl]
 
 test pkgMkIndex-2.1 {simple package} {
     pkgtest::runIndex -lazy $fullPkgPath simple.tcl
@@ -289,7 +291,7 @@ packages provided were {simple 1.0}
 processed simple.tcl
 }
 
-removeFile [file join pkg simple.tcl]
+removeFile [file join pkgMkIndexDir simple.tcl]
 
 makeFile {
 #  Contains global symbols, used to check that they don't have a leading ::
@@ -300,13 +302,13 @@ proc global_lower { stg } {
 proc global_upper { stg } {
     return [string toupper $stg]
 }
-} [file join pkg global.tcl]
+} [file join pkgMkIndexDir global.tcl]
 
 test pkgMkIndex-3.1 {simple package with global symbols} {
     pkgtest::runIndex -lazy $fullPkgPath global.tcl
 } {0 {{global:1.0 {tclPkgSetup {global.tcl source {global_lower global_upper}}}}}}
 
-removeFile [file join pkg global.tcl]
+removeFile [file join pkgMkIndexDir global.tcl]
 
 makeFile {
 #  This package is required by pkg1.
@@ -319,7 +321,7 @@ namespace eval pkg2 {
 proc pkg2::p2-1 { num } {
     return [expr $num * 2]
 }
-} [file join pkg pkg2_a.tcl]
+} [file join pkgMkIndexDir pkg2_a.tcl]
 
 makeFile {
 #  This package is required by pkg1.
@@ -332,7 +334,7 @@ namespace eval pkg2 {
 proc pkg2::p2-2 { num } {
     return [expr $num * 3]
 }
-} [file join pkg pkg2_b.tcl]
+} [file join pkgMkIndexDir pkg2_b.tcl]
 
 test pkgMkIndex-4.1 {split package} {
     pkgtest::runIndex -lazy $fullPkgPath pkg2_a.tcl pkg2_b.tcl
@@ -377,7 +379,7 @@ proc std::p1 { stg } {
 proc std::p2 { stg } {
     return [string toupper $stg]
 }
-} [file join pkg std.tcl]
+} [file join pkgMkIndexDir std.tcl]
 
 test pkgMkIndex-5.1 {requires -direct package} {
     pkgtest::runIndex -lazy $fullPkgPath std.tcl
@@ -386,7 +388,7 @@ test pkgMkIndex-5.1 {requires -direct package} {
 removeFile [file join direct1 direct1.tcl]
 file delete [file join $direct1 pkgIndex.tcl]
 removeDirectory direct1
-removeFile [file join pkg std.tcl]
+removeFile [file join pkgMkIndexDir std.tcl]
 
 makeFile {
 #  This package requires pkg3, but it does
@@ -403,7 +405,7 @@ proc pkg1::p1-1 { num } {
 proc pkg1::p1-2 { num } {
     return [pkg3::p3-2 $num]
 }
-} [file join pkg pkg1.tcl]
+} [file join pkgMkIndexDir pkg1.tcl]
 
 makeFile {
 package provide pkg3 1.0
@@ -416,7 +418,7 @@ proc pkg3::p3-1 { num } {
 proc pkg3::p3-2 { num } {
     return {[expr $num * 3]}
 }
-} [file join pkg pkg3.tcl]
+} [file join pkgMkIndexDir pkg3.tcl]
 
 test pkgMkIndex-6.1 {pkg1 requires pkg3} {
     pkgtest::runIndex -lazy $fullPkgPath pkg1.tcl pkg3.tcl
@@ -426,7 +428,7 @@ test pkgMkIndex-6.2 {pkg1 requires pkg3 - use -direct} {
     pkgtest::runIndex -direct $fullPkgPath pkg1.tcl pkg3.tcl
 } "0 {{pkg1:1.0 {[list source [file join $fullPkgPath pkg1.tcl]]}} {pkg3:1.0 {[list source [file join $fullPkgPath pkg3.tcl]]}}}"
 
-removeFile [file join pkg pkg1.tcl]
+removeFile [file join pkgMkIndexDir pkg1.tcl]
 
 makeFile {
 #  This package requires pkg3, and it calls
@@ -444,7 +446,7 @@ proc pkg4::p4-1 { num } {
 proc pkg4::p4-2 { num } {
     return [pkg3::p3-2 $num]
 }
-} [file join pkg pkg4.tcl]
+} [file join pkgMkIndexDir pkg4.tcl]
 
 test pkgMkIndex-7.1 {pkg4 uses pkg3} {
     pkgtest::runIndex -lazy $fullPkgPath pkg4.tcl pkg3.tcl
@@ -454,8 +456,8 @@ test pkgMkIndex-7.2 {pkg4 uses pkg3 - use -direct} {
     pkgtest::runIndex -direct $fullPkgPath pkg4.tcl pkg3.tcl
 } "0 {{pkg3:1.0 {[list source [file join $fullPkgPath pkg3.tcl]]}} {pkg4:1.0 {[list source [file join $fullPkgPath pkg4.tcl]]}}}"
 
-removeFile [file join pkg pkg4.tcl]
-removeFile [file join pkg pkg3.tcl]
+removeFile [file join pkgMkIndexDir pkg4.tcl]
+removeFile [file join pkgMkIndexDir pkg3.tcl]
 
 makeFile {
 #  This package requires pkg2, and it calls
@@ -476,7 +478,7 @@ proc pkg5::p5-2 { num } {
     variable m2
     return [expr {$m2 * $num}]
 }
-} [file join pkg pkg5.tcl]
+} [file join pkgMkIndexDir pkg5.tcl]
 
 test pkgMkIndex-8.1 {pkg5 uses pkg2} {
     pkgtest::runIndex -lazy $fullPkgPath pkg5.tcl pkg2_a.tcl pkg2_b.tcl
@@ -487,9 +489,9 @@ test pkgMkIndex-8.2 {pkg5 uses pkg2 - use -direct} {
 } "0 {{pkg2:1.0 {[list source [file join $fullPkgPath pkg2_a.tcl]]
 [list source [file join $fullPkgPath pkg2_b.tcl]]}} {pkg5:1.0 {[list source [file join $fullPkgPath pkg5.tcl]]}}}"
 
-removeFile [file join pkg pkg5.tcl]
-removeFile [file join pkg pkg2_a.tcl]
-removeFile [file join pkg pkg2_b.tcl]
+removeFile [file join pkgMkIndexDir pkg5.tcl]
+removeFile [file join pkgMkIndexDir pkg2_a.tcl]
+removeFile [file join pkgMkIndexDir pkg2_b.tcl]
 
 makeFile {
 #  This package requires circ2, and circ2
@@ -512,7 +514,7 @@ proc circ1::c1-3 {} {
 proc circ1::c1-4 {} {
     return 20
 }
-} [file join pkg circ1.tcl]
+} [file join pkgMkIndexDir circ1.tcl]
 
 makeFile {
 #  This package is required by circ1, and
@@ -528,7 +530,7 @@ proc circ2::c2-1 { num } {
 proc circ2::c2-2 { num } {
     return [expr $num * [circ3::c3-2]]
 }
-} [file join pkg circ2.tcl]
+} [file join pkgMkIndexDir circ2.tcl]
 
 makeFile {
 #  This package is required by circ2, and in
@@ -544,15 +546,15 @@ proc circ3::c3-1 {} {
 proc circ3::c3-2 {} {
     return [circ1::c1-4]
 }
-} [file join pkg circ3.tcl]
+} [file join pkgMkIndexDir circ3.tcl]
 
 test pkgMkIndex-9.1 {circular packages} {
     pkgtest::runIndex -lazy $fullPkgPath circ1.tcl circ2.tcl circ3.tcl
 } {0 {{circ1:1.0 {tclPkgSetup {circ1.tcl source {::circ1::c1-1 ::circ1::c1-2 ::circ1::c1-3 ::circ1::c1-4}}}} {circ2:1.0 {tclPkgSetup {circ2.tcl source {::circ2::c2-1 ::circ2::c2-2}}}} {circ3:1.0 {tclPkgSetup {circ3.tcl source ::circ3::c3-1}}}}}
 
-removeFile [file join pkg circ1.tcl]
-removeFile [file join pkg circ2.tcl]
-removeFile [file join pkg circ3.tcl]
+removeFile [file join pkgMkIndexDir circ1.tcl]
+removeFile [file join pkgMkIndexDir circ2.tcl]
+removeFile [file join pkgMkIndexDir circ3.tcl]
 
 # Some tests require the existence of one of the DLLs in the dltest directory
 set x [file join [file dirname [info nameofexecutable]] dltest \
@@ -567,7 +569,7 @@ package provide Pkga 1.0
 proc pkga_neq { x } {
     return [expr {! [pkgq_eq $x]}]
 }
-} [file join pkg pkga.tcl]
+} [file join pkgMkIndexDir pkga.tcl]
     file copy -force $x $fullPkgPath
 }
 testConstraint exec [llength [info commands ::exec]]
@@ -595,7 +597,7 @@ test pkgMkIndex-10.2 {package in DLL hidden by -load} [list exec $dll] {
 
 if {[testConstraint $dll]} {
     file delete -force [file join $fullPkgPath [file tail $x]]
-    removeFile [file join pkg pkga.tcl]
+    removeFile [file join pkgMkIndexDir pkga.tcl]
 }
 
 # Tolerate "namespace import" at the global scope
@@ -613,13 +615,13 @@ proc ::fubar::foo {bar} {
     return true
 }
 namespace import ::fubar::foo
-} [file join pkg import.tcl]
+} [file join pkgMkIndexDir import.tcl]
 
 test pkgMkIndex-11.1 {conflicting namespace imports} {
     pkgtest::runIndex -lazy $fullPkgPath import.tcl
 } {0 {{fubar:1.0 {tclPkgSetup {import.tcl source ::fubar::foo}}}}}
 
-removeFile [file join pkg import.tcl]
+removeFile [file join pkgMkIndexDir import.tcl]
 
 # Verify that the auto load list generated is correct even when there
 # is a proc name conflict between two namespaces (ie, ::foo::baz and
@@ -647,13 +649,13 @@ proc ::college::team {} {
     puts "go badgers!"
     return true
 }
-} [file join pkg samename.tcl]
+} [file join pkgMkIndexDir samename.tcl]
 
 test pkgMkIndex-12.1 {same name procs in different namespace} {
     pkgtest::runIndex -lazy $fullPkgPath samename.tcl
 } {0 {{football:1.0 {tclPkgSetup {samename.tcl source {::college::team ::pro::team}}}}}}
 
-removeFile [file join pkg samename.tcl]
+removeFile [file join pkgMkIndexDir samename.tcl]
 
 # Proc names with embedded spaces are properly listed (ie, correct number of
 # braces) in result
@@ -661,13 +663,13 @@ makeFile {
 package provide spacename 1.0
 proc {a b} {} {}
 proc {c d} {} {}
-} [file join pkg spacename.tcl]
+} [file join pkgMkIndexDir spacename.tcl]
 
 test pkgMkIndex-13.1 {proc names with embedded spaces} {
     pkgtest::runIndex -lazy $fullPkgPath spacename.tcl
 } {0 {{spacename:1.0 {tclPkgSetup {spacename.tcl source {{a b} {c d}}}}}}}
 
-removeFile [file join pkg spacename.tcl]
+removeFile [file join pkgMkIndexDir spacename.tcl]
 
 # Test the tcl::Pkg::CompareExtension helper function
 test pkgMkIndex-14.1 {tcl::Pkg::CompareExtension} {unix} {
@@ -691,7 +693,7 @@ test pkgMkIndex-14.6 {tcl::Pkg::CompareExtension} {unix} {
 
 # cleanup
 
-removeDirectory pkg
+removeDirectory pkgMkIndexDir
 
 namespace delete pkgtest
 ::tcltest::cleanupTests

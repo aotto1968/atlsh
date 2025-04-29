@@ -106,7 +106,7 @@ test cmdAH-2.6.1 {Tcl_CdObjCmd} {
 
 test cmdAH-2.6.3 {Tcl_CdObjCmd, bug #3118489} -returnCodes error -body {
     cd .\0
-} -result "couldn't change working directory to \".\0\": no such file or directory"
+} -result "couldn't change working directory to \".\0\": invalid argument"
 test cmdAH-2.7 {Tcl_ConcatObjCmd} {
     concat
 } {}
@@ -805,7 +805,7 @@ catch {testsetplatform $platform}
 
 # readable
 
-set gorpfile [makeFile abcde gorp.file]
+set gorpfile [makeFile abcde gorpCmdAH.file]
 set dirfile [makeDirectory dir.file]
 
 test cmdAH-16.1 {Tcl_FileObjCmd: readable} {
@@ -850,7 +850,7 @@ test cmdAH-17.3 {Tcl_FileObjCmd: writable} {
 removeFile $gorpfile
 removeDirectory $dirfile
 set dirfile [makeDirectory dir.file]
-set gorpfile [makeFile abcde gorp.file]
+set gorpfile [makeFile abcde gorpCmdAH.file]
 
 test cmdAH-18.1 {Tcl_FileObjCmd: executable} {} {
     list [catch {file executable a b} msg] $msg
@@ -902,12 +902,12 @@ test cmdAH-19.1 {Tcl_FileObjCmd: exists} {
 } {1 {wrong # args: should be "file exists name"}}
 test cmdAH-19.2 {Tcl_FileObjCmd: exists} {file exists $gorpfile} 0
 test cmdAH-19.3 {Tcl_FileObjCmd: exists} {
-    file exists [file join [temporaryDirectory] dir.file gorp.file]
+    file exists [file join [temporaryDirectory] dir.file gorpCmdAH.file]
 } 0
 catch {
-    set gorpfile [makeFile abcde gorp.file]
+    set gorpfile [makeFile abcde gorpCmdAH.file]
     set dirfile [makeDirectory dir.file]
-    set subgorp [makeFile 12345 [file join $dirfile gorp.file]]
+    set subgorp [makeFile 12345 [file join $dirfile gorpCmdAH.file]]
 }
 test cmdAH-19.4 {Tcl_FileObjCmd: exists} {
     file exists $gorpfile
@@ -970,7 +970,7 @@ test cmdAH-19.12 {Bug 3608360: [file exists] mustn't do globbing} -setup {
 
 catch {testsetplatform $platform}
 removeFile $gorpfile
-set gorpfile [makeFile "Test string" gorp.file]
+set gorpfile [makeFile "Test string" gorpCmdAH.file]
 catch {file attributes $gorpfile -permissions 0765}
 
 # atime
@@ -1330,7 +1330,7 @@ test cmdAH-27.3 {Tcl_FileObjCmd: size} {
 
 catch {testsetplatform $platform}
 removeFile $gorpfile
-set gorpfile [makeFile "Test string" gorp.file]
+set gorpfile [makeFile "Test string" gorpCmdAH.file]
 catch {file attributes $gorpfile -permissions 0765}
 
 test cmdAH-28.1 {Tcl_FileObjCmd: stat} {

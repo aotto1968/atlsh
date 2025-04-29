@@ -1,0 +1,35 @@
+# This file contains the mapping of directory names to package names for
+# documentation purposes. Each non-blank non-comment line is a two-element
+# list that says a possible name of directory (multiple lines may be needed
+# because of capitalization issues) and the documentation name of the package
+# to match. Pseudo-numeric suffixes are interpreted as version numbers.
+
+#future enhancement: # [incr Tcl]
+#future enhancement: itcl {[incr Tcl]}
+#future enhancement: Itcl {[incr Tcl]}
+#future enhancement: 
+#future enhancement: # SQLite
+#future enhancement: Sqlite SQLite3
+#future enhancement: sqlite SQLite3
+#future enhancement: Sqlite3 SQLite3
+#future enhancement: sqlite3 SQLite3
+#future enhancement: 
+#future enhancement: # Thread
+#future enhancement: Thread Thread
+#future enhancement: thread Thread
+#future enhancement: 
+#future enhancement: # Tcl Database Connectivity
+#future enhancement: tdbc TDBC
+#future enhancement: Tdbc TDBC
+#future enhancement: TDBC TDBC
+#future enhancement: # Drivers for TDBC
+#future enhancement: Tdbcmysql	tdbc::mysql
+#future enhancement: tdbcmysql	tdbc::mysql
+#future enhancement: Tdbcodbc	tdbc::odbc
+#future enhancement: tdbcodbc	tdbc::odbc
+#future enhancement: Tdbcpostgres	tdbc::postgres
+#future enhancement: tdbcpostgres	tdbc::postgres
+#future enhancement: Tdbcsqlite3	tdbc::sqlite3
+#future enhancement: tdbcsqlite3	tdbc::sqlite3
+#future enhancement: Tdbcsqlite	tdbc::sqlite3
+#future enhancement: tdbcsqlite	tdbc::sqlite3

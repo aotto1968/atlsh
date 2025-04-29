@@ -16,6 +16,8 @@
 # Contributions from Don Porter, NIST, 2002.  (not subject to US copyright)
 # All rights reserved.
 
+#puts stderr "load: 2.5.3"
+
 package require Tcl 8.5-		;# -verbose line uses [info frame]
 namespace eval tcltest {
 

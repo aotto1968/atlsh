@@ -17,6 +17,9 @@ if {[catch {package require tcltest 2.3}]} {
     chan puts stderr "Skipping tests in [info script].  tcltest 2 required."
     return
 }
+
+set tcltest::verbose pstbel
+
 namespace eval ::tcl::test::io {
     namespace import ::tcltest::*
 
@@ -62,7 +65,7 @@ namespace eval ::tcl::test::io {
     }
     chan close $f
 
-    set path(cat) [makeFile {
+    set path(catChanIo) [makeFile {
 	set f stdin
 	if {$argv != ""} {
 	    set f [open [lindex $argv 0]]
@@ -79,7 +82,7 @@ namespace eval ::tcl::test::io {
 	    }
 	}
 	vwait forever
-    } cat]
+    } catChanIo]
 
     set thisScript [file join [pwd] [info script]]
 
@@ -94,22 +97,22 @@ namespace eval ::tcl::test::io {
 test chan-io-1.5 {Tcl_WriteChars: CheckChannelErrors} {emptyTest} {
     # no test, need to cause an async error.
 } {}
-set path(test1) [makeFile {} test1]
+set path(test1ChanIo) [makeFile {} test1ChanIo]
 test chan-io-1.6 {Tcl_WriteChars: WriteBytes} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary
     chan puts -nonewline $f "a\u4e4d\0"
     chan close $f
-    contents $path(test1)
+    contents $path(test1ChanIo)
 } "a\x4d\x00"
 test chan-io-1.7 {Tcl_WriteChars: WriteChars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding shiftjis
     chan puts -nonewline $f "a\u4e4d\0"
     chan close $f
-    contents $path(test1)
+    contents $path(test1ChanIo)
 } "a\x93\xe1\x00"
-set path(test2) [makeFile {} test2]
+set path(test2ChanIo) [makeFile {} test2ChanIo]
 test chan-io-1.8 {Tcl_WriteChars: WriteChars} {
     # This test written for SF bug #506297.
     #
@@ -117,11 +120,11 @@ test chan-io-1.8 {Tcl_WriteChars: WriteChars} {
     # applied to tcl will cause tcl, more specifically WriteChars, to
     # go into an infinite loop.
 
-    set f [open $path(test2) w] 
+    set f [open $path(test2ChanIo) w] 
     chan configure      $f -encoding iso2022-jp 
     chan puts -nonewline $f [format %s%c [string repeat " " 4] 12399] 
     chan close           $f 
-    contents $path(test2)
+    contents $path(test2ChanIo)
 } "    \x1b\$B\$O\x1b(B"
 
 test chan-io-1.9 {Tcl_WriteChars: WriteChars} {
@@ -135,21 +138,21 @@ test chan-io-1.9 {Tcl_WriteChars: WriteChars} {
     set sizes [list]
 
     # With default buffer size
-    set f [open $path(test2) w]
+    set f [open $path(test2ChanIo) w]
     chan configure      $f -encoding iso2022-jp
     chan puts -nonewline $f $data
     chan close           $f
-    lappend sizes [file size $path(test2)]
+    lappend sizes [file size $path(test2ChanIo)]
 
     # With buffer size equal to the length
     # of the data, the escape bytes would
     # go into the next buffer.
 
-    set f [open $path(test2) w]
+    set f [open $path(test2ChanIo) w]
     chan configure      $f -encoding iso2022-jp -buffersize 16
     chan puts -nonewline $f $data
     chan close           $f
-    lappend sizes [file size $path(test2)]
+    lappend sizes [file size $path(test2ChanIo)]
 
     # With buffer size that is large enough
     # to hold 1 byte of escaped data, but
@@ -157,29 +160,29 @@ test chan-io-1.9 {Tcl_WriteChars: WriteChars} {
     # the escape bytes to the first buffer
     # and then again to the second buffer.
 
-    set f [open $path(test2) w]
+    set f [open $path(test2ChanIo) w]
     chan configure      $f -encoding iso2022-jp -buffersize 17
     chan puts -nonewline $f $data
     chan close           $f
-    lappend sizes [file size $path(test2)]
+    lappend sizes [file size $path(test2ChanIo)]
 
     # With buffer size that can hold 2 out of
     # 3 bytes of escaped data.
 
-    set f [open $path(test2) w]
+    set f [open $path(test2ChanIo) w]
     chan configure      $f -encoding iso2022-jp -buffersize 18
     chan puts -nonewline $f $data
     chan close           $f
-    lappend sizes [file size $path(test2)]
+    lappend sizes [file size $path(test2ChanIo)]
 
     # With buffer size that can hold all the
     # data and escape bytes.
 
-    set f [open $path(test2) w]
+    set f [open $path(test2ChanIo) w]
     chan configure      $f -encoding iso2022-jp -buffersize 19
     chan puts -nonewline $f $data
     chan close           $f
-    lappend sizes [file size $path(test2)]
+    lappend sizes [file size $path(test2ChanIo)]
 
     set sizes
 } {19 19 19 19 19}
@@ -187,98 +190,98 @@ test chan-io-1.9 {Tcl_WriteChars: WriteChars} {
 test chan-io-2.1 {WriteBytes} {
     # loop until all bytes are written
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f  -encoding binary -buffersize 16 -translation crlf
     chan puts $f "abcdefghijklmnopqrstuvwxyz"
     chan close $f
-    contents $path(test1)
+    contents $path(test1ChanIo)
 } "abcdefghijklmnopqrstuvwxyz\r\n"
 test chan-io-2.2 {WriteBytes: savedLF > 0} {
     # After flushing buffer, there was a \n left over from the last
     # \n -> \r\n expansion.  It gets stuck at beginning of this buffer.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary -buffersize 16 -translation crlf
     chan puts -nonewline $f "123456789012345\n12"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "123456789012345\r" "123456789012345\r\n12"]
 test chan-io-2.3 {WriteBytes: flush on line} {
     # Tcl "line" buffering has weird behavior: if current buffer contains
     # a \n, entire buffer gets flushed.  Logical behavior would be to flush
     # only up to the \n.
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary -buffering line -translation crlf
     chan puts -nonewline $f "\n12"
-    set x [contents $path(test1)]
+    set x [contents $path(test1ChanIo)]
     chan close $f
     set x
 } "\r\n12"
 test chan-io-2.4 {WriteBytes: reset sawLF after each buffer} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
      chan configure $f -encoding binary -buffering line -translation lf \
 	     -buffersize 16
     chan puts -nonewline $f "abcdefg\nhijklmnopqrstuvwxyz"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "abcdefg\nhijklmno" "abcdefg\nhijklmnopqrstuvwxyz"]
 
 test chan-io-3.1 {WriteChars: compatibility with WriteBytes} {
     # loop until all bytes are written
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding ascii -buffersize 16 -translation crlf
     chan puts $f "abcdefghijklmnopqrstuvwxyz"
     chan close $f
-    contents $path(test1)
+    contents $path(test1ChanIo)
 } "abcdefghijklmnopqrstuvwxyz\r\n"
 test chan-io-3.2 {WriteChars: compatibility with WriteBytes: savedLF > 0} {
     # After flushing buffer, there was a \n left over from the last
     # \n -> \r\n expansion.  It gets stuck at beginning of this buffer.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding ascii -buffersize 16 -translation crlf
     chan puts -nonewline $f "123456789012345\n12"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "123456789012345\r" "123456789012345\r\n12"]
 test chan-io-3.3 {WriteChars: compatibility with WriteBytes: flush on line} {
     # Tcl "line" buffering has weird behavior: if current buffer contains
     # a \n, entire buffer gets flushed.  Logical behavior would be to flush
     # only up to the \n.
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding ascii -buffering line -translation crlf
     chan puts -nonewline $f "\n12"
-    set x [contents $path(test1)]
+    set x [contents $path(test1ChanIo)]
     chan close $f
     set x
 } "\r\n12"
 test chan-io-3.4 {WriteChars: loop over stage buffer} {
     # stage buffer maps to more than can be queued at once.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding jis0208 -buffersize 16 
     chan puts -nonewline $f "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "!)!)!)!)!)!)!)!)" "!)!)!)!)!)!)!)!)!)!)!)!)!)!)!)"]
 test chan-io-3.5 {WriteChars: saved != 0} {
     # Bytes produced by UtfToExternal from end of last channel buffer
     # had to be moved to beginning of next channel buffer to preserve
     # requested buffersize.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding jis0208 -buffersize 17 
     chan puts -nonewline $f "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "!)!)!)!)!)!)!)!)!" "!)!)!)!)!)!)!)!)!)!)!)!)!)!)!)"]
 test chan-io-3.6 {WriteChars: (stageRead + dstWrote == 0)} {
     # One incomplete UTF-8 character at end of staging buffer.  Backup
@@ -290,12 +293,12 @@ test chan-io-3.6 {WriteChars: (stageRead + dstWrote == 0)} {
     # to outer loop where those two bytes will have the remaining 4 bytes
     # (the last byte of \uff21 plus the all of \uff22) appended.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding shiftjis -buffersize 16
     chan puts -nonewline $f "12345678901234\uff21\uff22"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "12345678901234\x82\x60" "12345678901234\x82\x60\x82\x61"]
 test chan-io-3.7 {WriteChars: (bufPtr->nextAdded > bufPtr->length)} {
     # When translating UTF-8 to external, the produced bytes went past end
@@ -304,121 +307,121 @@ test chan-io-3.7 {WriteChars: (bufPtr->nextAdded > bufPtr->length)} {
     # blocksize on flush.  The truncated bytes are moved to the beginning
     # of the next channel buffer.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding jis0208 -buffersize 17 
     chan puts -nonewline $f "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "!)!)!)!)!)!)!)!)!" "!)!)!)!)!)!)!)!)!)!)!)!)!)!)!)"]
 test chan-io-3.8 {WriteChars: reset sawLF after each buffer} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding ascii -buffering line -translation lf \
 	     -buffersize 16
     chan puts -nonewline $f "abcdefg\nhijklmnopqrstuvwxyz"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "abcdefg\nhijklmno" "abcdefg\nhijklmnopqrstuvwxyz"]
 
 test chan-io-4.1 {TranslateOutputEOL: lf} {
     # search for \n
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering line -translation lf
     chan puts $f "abcde"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "abcde\n" "abcde\n"]
 test chan-io-4.2 {TranslateOutputEOL: cr} {
     # search for \n, replace with \r
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering line -translation cr
     chan puts $f "abcde"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "abcde\r" "abcde\r"]
 test chan-io-4.3 {TranslateOutputEOL: crlf} {
     # simple case: search for \n, replace with \r
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering line -translation crlf
     chan puts $f "abcde"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "abcde\r\n" "abcde\r\n"]
 test chan-io-4.4 {TranslateOutputEOL: crlf} {
     # keep storing more bytes in output buffer until output buffer is full.
     # We have 13 bytes initially that would turn into 18 bytes.  Fill
     # dest buffer while (dstEnd < dstMax).
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -buffersize 16
     chan puts -nonewline $f "1234567\n\n\n\n\nA"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "1234567\r\n\r\n\r\n\r\n\r" "1234567\r\n\r\n\r\n\r\n\r\nA"]
 test chan-io-4.5 {TranslateOutputEOL: crlf} {
     # Check for overflow of the destination buffer
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -buffersize 12
     chan puts -nonewline $f "12345678901\n456789012345678901234"
     chan close $f
-    set x [contents $path(test1)]
+    set x [contents $path(test1ChanIo)]
 } "12345678901\r\n456789012345678901234"
 
 test chan-io-5.1 {CheckFlush: not full} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f 
     chan puts -nonewline $f "12345678901234567890"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "" "12345678901234567890"]
 test chan-io-5.2 {CheckFlush: full} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffersize 16
     chan puts -nonewline $f "12345678901234567890"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "1234567890123456" "12345678901234567890"]
 test chan-io-5.3 {CheckFlush: not line} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering line
     chan puts -nonewline $f "12345678901234567890"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "" "12345678901234567890"]
 test chan-io-5.4 {CheckFlush: line} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering line -translation lf -encoding ascii
     chan puts -nonewline $f "1234567890\n1234567890"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "1234567890\n1234567890" "1234567890\n1234567890"]
 test chan-io-5.5 {CheckFlush: none} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffering none
     chan puts -nonewline $f "1234567890"
-    set x [list [contents $path(test1)]]
+    set x [list [contents $path(test1ChanIo)]]
     chan close $f
-    lappend x [contents $path(test1)]
+    lappend x [contents $path(test1ChanIo)]
 } [list "1234567890" "1234567890"]
 
 test chan-io-6.1 {Tcl_GetsObj: working} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f "foo\nboo"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [chan gets $f]
     chan close $f
     set x
@@ -429,32 +432,32 @@ test chan-io-6.2 {Tcl_GetsObj: CheckChannelErrors() != 0} emptyTest {
 test chan-io-6.3 {Tcl_GetsObj: how many have we used?} {
     # if (bufPtr != NULL) {oldRemoved = bufPtr->nextRemoved}
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f "abc\ndefg"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan tell $f] [chan gets $f line] [chan tell $f] [chan gets $f line] $line]
     chan close $f
     set x
 } {0 3 5 4 defg}
 test chan-io-6.4 {Tcl_GetsObj: encoding == NULL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation binary
     chan puts $f "\x81\u1234\0"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation binary
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
 } [list 3 "\x81\x34\x00"]
 test chan-io-6.5 {Tcl_GetsObj: encoding != NULL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation binary
     chan puts $f "\x88\xea\x92\x9a"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding shiftjis
     set x [list [chan gets $f line] $line]
     chan close $f
@@ -466,11 +469,11 @@ append a $a
 test chan-io-6.6 {Tcl_GetsObj: loop test} {
     # if (dst >= dstEnd) 
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f $a
     chan puts $f hi
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
@@ -478,7 +481,7 @@ test chan-io-6.6 {Tcl_GetsObj: loop test} {
 test chan-io-6.7 {Tcl_GetsObj: error in input} {stdio openpipe} {
     # if (FilterInputBytes(chanPtr, &gs) != 0)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan puts -nonewline $f "hi\nwould"
     chan flush $f
     chan gets $f
@@ -488,20 +491,20 @@ test chan-io-6.7 {Tcl_GetsObj: error in input} {stdio openpipe} {
     set x
 } {-1}
 test chan-io-6.8 {Tcl_GetsObj: remember if EOF is seen} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f "abcdef\x1aghijk\nwombat"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -eofchar \x1a
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {6 abcdef -1 {}}
 test chan-io-6.9 {Tcl_GetsObj: remember if EOF is seen} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f "abcdefghijk\nwom\u001abat"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -eofchar \x1a
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
@@ -509,214 +512,214 @@ test chan-io-6.9 {Tcl_GetsObj: remember if EOF is seen} {
 } {11 abcdefghijk 3 wom}
 # Comprehensive tests
 test chan-io-6.10 {Tcl_GetsObj: lf mode: no chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
 } {-1 {}}
 test chan-io-6.11 {Tcl_GetsObj: lf mode: lone \n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {0 {} -1 {}}
 test chan-io-6.12 {Tcl_GetsObj: lf mode: lone \r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 1 "\r" -1 ""]
 test chan-io-6.13 {Tcl_GetsObj: lf mode: 1 char} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f a
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.14 {Tcl_GetsObj: lf mode: 1 char followed by EOL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.15 {Tcl_GetsObj: lf mode: several chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\nefgh\rijkl\r\nmnop"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation lf
     set x [list [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 4 "abcd" 10 "efgh\rijkl\r" 4 "mnop" -1 ""]
 test chan-io-6.16 {Tcl_GetsObj: cr mode: no chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
 } {-1 {}}
 test chan-io-6.17 {Tcl_GetsObj: cr mode: lone \n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 1 "\n" -1 ""]
 test chan-io-6.18 {Tcl_GetsObj: cr mode: lone \r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {0 {} -1 {}}
 test chan-io-6.19 {Tcl_GetsObj: cr mode: 1 char} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f a
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.20 {Tcl_GetsObj: cr mode: 1 char followed by EOL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.21 {Tcl_GetsObj: cr mode: several chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\nefgh\rijkl\r\nmnop"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [list [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 9 "abcd\nefgh" 4 "ijkl" 5 "\nmnop" -1 ""]
 test chan-io-6.22 {Tcl_GetsObj: crlf mode: no chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
 } {-1 {}}
 test chan-io-6.23 {Tcl_GetsObj: crlf mode: lone \n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 1 "\n" -1 ""]
 test chan-io-6.24 {Tcl_GetsObj: crlf mode: lone \r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 1 "\r" -1 ""]
 test chan-io-6.25 {Tcl_GetsObj: crlf mode: \r\r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 2 "\r\r" -1 ""]
 test chan-io-6.26 {Tcl_GetsObj: crlf mode: \r\n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 0 "" -1 ""]
 test chan-io-6.27 {Tcl_GetsObj: crlf mode: 1 char} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f a
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.28 {Tcl_GetsObj: crlf mode: 1 char followed by EOL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.29 {Tcl_GetsObj: crlf mode: several chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\nefgh\rijkl\r\nmnop"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [list [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
@@ -725,11 +728,11 @@ test chan-io-6.29 {Tcl_GetsObj: crlf mode: several chars} {
 test chan-io-6.30 {Tcl_GetsObj: crlf mode: buffer exhausted} {testchannel} {
     # if (eol >= dstEnd)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\r\nabcdefghijklmnoprstuvwxyz"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf -buffersize 16
     set x [list [chan gets $f line] $line [testchannel inputbuffered $f]]
     chan close $f
@@ -738,7 +741,7 @@ test chan-io-6.30 {Tcl_GetsObj: crlf mode: buffer exhausted} {testchannel} {
 test chan-io-6.31 {Tcl_GetsObj: crlf mode: buffer exhausted, blocked} {stdio testchannel openpipe fileevent} {
     # (FilterInputBytes() != 0)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {crlf lf} -buffering none
     chan puts -nonewline $f "bbbbbbbbbbbbbb\r\n123456789012345\r"
     chan configure $f -buffersize 16
@@ -751,11 +754,11 @@ test chan-io-6.31 {Tcl_GetsObj: crlf mode: buffer exhausted, blocked} {stdio tes
 test chan-io-6.32 {Tcl_GetsObj: crlf mode: buffer exhausted, more data} {testchannel} {
     # not (FilterInputBytes() != 0)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\r\n123"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf -buffersize 16
     set x [list [chan gets $f line] $line [chan tell $f] [testchannel inputbuffered $f]]
     chan close $f
@@ -764,11 +767,11 @@ test chan-io-6.32 {Tcl_GetsObj: crlf mode: buffer exhausted, more data} {testcha
 test chan-io-6.33 {Tcl_GetsObj: crlf mode: buffer exhausted, at eof} {
     # eol still equals dstEnd
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf -buffersize 16
     set x [list [chan gets $f line] $line [chan eof $f]]
     chan close $f
@@ -777,97 +780,97 @@ test chan-io-6.33 {Tcl_GetsObj: crlf mode: buffer exhausted, at eof} {
 test chan-io-6.34 {Tcl_GetsObj: crlf mode: buffer exhausted, not followed by \n} {
     # not (*eol == '\n') 
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\rabcd\r\nefg"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf -buffersize 16
     set x [list [chan gets $f line] $line [chan tell $f]]
     chan close $f
     set x
 } [list 20 "123456789012345\rabcd" 22]
 test chan-io-6.35 {Tcl_GetsObj: auto mode: no chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line]
     chan close $f
     set x
 } {-1 {}}
 test chan-io-6.36 {Tcl_GetsObj: auto mode: lone \n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 0 "" -1 ""]
 test chan-io-6.37 {Tcl_GetsObj: auto mode: lone \r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 0 "" -1 ""]
 test chan-io-6.38 {Tcl_GetsObj: auto mode: \r\r} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 0 "" 0 "" -1 ""]
 test chan-io-6.39 {Tcl_GetsObj: auto mode: \r\n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } [list 0 "" -1 ""]
 test chan-io-6.40 {Tcl_GetsObj: auto mode: 1 char} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f a
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.41 {Tcl_GetsObj: auto mode: 1 char followed by EOL} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
     set x
 } {1 a -1 {}}
 test chan-io-6.42 {Tcl_GetsObj: auto mode: several chars} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\nefgh\rijkl\r\nmnop"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan gets $f line] $line [chan gets $f line] $line]
     lappend x [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line
@@ -877,7 +880,7 @@ test chan-io-6.42 {Tcl_GetsObj: auto mode: several chars} {
 test chan-io-6.43 {Tcl_GetsObj: input saw cr} {stdio testchannel openpipe fileevent} {
     # if (chanPtr->flags & INPUT_SAW_CR)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto lf} -buffering none
     chan puts -nonewline $f "bbbbbbbbbbbbbbb\n123456789abcdef\r"
     chan configure $f -buffersize 16
@@ -894,7 +897,7 @@ test chan-io-6.43 {Tcl_GetsObj: input saw cr} {stdio testchannel openpipe fileev
 test chan-io-6.44 {Tcl_GetsObj: input saw cr, not followed by cr} {stdio testchannel openpipe fileevent} {
     # not (*eol == '\n') 
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto lf} -buffering none
     chan puts -nonewline $f "bbbbbbbbbbbbbbb\n123456789abcdef\r"
     chan configure $f -buffersize 16
@@ -911,7 +914,7 @@ test chan-io-6.44 {Tcl_GetsObj: input saw cr, not followed by cr} {stdio testcha
 test chan-io-6.45 {Tcl_GetsObj: input saw cr, skip right number of bytes} {stdio testchannel openpipe fileevent} {
     # Tcl_ExternalToUtf()
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto lf} -buffering none
     chan configure $f -encoding unicode
     chan puts -nonewline $f "bbbbbbbbbbbbbbb\n123456789abcdef\r"
@@ -928,7 +931,7 @@ test chan-io-6.45 {Tcl_GetsObj: input saw cr, skip right number of bytes} {stdio
 test chan-io-6.46 {Tcl_GetsObj: input saw cr, followed by just \n should give eof} {stdio testchannel openpipe fileevent} {
     # memmove()
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto lf} -buffering none
     chan puts -nonewline $f "bbbbbbbbbbbbbbb\n123456789abcdef\r"
     chan configure $f -buffersize 16
@@ -944,11 +947,11 @@ test chan-io-6.46 {Tcl_GetsObj: input saw cr, followed by just \n should give eo
 test chan-io-6.47 {Tcl_GetsObj: auto mode: \r at end of buffer, peek for \n} {testchannel} {
     # (eol == dstEnd)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\r\nabcdefghijklmnopq"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto -buffersize 16
     set x [list [chan gets $f] [testchannel inputbuffered $f]]
     chan close $f
@@ -957,11 +960,11 @@ test chan-io-6.47 {Tcl_GetsObj: auto mode: \r at end of buffer, peek for \n} {te
 test chan-io-6.48 {Tcl_GetsObj: auto mode: \r at end of buffer, no more avail} {testchannel} {
     # PeekAhead() did not get any, so (eol >= dstEnd)
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456789012345\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto -buffersize 16
     set x [list [chan gets $f] [testchannel queuedcr $f]]
     chan close $f
@@ -970,11 +973,11 @@ test chan-io-6.48 {Tcl_GetsObj: auto mode: \r at end of buffer, no more avail} {
 test chan-io-6.49 {Tcl_GetsObj: auto mode: \r followed by \n} {testchannel} {
     # if (*eol == '\n') {skip++}
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456\r\n78901"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f] [testchannel queuedcr $f] [chan tell $f] [chan gets $f]]
     chan close $f
     set x
@@ -982,11 +985,11 @@ test chan-io-6.49 {Tcl_GetsObj: auto mode: \r followed by \n} {testchannel} {
 test chan-io-6.50 {Tcl_GetsObj: auto mode: \r not followed by \n} {testchannel} {
     # not (*eol == '\n') 
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456\r78901"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f] [testchannel queuedcr $f] [chan tell $f] [chan gets $f]]
     chan close $f
     set x
@@ -994,11 +997,11 @@ test chan-io-6.50 {Tcl_GetsObj: auto mode: \r not followed by \n} {testchannel} 
 test chan-io-6.51 {Tcl_GetsObj: auto mode: \n} {
     # else if (*eol == '\n') {goto gotoeol;}
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456\n78901"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f] [chan tell $f] [chan gets $f]]
     chan close $f
     set x
@@ -1006,11 +1009,11 @@ test chan-io-6.51 {Tcl_GetsObj: auto mode: \n} {
 test chan-io-6.52 {Tcl_GetsObj: saw EOF character} {testchannel} {
     # if (eof != NULL)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "123456\x1ak9012345\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -eofchar \x1a
     set x [list [chan gets $f] [testchannel queuedcr $f] [chan tell $f] [chan gets $f]]
     chan close $f
@@ -1019,9 +1022,9 @@ test chan-io-6.52 {Tcl_GetsObj: saw EOF character} {testchannel} {
 test chan-io-6.53 {Tcl_GetsObj: device EOF} {
     # didn't produce any bytes
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f line] $line [chan eof $f]]
     chan close $f
     set x
@@ -1029,10 +1032,10 @@ test chan-io-6.53 {Tcl_GetsObj: device EOF} {
 test chan-io-6.54 {Tcl_GetsObj: device EOF} {
     # got some bytes before EOF.
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abc
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan gets $f line] $line [chan eof $f]]
     chan close $f
     set x
@@ -1040,11 +1043,11 @@ test chan-io-6.54 {Tcl_GetsObj: device EOF} {
 test chan-io-6.55 {Tcl_GetsObj: overconverted} {
     # Tcl_ExternalToUtf(), make sure state updated
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding iso2022-jp
     chan puts $f "there\u4e00ok\n\u4e01more bytes\nhere"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding iso2022-jp
     set x [list [chan gets $f line] $line [chan gets $f line] $line [chan gets $f line] $line]
     chan close $f
@@ -1052,7 +1055,7 @@ test chan-io-6.55 {Tcl_GetsObj: overconverted} {
 } [list 8 "there\u4e00ok" 11 "\u4e01more bytes" 4 "here"]
 test chan-io-6.56 {Tcl_GetsObj: incomplete lines should disable file events} {stdio openpipe fileevent} {
     update
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -buffering none
     chan puts -nonewline $f "foobar"
     chan configure $f -blocking 0
@@ -1074,11 +1077,11 @@ test chan-io-6.56 {Tcl_GetsObj: incomplete lines should disable file events} {st
 test chan-io-7.1 {FilterInputBytes: split up character at end of buffer} {
     # (result == TCL_CONVERT_MULTIBYTE)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding shiftjis
     chan puts $f "1234567890123\uff10\uff11\uff12\uff13\uff14\nend"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding shiftjis -buffersize 16
     set x [chan gets $f]
     chan close $f
@@ -1087,22 +1090,22 @@ test chan-io-7.1 {FilterInputBytes: split up character at end of buffer} {
 test chan-io-7.2 {FilterInputBytes: split up character in middle of buffer} {
     # (bufPtr->nextAdded < bufPtr->bufLength)
     
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary
     chan puts -nonewline $f "1234567890\n123\x82\x4f\x82\x50\x82"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding shiftjis
     set x [list [chan gets $f line] $line [chan eof $f]]
     chan close $f
     set x
 } [list 10 "1234567890" 0]
 test chan-io-7.3 {FilterInputBytes: split up character at EOF} {testchannel} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary
     chan puts -nonewline $f "1234567890123\x82\x4f\x82\x50\x82"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding shiftjis
     set x [list [chan gets $f line] $line]
     lappend x [chan tell $f] [testchannel inputbuffered $f] [chan eof $f]
@@ -1111,7 +1114,7 @@ test chan-io-7.3 {FilterInputBytes: split up character at EOF} {testchannel} {
     set x
 } [list 15 "1234567890123\uff10\uff11" 18 0 1 -1 ""]
 test chan-io-7.4 {FilterInputBytes: recover from split up character} {stdio openpipe fileevent} {
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -encoding binary -buffering none
     chan puts -nonewline $f "1234567890123\x82\x4f\x82\x50\x82"
     chan configure $f -encoding shiftjis -blocking 0
@@ -1133,11 +1136,11 @@ test chan-io-7.4 {FilterInputBytes: recover from split up character} {stdio open
 test chan-io-8.1 {PeekAhead: only go to device if no more cached data} {testchannel} {
     # (bufPtr->nextPtr == NULL)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding ascii -translation lf
     chan puts -nonewline $f "123456789012345\r\n2345678"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding ascii -translation auto -buffersize 16
     # here
     chan gets $f
@@ -1148,7 +1151,7 @@ test chan-io-8.1 {PeekAhead: only go to device if no more cached data} {testchan
 test chan-io-8.2 {PeekAhead: only go to device if no more cached data} {stdio testchannel openpipe fileevent} {
     # not (bufPtr->nextPtr == NULL)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation lf -encoding ascii -buffering none
     chan puts -nonewline $f "123456789012345\r\nbcdefghijklmnopqrstuvwxyz"
     variable x {}
@@ -1168,7 +1171,7 @@ test chan-io-8.2 {PeekAhead: only go to device if no more cached data} {stdio te
 test chan-io-8.3 {PeekAhead: no cached data available} {stdio testchannel openpipe fileevent} {
     # (bytesLeft == 0)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto binary}
     chan puts -nonewline $f "abcdefghijklmno\r"
     chan flush $f
@@ -1182,11 +1185,11 @@ append a "1234567890123456789012345678901"
 test chan-io-8.4 {PeekAhead: cached data available in this buffer} {
     # not (bytesLeft == 0)
 
-    set f [open $path(test1) w+]
+    set f [open $path(test1ChanIo) w+]
     chan configure $f -translation binary
     chan puts $f "${a}\r\nabcdef"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding binary -translation auto
 
     # "${a}\r" was converted in one operation (because ENCODING_LINESIZE
@@ -1201,7 +1204,7 @@ unset a
 test chan-io-8.5 {PeekAhead: don't peek if last read was short} {stdio testchannel openpipe fileevent} {
     # (bufPtr->nextAdded < bufPtr->length)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto binary}
     chan puts -nonewline $f "abcdefghijklmno\r"
     chan flush $f
@@ -1213,7 +1216,7 @@ test chan-io-8.5 {PeekAhead: don't peek if last read was short} {stdio testchann
 test chan-io-8.6 {PeekAhead: change to non-blocking mode} {stdio testchannel openpipe fileevent} {
     # ((chanPtr->flags & CHANNEL_NONBLOCKING) == 0) 
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto binary} -buffersize 16
     chan puts -nonewline $f "abcdefghijklmno\r"
     chan flush $f
@@ -1225,7 +1228,7 @@ test chan-io-8.6 {PeekAhead: change to non-blocking mode} {stdio testchannel ope
 test chan-io-8.7 {PeekAhead: cleanup} {stdio testchannel openpipe fileevent} {
     # Make sure bytes are removed from buffer.
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -translation {auto binary} -buffering none
     chan puts -nonewline $f "abcdefghijklmno\r"
     # here
@@ -1246,11 +1249,11 @@ test chan-io-10.2 {Tcl_ReadChars: loop until enough copied} {
     # one time
     # for (copied = 0; (unsigned) toRead > 0; )
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnop
     chan close $f
 
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [chan read $f 5]
     chan close $f
     set x
@@ -1259,11 +1262,11 @@ test chan-io-10.3 {Tcl_ReadChars: loop until enough copied} {
     # multiple times
     # for (copied = 0; (unsigned) toRead > 0; )
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnopqrstuvwxyz
     chan close $f
 
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -buffersize 16
     # here
     set x [chan read $f 19]
@@ -1273,11 +1276,11 @@ test chan-io-10.3 {Tcl_ReadChars: loop until enough copied} {
 test chan-io-10.4 {Tcl_ReadChars: no more in channel buffer} {
     # (copiedNow < 0)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
 
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     # here
     set x [chan read $f 1000]
     chan close $f
@@ -1286,11 +1289,11 @@ test chan-io-10.4 {Tcl_ReadChars: no more in channel buffer} {
 test chan-io-10.5 {Tcl_ReadChars: stop on EOF} {
     # (chanPtr->flags & CHANNEL_EOF)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
 
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     # here
     set x [chan read $f 1000]
     chan close $f
@@ -1300,10 +1303,10 @@ test chan-io-10.5 {Tcl_ReadChars: stop on EOF} {
 test chan-io-11.1 {ReadBytes: want to read a lot} {
     # ((unsigned) toRead > (unsigned) srcLen)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding binary
     # here
     set x [chan read $f 1000]
@@ -1313,10 +1316,10 @@ test chan-io-11.1 {ReadBytes: want to read a lot} {
 test chan-io-11.2 {ReadBytes: want to read all} {
     # ((unsigned) toRead > (unsigned) srcLen)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -encoding binary
     # here
     set x [chan read $f]
@@ -1326,10 +1329,10 @@ test chan-io-11.2 {ReadBytes: want to read all} {
 test chan-io-11.3 {ReadBytes: allocate more space} {
     # (toRead > length - offset - 1)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijklmnopqrstuvwxyz
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -buffersize 16 -encoding binary
     # here
     set x [chan read $f]
@@ -1339,10 +1342,10 @@ test chan-io-11.3 {ReadBytes: allocate more space} {
 test chan-io-11.4 {ReadBytes: EOF char found} {
     # (TranslateInputEOL() != 0)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnopqrstuvwxyz
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -eofchar m -encoding binary
     # here
     set x [list [chan read $f] [chan eof $f] [chan read $f] [chan eof $f]]
@@ -1353,10 +1356,10 @@ test chan-io-11.4 {ReadBytes: EOF char found} {
 test chan-io-12.1 {ReadChars: want to read a lot} {
     # ((unsigned) toRead > (unsigned) srcLen)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     # here
     set x [chan read $f 1000]
     chan close $f
@@ -1365,10 +1368,10 @@ test chan-io-12.1 {ReadChars: want to read a lot} {
 test chan-io-12.2 {ReadChars: want to read all} {
     # ((unsigned) toRead > (unsigned) srcLen)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijkl
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     # here
     set x [chan read $f]
     chan close $f
@@ -1377,10 +1380,10 @@ test chan-io-12.2 {ReadChars: want to read all} {
 test chan-io-12.3 {ReadChars: allocate more space} {
     # (toRead > length - offset - 1)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f abcdefghijklmnopqrstuvwxyz
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -buffersize 16
     # here
     set x [chan read $f]
@@ -1390,7 +1393,7 @@ test chan-io-12.3 {ReadChars: allocate more space} {
 test chan-io-12.4 {ReadChars: split-up char} {stdio testchannel openpipe fileevent} {
     # (srcRead == 0)
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -encoding binary -buffering none -buffersize 16
     chan puts -nonewline $f "123456789012345\x96"
     chan configure $f -encoding shiftjis -blocking 0
@@ -1406,20 +1409,20 @@ test chan-io-12.4 {ReadChars: split-up char} {stdio testchannel openpipe fileeve
     vwait [namespace which -variable x]
     chan configure $f -encoding binary -blocking 1
     chan puts -nonewline $f "\x7b"
-    after 500			;# Give the cat process time to catch up
+    after 500			;# Give the catChanIo process time to catch up
     chan configure $f -encoding shiftjis -blocking 0
     vwait [namespace which -variable x]
     chan close $f
     set x
 } [list "123456789012345" 1 "\u672c" 0]
 test chan-io-12.5 {ReadChars: chan events on partial characters} {stdio openpipe fileevent} {
-    set path(test1) [makeFile {
+    set path(test1ChanIo) [makeFile {
 	chan configure stdout -encoding binary -buffering none
 	chan gets stdin; chan puts -nonewline "\xe7"
 	chan gets stdin; chan puts -nonewline "\x89"
 	chan gets stdin; chan puts -nonewline "\xa6"
-    } test1]
-    set f [open "|[list [interpreter] $path(test1)]" r+]
+    } test1ChanIo]
+    set f [open "|[list [interpreter] $path(test1ChanIo)]" r+]
     chan event $f readable [namespace code {
 	lappend x [chan read $f]
 	if {[chan eof $f]} {
@@ -1447,22 +1450,22 @@ test chan-io-12.5 {ReadChars: chan events on partial characters} {stdio openpipe
 } "{} timeout {} timeout \u7266 {} eof 0 {}"
 
 test chan-io-13.1 {TranslateInputEOL: cr mode} {} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\rdef\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation cr
     set x [chan read $f]
     chan close $f
     set x
 } "abcd\ndef\n"
 test chan-io-13.2 {TranslateInputEOL: crlf mode} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r\ndef\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
@@ -1471,11 +1474,11 @@ test chan-io-13.2 {TranslateInputEOL: crlf mode} {
 test chan-io-13.3 {TranslateInputEOL: crlf mode: naked cr} {
     # (src >= srcMax) 
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r\ndef\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
@@ -1484,11 +1487,11 @@ test chan-io-13.3 {TranslateInputEOL: crlf mode: naked cr} {
 test chan-io-13.4 {TranslateInputEOL: crlf mode: cr followed by not \n} {
     # (src >= srcMax) 
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r\ndef\rfgh"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
@@ -1497,11 +1500,11 @@ test chan-io-13.4 {TranslateInputEOL: crlf mode: cr followed by not \n} {
 test chan-io-13.5 {TranslateInputEOL: crlf mode: naked lf} {
     # (src >= srcMax) 
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r\ndef\nfgh"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
@@ -1511,7 +1514,7 @@ test chan-io-13.6 {TranslateInputEOL: auto mode: saw cr in last segment} {stdio 
     # (chanPtr->flags & INPUT_SAW_CR)
     # This test may fail on slower machines.
 
-    set f [open "|[list [interpreter] $path(cat)]" w+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" w+]
     chan configure $f -blocking 0 -buffering none -translation {auto lf}
 
     chan event $f read [namespace code "ready $f"]
@@ -1536,11 +1539,11 @@ test chan-io-13.6 {TranslateInputEOL: auto mode: saw cr in last segment} {stdio 
 test chan-io-13.7 {TranslateInputEOL: auto mode: naked \r} {testchannel openpipe} {
     # (src >= srcMax)
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [list [chan read $f] [testchannel queuedcr $f]]
     chan close $f
@@ -1549,22 +1552,22 @@ test chan-io-13.7 {TranslateInputEOL: auto mode: naked \r} {testchannel openpipe
 test chan-io-13.8 {TranslateInputEOL: auto mode: \r\n} {
     # (*src == '\n')
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\r\ndef"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [chan read $f]
     chan close $f
     set x
 } "abcd\ndef"
 test chan-io-13.9 {TranslateInputEOL: auto mode: \r followed by not \n} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\rdef"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [chan read $f]
     chan close $f
@@ -1573,11 +1576,11 @@ test chan-io-13.9 {TranslateInputEOL: auto mode: \r followed by not \n} {
 test chan-io-13.10 {TranslateInputEOL: auto mode: \n} {
     # not (*src == '\r') 
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\ndef"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto
     set x [chan read $f]
     chan close $f
@@ -1586,11 +1589,11 @@ test chan-io-13.10 {TranslateInputEOL: auto mode: \n} {
 test chan-io-13.11 {TranslateInputEOL: EOF char} {
     # (*chanPtr->inEofChar != '\0')
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "abcd\ndefgh"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto -eofchar e
     set x [chan read $f]
     chan close $f
@@ -1599,11 +1602,11 @@ test chan-io-13.11 {TranslateInputEOL: EOF char} {
 test chan-io-13.12 {TranslateInputEOL: find EOF char in src} {
     # (*chanPtr->inEofChar != '\0')
 
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "\r\n\r\n\r\nab\r\n\r\ndef\r\n\r\n\r\n"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     chan configure $f -translation auto -eofchar e
     set x [chan read $f]
     chan close $f
@@ -1638,17 +1641,17 @@ test chan-io-14.2 {Tcl_SetStdChannel and Tcl_GetStdChannel} {
     interp delete x
     set l
 } {line line none}
-set path(test3) [makeFile {} test3]
+set path(test3ChanIo) [makeFile {} test3ChanIo]
 test chan-io-14.3 {Tcl_SetStdChannel & Tcl_GetStdChannel} {exec openpipe} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f {
 	chan close stdin
 	chan close stdout
 	chan close stderr
 	set f  [}
-    chan puts $f [list open $path(test1) r]]
-    chan puts $f "set f2 \[[list open $path(test2) w]]"
-    chan puts $f "set f3 \[[list open $path(test3) w]]"
+    chan puts $f [list open $path(test1ChanIo) r]]
+    chan puts $f "set f2 \[[list open $path(test2ChanIo) w]]"
+    chan puts $f "set f3 \[[list open $path(test3ChanIo) w]]"
     chan puts $f {	chan puts stdout [chan gets stdin]
 	chan puts stdout out
 	chan puts stderr err
@@ -1657,9 +1660,9 @@ test chan-io-14.3 {Tcl_SetStdChannel & Tcl_GetStdChannel} {exec openpipe} {
 	chan close $f3
     }
     chan close $f
-    set result [exec [interpreter] $path(test1)]
-    set f  [open $path(test2) r]
-    set f2 [open $path(test3) r]
+    set result [exec [interpreter] $path(test1ChanIo)]
+    set f  [open $path(test2ChanIo) r]
+    set f2 [open $path(test3ChanIo) r]
     lappend result [chan read $f] [chan read $f2]
     chan close $f
     chan close $f2
@@ -1670,14 +1673,14 @@ out
 }}
 # This test relies on the fact that the smallest available fd is used first.
 test chan-io-14.4 {Tcl_SetStdChannel & Tcl_GetStdChannel} {exec unix} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts -nonewline $f { chan close stdin
 	chan close stdout
 	chan close stderr
 	set f  [}
-    chan puts $f [list open $path(test1) r]]
-    chan puts $f "set f2 \[[list open $path(test2) w]]"
-    chan puts $f "set f3 \[[list open $path(test3) w]]"
+    chan puts $f [list open $path(test1ChanIo) r]]
+    chan puts $f "set f2 \[[list open $path(test2ChanIo) w]]"
+    chan puts $f "set f3 \[[list open $path(test3ChanIo) w]]"
     chan puts $f {	chan puts stdout [chan gets stdin]
 	chan puts stdout $f2
 	chan puts stderr $f3
@@ -1686,9 +1689,9 @@ test chan-io-14.4 {Tcl_SetStdChannel & Tcl_GetStdChannel} {exec unix} {
 	chan close $f3
     }
     chan close $f
-    set result [exec [interpreter] $path(test1)]
-    set f  [open $path(test2) r]
-    set f2 [open $path(test3) r]
+    set result [exec [interpreter] $path(test1ChanIo)]
+    set f  [open $path(test2ChanIo) r]
+    set f2 [open $path(test3ChanIo) r]
     lappend result [chan read $f] [chan read $f2]
     chan close $f
     chan close $f2
@@ -1731,17 +1734,17 @@ test chan-io-14.7 {Tcl_GetChannel: stdio name translation} {
 set path(script) [makeFile {} script]
 test chan-io-14.8 {reuse of stdio special channels} {stdio openpipe} {
     file delete $path(script)
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f [open $path(script) w]
     chan puts -nonewline $f {
 	chan close stderr
 	set f [}
-    chan puts $f [list open $path(test1) w]]
+    chan puts $f [list open $path(test1ChanIo) w]]
     chan puts -nonewline $f {
 	chan puts stderr hello
 	chan close $f
 	set f [}
-    chan puts $f [list open $path(test1) r]]
+    chan puts $f [list open $path(test1ChanIo) r]]
     chan puts $f {
 	chan puts [chan gets $f]
     }
@@ -1753,15 +1756,15 @@ test chan-io-14.8 {reuse of stdio special channels} {stdio openpipe} {
 } hello
 test chan-io-14.9 {reuse of stdio special channels} {stdio openpipe fileevent} {
     file delete $path(script)
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f [open $path(script) w]
     chan puts $f {
         array set path [lindex $argv 0]
-	set f [open $path(test1) w]
+	set f [open $path(test1ChanIo) w]
 	chan puts $f hello
 	chan close $f
 	chan close stderr
-	set f [open "|[list [info nameofexecutable] $path(cat) $path(test1)]" r]
+	set f [open "|[list [info nameofexecutable] $path(catChanIo) $path(test1ChanIo)]" r]
 	chan puts [chan gets $f]
     }
     chan close $f
@@ -1769,11 +1772,11 @@ test chan-io-14.9 {reuse of stdio special channels} {stdio openpipe fileevent} {
     set c [chan gets $f]
     chan close $f
     # Added delay to give Windows time to stop the spawned process and clean
-    # up its grip on the file test1. Added delete as proper test cleanup.
-    # The failing tests were 18.1 and 18.2 as first re-users of file "test1".
+    # up its grip on the file test1ChanIo. Added delete as proper test cleanup.
+    # The failing tests were 18.1 and 18.2 as first re-users of file "test1ChanIo".
     after 10000
     file delete $path(script)
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set c
 } hello
 
@@ -1828,9 +1831,9 @@ test chan-io-17.3 {GetChannelTable, DeleteChannelTable on std handles} {testchan
 } {0 1 0}
 
 test chan-io-18.1 {Tcl_RegisterChannel, Tcl_UnregisterChannel} {testchannel} {
-    file delete -force $path(test1)
+    file delete -force $path(test1ChanIo)
     set l ""
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     lappend l [lindex [testchannel info $f] 15]
     chan close $f
     if {[catch {lindex [testchannel info $f] 15} msg]} {
@@ -1842,9 +1845,9 @@ test chan-io-18.1 {Tcl_RegisterChannel, Tcl_UnregisterChannel} {testchannel} {
 	[list 1 [format "can not find channel named \"%s\"" $f]]
 } 0
 test chan-io-18.2 {Tcl_RegisterChannel, Tcl_UnregisterChannel} {testchannel} {
-    file delete -force $path(test1)
+    file delete -force $path(test1ChanIo)
     set l ""
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     lappend l [lindex [testchannel info $f] 15]
     interp create x
     interp share "" $f x
@@ -1863,9 +1866,9 @@ test chan-io-18.2 {Tcl_RegisterChannel, Tcl_UnregisterChannel} {testchannel} {
 	[list 1 2 1 1 [format "can not find channel named \"%s\"" $f]]
 } 0
 test chan-io-18.3 {Tcl_RegisterChannel, Tcl_UnregisterChannel} {testchannel} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set l ""
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     lappend l [lindex [testchannel info $f] 15]
     interp create x
     interp share "" $f x
@@ -1886,8 +1889,8 @@ test chan-io-19.1 {Tcl_GetChannel->Tcl_GetStdChannel, standard handles} {
     chan eof stdin
 } 0
 test chan-io-19.2 {testing Tcl_GetChannel, user opened handle} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     set x [chan eof $f]
     chan close $f
     set x
@@ -1896,8 +1899,8 @@ test chan-io-19.3 {Tcl_GetChannel, channel not found} {
     list [catch {chan eof file34} msg] $msg
 } {1 {can not find channel named "file34"}}
 test chan-io-19.4 {Tcl_CreateChannel, insertion into channel table} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     set l ""
     lappend l [chan eof $f]
     chan close $f
@@ -1911,10 +1914,10 @@ test chan-io-19.4 {Tcl_CreateChannel, insertion into channel table} {testchannel
 } 0
 
 test chan-io-20.1 {Tcl_CreateChannel: initial settings} {
-	set a [open $path(test2) w]
+	set a [open $path(test2ChanIo) w]
     set old [encoding system]
     encoding system ascii
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     set x [chan configure $f -encoding]
     chan close $f
     encoding system $old
@@ -1922,13 +1925,13 @@ test chan-io-20.1 {Tcl_CreateChannel: initial settings} {
     set x
 } {ascii}    
 test chan-io-20.2 {Tcl_CreateChannel: initial settings} {win} {
-    set f [open $path(test1) w+]
+    set f [open $path(test1ChanIo) w+]
     set x [list [chan configure $f -eofchar] [chan configure $f -translation]]
     chan close $f
     set x
 } [list [list \x1a ""] {auto crlf}]
 test chan-io-20.3 {Tcl_CreateChannel: initial settings} {unix} {
-    set f [open $path(test1) w+]
+    set f [open $path(test1ChanIo) w+]
     set x [list [chan configure $f -eofchar] [chan configure $f -translation]]
     chan close $f
     set x
@@ -1964,27 +1967,27 @@ test chan-io-22.1 {Tcl_GetChannelMode} emptyTest {
 } {}
 
 test chan-io-23.1 {Tcl_GetChannelName} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     set n [testchannel name $f]
     chan close $f
     string compare $n $f
 } 0
 
 test chan-io-24.1 {Tcl_GetChannelType} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     set t [testchannel type $f]
     chan close $f
     string compare $t file
 } 0
 
 test chan-io-25.1 {Tcl_GetChannelHandle, input} {testchannel} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts $f "1234567890\n098765432"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan gets $f
     set l ""
     lappend l [testchannel inputbuffered $f]
@@ -1993,8 +1996,8 @@ test chan-io-25.1 {Tcl_GetChannelHandle, input} {testchannel} {
     set l
 } {10 11}
 test chan-io-25.2 {Tcl_GetChannelHandle, output} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello
     set l ""
@@ -2004,7 +2007,7 @@ test chan-io-25.2 {Tcl_GetChannelHandle, output} {testchannel} {
     lappend l [testchannel outputbuffered $f]
     lappend l [chan tell $f]
     chan close $f
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set l
 } {6 6 0 6}
 
@@ -2020,66 +2023,66 @@ test chan-io-26.1 {Tcl_GetChannelInstanceData} {stdio openpipe} {
 # Test flushing. The functions tested here are FlushChannel.
 
 test chan-io-27.1 {FlushChannel, no output buffered} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan flush $f
-    set s [file size $path(test1)]
+    set s [file size $path(test1ChanIo)]
     chan close $f
     set s
 } 0
 test chan-io-27.2 {FlushChannel, some output buffered} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set l ""
     chan puts $f hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     set l
 } {0 6 6}
 test chan-io-27.3 {FlushChannel, implicit flush on chan close} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set l ""
     chan puts $f hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     set l
 } {0 6}
 test chan-io-27.4 {FlushChannel, implicit flush when buffer fills} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan configure $f -buffersize 60
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     for {set i 0} {$i < 12} {incr i} {
 	chan puts $f hello
     }
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {0 60 72}
 test chan-io-27.5 {FlushChannel, implicit flush when buffer fills and on chan close} \
 	{unixOrPc} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffersize 60 -eofchar {}
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     for {set i 0} {$i < 12} {incr i} {
 	chan puts $f hello
     }
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     set l
 } {0 60 72}
 set path(pipe)   [makeFile {} pipe]
@@ -2124,8 +2127,8 @@ test chan-io-27.6 {FlushChannel, async flushing, async chan close} \
 # Tests closing a channel. The functions tested are Chan CloseChannel and Tcl_Chan Close.
 
 test chan-io-28.1 {Chan CloseChannel called when all references are dropped} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     interp create x
     interp share "" $f x
     set l ""
@@ -2137,8 +2140,8 @@ test chan-io-28.1 {Chan CloseChannel called when all references are dropped} {te
     set l
 } {2 1}
 test chan-io-28.2 {Chan CloseChannel called when all references are dropped} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     interp create x
     interp share "" $f x
     chan puts -nonewline $f abc
@@ -2146,7 +2149,7 @@ test chan-io-28.2 {Chan CloseChannel called when all references are dropped} {
     x eval chan puts $f def
     x eval chan close $f
     interp delete x
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l [chan gets $f]
     chan close $f
     set l
@@ -2197,10 +2200,10 @@ test chan-io-28.3 {Chan CloseChannel, not called before output queue is empty} \
     }
 } ok
 test chan-io-28.4 {Tcl_Chan Close} {testchannel} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set l ""
     lappend l [lsort [testchannel open]]
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     lappend l [lsort [testchannel open]]
     chan close $f
     lappend l [lsort [testchannel open]]
@@ -2227,97 +2230,97 @@ test chan-io-29.1 {Tcl_WriteChars, channel not writable} {
     list [catch {chan puts stdin hello} msg] $msg
 } {1 {channel "stdin" wasn't opened for writing}}
 test chan-io-29.2 {Tcl_WriteChars, empty string} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -eofchar {}
     chan puts -nonewline $f ""
     chan close $f
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 0
 test chan-io-29.3 {Tcl_WriteChars, nonempty string} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -eofchar {}
     chan puts -nonewline $f hello
     chan close $f
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 5
 test chan-io-29.4 {Tcl_WriteChars, buffering in full buffering mode} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffering full -eofchar {}
     chan puts $f hello
     set l ""
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {6 0 0 6}
 test chan-io-29.5 {Tcl_WriteChars, buffering in line buffering mode} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffering line -eofchar {}
     chan puts -nonewline $f hello
     set l ""
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts $f hello
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {5 0 0 11}
 test chan-io-29.6 {Tcl_WriteChars, buffering in no buffering mode} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffering none -eofchar {}
     chan puts -nonewline $f hello
     set l ""
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts $f hello
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {0 5 0 11}
 test chan-io-29.7 {Tcl_Flush, full buffering} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffering full -eofchar {}
     chan puts -nonewline $f hello
     set l ""
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts $f hello
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {5 0 11 0 0 11}
 test chan-io-29.8 {Tcl_Flush, full buffering} {testchannel} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -buffering line
     chan puts -nonewline $f hello
     set l ""
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts $f hello
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan flush $f
     lappend l [testchannel outputbuffered $f]
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f
     set l
 } {5 0 0 5 0 11 0 11}
@@ -2325,8 +2328,8 @@ test chan-io-29.9 {Tcl_Flush, channel not writable} {
     list [catch {chan flush stdin} msg] $msg
 } {1 {channel "stdin" wasn't opened for writing}}
 test chan-io-29.10 {Tcl_WriteChars, looping and buffering} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     set f2 [open $path(longfile) r]
     for {set x 0} {$x < 10} {incr x} {
@@ -2334,11 +2337,11 @@ test chan-io-29.10 {Tcl_WriteChars, looping and buffering} {
     }
     chan close $f2
     chan close $f1
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 387
 test chan-io-29.11 {Tcl_WriteChars, no newline, implicit flush} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -eofchar {}
     set f2 [open $path(longfile) r]
     for {set x 0} {$x < 10} {incr x} {
@@ -2346,10 +2349,10 @@ test chan-io-29.11 {Tcl_WriteChars, no newline, implicit flush} {
     }
     chan close $f1
     chan close $f2
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 377
 test chan-io-29.12 {Tcl_WriteChars on a pipe} {stdio openpipe} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     file delete $path(pipe)
     set f1 [open $path(pipe) w]
     chan puts $f1 "set f1 \[[list open $path(longfile) r]]"
@@ -2374,7 +2377,7 @@ test chan-io-29.12 {Tcl_WriteChars on a pipe} {stdio openpipe} {
     set y
 } ok
 test chan-io-29.13 {Tcl_WriteChars to a pipe, line buffered} {stdio openpipe} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     file delete $path(pipe)
     set f1 [open $path(pipe) w]
     chan puts $f1 {
@@ -2403,99 +2406,99 @@ test chan-io-29.13 {Tcl_WriteChars to a pipe, line buffered} {stdio openpipe} {
     set y
 } ok
 test chan-io-29.14 {Tcl_WriteChars, buffering and implicit flush at chan close} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts -nonewline $f "Text1"
     chan puts -nonewline $f " Text 2"
     chan puts $f " Text 3"
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set x [chan gets $f]
     chan close $f
     set x
 } {Text1 Text 2 Text 3}
 test chan-io-29.15 {Tcl_Flush, channel not open for writing} {
-    file delete $path(test1)
-    set fd [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set fd [open $path(test1ChanIo) w]
     chan close $fd
-    set fd [open $path(test1) r]
+    set fd [open $path(test1ChanIo) r]
     set x [list [catch {chan flush $fd} msg] $msg]
     chan close $fd
     string compare $x \
 	[list 1 "channel \"$fd\" wasn't opened for writing"]
 } 0
 test chan-io-29.16 {Tcl_Flush on pipe opened only for reading} {stdio openpipe} {
-    set fd [open "|[list [interpreter] cat longfile]" r]
+    set fd [open "|[list [interpreter] catChanIo longfile]" r]
     set x [list [catch {chan flush $fd} msg] $msg]
     catch {chan close $fd}
     string compare $x \
 	[list 1 "channel \"$fd\" wasn't opened for writing"]
 } 0
 test chan-io-29.17 {Tcl_WriteChars buffers, then Tcl_Flush flushes} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf
     chan puts $f1 hello
     chan puts $f1 hello
     chan puts $f1 hello
     chan flush $f1
-    set x [file size $path(test1)]
+    set x [file size $path(test1ChanIo)]
     chan close $f1
     set x
 } 18
 test chan-io-29.18 {Tcl_WriteChars and Tcl_Flush intermixed} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set x ""
-    set f1 [open $path(test1) w]
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf
     chan puts $f1 hello
     chan puts $f1 hello
     chan puts $f1 hello
     chan flush $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan puts $f1 hello
     chan flush $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan puts $f1 hello
     chan flush $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan close $f1
     set x
 } {18 24 30}
 test chan-io-29.19 {Explicit and implicit flushes} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     set x ""
     chan puts $f1 hello
     chan puts $f1 hello
     chan puts $f1 hello
     chan flush $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan puts $f1 hello
     chan flush $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan puts $f1 hello
     chan close $f1
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     set x
 } {18 24 30}
 test chan-io-29.20 {Implicit flush when buffer is full} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     set line "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     for {set x 0} {$x < 100} {incr x} {
       chan puts $f1 $line
     }
     set z ""
-    lappend z [file size $path(test1)]
+    lappend z [file size $path(test1ChanIo)]
     for {set x 0} {$x < 100} {incr x} {
 	chan puts $f1 $line
     }
-    lappend z [file size $path(test1)]
+    lappend z [file size $path(test1ChanIo)]
     chan close $f1
-    lappend z [file size $path(test1)]
+    lappend z [file size $path(test1ChanIo)]
     set z
 } {4096 12288 12600}
 test chan-io-29.21 {Tcl_Flush to pipe} {stdio openpipe} {
@@ -2556,28 +2559,28 @@ test chan-io-29.23 {Tcl_Flush and line buffering at end of pipe} {stdio openpipe
     set x
 } {hello hello bye}
 test chan-io-29.24 {Tcl_WriteChars and Tcl_Flush move end of file} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan puts $f "Line 1"
     chan puts $f "Line 2"
-    set f2 [open $path(test3)]
+    set f2 [open $path(test3ChanIo)]
     set x {}
     lappend x [chan read -nonewline $f2]
     chan close $f2
     chan flush $f
-    set f2 [open $path(test3)]
+    set f2 [open $path(test3ChanIo)]
     lappend x [chan read -nonewline $f2]
     chan close $f2
     chan close $f
     set x
 } "{} {Line 1\nLine 2}"
 test chan-io-29.25 {Implicit flush with Tcl_Flush to command pipelines} {stdio openpipe fileevent} {
-    file delete $path(test3)
-    set f [open "|[list [interpreter] $path(cat) | [interpreter] $path(cat) > $path(test3)]" w]
+    file delete $path(test3ChanIo)
+    set f [open "|[list [interpreter] $path(catChanIo) | [interpreter] $path(catChanIo) > $path(test3ChanIo)]" w]
     chan puts $f "Line 1"
     chan puts $f "Line 2"
     chan close $f
     after 100
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set x [chan read $f]
     chan close $f
     set x
@@ -2619,30 +2622,30 @@ test chan-io-29.27 {Tcl_Flush on chan closed pipeline} {stdio openpipe} {
     string tolower $x
 } {1 {error flushing "": broken pipe} {posix epipe {broken pipe}}}
 test chan-io-29.28 {Tcl_WriteChars, lf mode} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts $f hello\nthere\nand\nhere
     chan flush $f
-    set s [file size $path(test1)]
+    set s [file size $path(test1ChanIo)]
     chan close $f
     set s
 } 21
 test chan-io-29.29 {Tcl_WriteChars, cr mode} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 21
 test chan-io-29.30 {Tcl_WriteChars, crlf mode} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    file size $path(test1)
+    file size $path(test1ChanIo)
 } 25
 test chan-io-29.31 {Tcl_WriteChars, background flush} {stdio openpipe} {
     file delete $path(pipe)
@@ -2723,7 +2726,7 @@ test chan-io-29.32 {Tcl_WriteChars, background flush to slow reader} \
 } ok
 test chan-io-29.33 {Tcl_Flush, implicit flush on exit} {exec} {
     set f [open $path(script) w]
-    chan puts $f "set f \[[list open $path(test1) w]]"
+    chan puts $f "set f \[[list open $path(test1ChanIo) w]]"
     chan puts $f {chan configure $f -translation lf
 	chan puts $f hello
 	chan puts $f bye
@@ -2731,7 +2734,7 @@ test chan-io-29.33 {Tcl_Flush, implicit flush on exit} {exec} {
     }
     chan close $f
     exec [interpreter] $path(script)
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set r [chan read $f]
     chan close $f
     set r
@@ -2818,120 +2821,120 @@ test chan-io-29.35 {Tcl_Chan Close vs chan event vs multiple interpreters} {sock
 # Test end of line translations. Procedures tested are Tcl_Write, Tcl_Read.
 
 test chan-io-30.1 {Tcl_Write lf, Tcl_Read lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set x [chan read $f]
     chan close $f
     set x
 } "hello\nthere\nand\nhere\n"
 test chan-io-30.2 {Tcl_Write lf, Tcl_Read cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set x [chan read $f]
     chan close $f
     set x
 } "hello\nthere\nand\nhere\n"
 test chan-io-30.3 {Tcl_Write lf, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
     set x
 } "hello\nthere\nand\nhere\n"
 test chan-io-30.4 {Tcl_Write cr, Tcl_Read cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set x [chan read $f]
     chan close $f
     set x
 } "hello\nthere\nand\nhere\n"
 test chan-io-30.5 {Tcl_Write cr, Tcl_Read lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set x [chan read $f]
     chan close $f
     set x
 } "hello\rthere\rand\rhere\r"
 test chan-io-30.6 {Tcl_Write cr, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
     set x 
 } "hello\rthere\rand\rhere\r"
 test chan-io-30.7 {Tcl_Write crlf, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set x [chan read $f]
     chan close $f
     set x
 } "hello\nthere\nand\nhere\n"
 test chan-io-30.8 {Tcl_Write crlf, Tcl_Read lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set x [chan read $f]
     chan close $f
     set x
 } "hello\r\nthere\r\nand\r\nhere\r\n"
 test chan-io-30.9 {Tcl_Write crlf, Tcl_Read cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set x [chan read $f]
     chan close $f
     set x
 } "hello\n\nthere\n\nand\n\nhere\n\n"
 test chan-io-30.10 {Tcl_Write lf, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set c [chan read $f]
     set x [chan configure $f -translation]
     chan close $f
@@ -2942,12 +2945,12 @@ and
 here
 } auto}
 test chan-io-30.11 {Tcl_Write cr, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set c [chan read $f]
     set x [chan configure $f -translation]
     chan close $f
@@ -2958,12 +2961,12 @@ and
 here
 } auto}
 test chan-io-30.12 {Tcl_Write crlf, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set c [chan read $f]
     set x [chan configure $f -translation]
     chan close $f
@@ -2974,8 +2977,8 @@ and
 here
 } auto}
 test chan-io-30.13 {Tcl_Write crlf on block boundary, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set line "123456789ABCDE"	;# 14 char plus crlf
     chan puts -nonewline $f x	;# shift crlf across block boundary
@@ -2983,15 +2986,15 @@ test chan-io-30.13 {Tcl_Write crlf on block boundary, Tcl_Read auto} {
 	chan puts $f $line
     }
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set c [chan read $f]
     chan close $f
     string length $c
 } [expr 700*15+1]
 test chan-io-30.14 {Tcl_Write crlf on block boundary, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set line "123456789ABCDE"	;# 14 char plus crlf
     chan puts -nonewline $f x	;# shift crlf across block boundary
@@ -2999,19 +3002,19 @@ test chan-io-30.14 {Tcl_Write crlf on block boundary, Tcl_Read crlf} {
 	chan puts $f $line
     }
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set c [chan read $f]
     chan close $f
     string length $c
 } [expr 700*15+1]
 test chan-io-30.15 {Tcl_Write mixed, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\rhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set c [chan read $f]
     chan close $f
@@ -3022,12 +3025,12 @@ and
 here
 }
 test chan-io-30.16 {Tcl_Write ^Z at end, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f hello\nthere\nand\rhere\n\x1a
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set c [chan read $f]
     chan close $f
@@ -3038,12 +3041,12 @@ and
 here
 }
 test chan-io-30.17 {Tcl_Write, implicit ^Z at end, Tcl_Read auto} {win} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -eofchar \x1a -translation lf
     chan puts $f hello\nthere\nand\rhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set c [chan read $f]
     chan close $f
@@ -3054,13 +3057,13 @@ and
 here
 }
 test chan-io-30.18 {Tcl_Write, ^Z in middle, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cghi\nqrs" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3074,13 +3077,13 @@ test chan-io-30.18 {Tcl_Write, ^Z in middle, Tcl_Read auto} {
     set l
 } {abc def 0 {} 1 {} 1}
 test chan-io-30.19 {Tcl_Write, ^Z no newline in middle, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cghi\nqrs" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3094,13 +3097,13 @@ test chan-io-30.19 {Tcl_Write, ^Z no newline in middle, Tcl_Read auto} {
     set l
 } {abc def 0 {} 1 {} 1}
 test chan-io-30.20 {Tcl_Write, ^Z in middle ignored, Tcl_Read lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set s [format "abc\ndef\n%cghi\nqrs" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar {}
     set l ""
     lappend l [chan gets $f]
@@ -3116,13 +3119,13 @@ test chan-io-30.20 {Tcl_Write, ^Z in middle ignored, Tcl_Read lf} {
     set l
 } "abc def 0 \x1aghi 0 qrs 0 {} 1"
 test chan-io-30.21 {Tcl_Write, ^Z in middle ignored, Tcl_Read cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set s [format "abc\ndef\n%cghi\nqrs" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar {}
     set l ""
     set x [chan gets $f]
@@ -3134,13 +3137,13 @@ test chan-io-30.21 {Tcl_Write, ^Z in middle ignored, Tcl_Read cr} {
     set l
 } {0 1 {} 1}
 test chan-io-30.22 {Tcl_Write, ^Z in middle ignored, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set s [format "abc\ndef\n%cghi\nqrs" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar {}
     set l ""
     set x [chan gets $f]
@@ -3152,13 +3155,13 @@ test chan-io-30.22 {Tcl_Write, ^Z in middle ignored, Tcl_Read crlf} {
     set l
 } {0 1 {} 1}
 test chan-io-30.23 {Tcl_Write lf, ^Z in middle, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3166,13 +3169,13 @@ test chan-io-30.23 {Tcl_Write lf, ^Z in middle, Tcl_Read auto} {
     list $c $e
 } {8 1}
 test chan-io-30.24 {Tcl_Write lf, ^Z in middle, Tcl_Read lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3180,13 +3183,13 @@ test chan-io-30.24 {Tcl_Write lf, ^Z in middle, Tcl_Read lf} {
     list $c $e
 } {8 1}
 test chan-io-30.25 {Tcl_Write cr, ^Z in middle, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3194,13 +3197,13 @@ test chan-io-30.25 {Tcl_Write cr, ^Z in middle, Tcl_Read auto} {
     list $c $e
 } {8 1}
 test chan-io-30.26 {Tcl_Write cr, ^Z in middle, Tcl_Read cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3208,13 +3211,13 @@ test chan-io-30.26 {Tcl_Write cr, ^Z in middle, Tcl_Read cr} {
     list $c $e
 } {8 1}
 test chan-io-30.27 {Tcl_Write crlf, ^Z in middle, Tcl_Read auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3222,13 +3225,13 @@ test chan-io-30.27 {Tcl_Write crlf, ^Z in middle, Tcl_Read auto} {
     list $c $e
 } {8 1}
 test chan-io-30.28 {Tcl_Write crlf, ^Z in middle, Tcl_Read crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format abc\ndef\n%cqrs\ntuv 26]
     chan puts $f $c
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar \x1a
     set c [string length [chan read $f]]
     set e [chan eof $f]
@@ -3239,12 +3242,12 @@ test chan-io-30.28 {Tcl_Write crlf, ^Z in middle, Tcl_Read crlf} {
 # Test end of line translations. Functions tested are Tcl_Write and Tcl_Gets.
 
 test chan-io-31.1 {Tcl_Write lf, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     lappend l [chan gets $f]
     lappend l [chan tell $f]
@@ -3256,12 +3259,12 @@ test chan-io-31.1 {Tcl_Write lf, Tcl_Gets auto} {
     set l
 } {hello 6 auto there 12 auto}
 test chan-io-31.2 {Tcl_Write cr, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     lappend l [chan gets $f]
     lappend l [chan tell $f]
@@ -3273,12 +3276,12 @@ test chan-io-31.2 {Tcl_Write cr, Tcl_Gets auto} {
     set l
 } {hello 6 auto there 12 auto}
 test chan-io-31.3 {Tcl_Write crlf, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     lappend l [chan gets $f]
     lappend l [chan tell $f]
@@ -3290,12 +3293,12 @@ test chan-io-31.3 {Tcl_Write crlf, Tcl_Gets auto} {
     set l
 } {hello 7 auto there 14 auto}
 test chan-io-31.4 {Tcl_Write lf, Tcl_Gets lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set l ""
     lappend l [chan gets $f]
@@ -3308,12 +3311,12 @@ test chan-io-31.4 {Tcl_Write lf, Tcl_Gets lf} {
     set l
 } {hello 6 lf there 12 lf}
 test chan-io-31.5 {Tcl_Write lf, Tcl_Gets cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set l ""
     lappend l [string length [chan gets $f]]
@@ -3328,12 +3331,12 @@ test chan-io-31.5 {Tcl_Write lf, Tcl_Gets cr} {
     set l
 } {21 21 cr 1 {} 21 cr 1}
 test chan-io-31.6 {Tcl_Write lf, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set l ""
     lappend l [string length [chan gets $f]]
@@ -3348,12 +3351,12 @@ test chan-io-31.6 {Tcl_Write lf, Tcl_Gets crlf} {
     set l
 } {21 21 crlf 1 {} 21 crlf 1}
 test chan-io-31.7 {Tcl_Write cr, Tcl_Gets cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set l ""
     lappend l [chan gets $f]
@@ -3368,12 +3371,12 @@ test chan-io-31.7 {Tcl_Write cr, Tcl_Gets cr} {
     set l
 } {hello 6 cr 0 there 12 cr 0}
 test chan-io-31.8 {Tcl_Write cr, Tcl_Gets lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set l ""
     lappend l [string length [chan gets $f]]
@@ -3388,12 +3391,12 @@ test chan-io-31.8 {Tcl_Write cr, Tcl_Gets lf} {
     set l
 } {21 21 lf 1 {} 21 lf 1}
 test chan-io-31.9 {Tcl_Write cr, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set l ""
     lappend l [string length [chan gets $f]]
@@ -3408,12 +3411,12 @@ test chan-io-31.9 {Tcl_Write cr, Tcl_Gets crlf} {
     set l
 } {21 21 crlf 1 {} 21 crlf 1}
 test chan-io-31.10 {Tcl_Write crlf, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf
     set l ""
     lappend l [chan gets $f]
@@ -3428,12 +3431,12 @@ test chan-io-31.10 {Tcl_Write crlf, Tcl_Gets crlf} {
     set l
 } {hello 7 crlf 0 there 14 crlf 0}
 test chan-io-31.11 {Tcl_Write crlf, Tcl_Gets cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr
     set l ""
     lappend l [chan gets $f]
@@ -3448,12 +3451,12 @@ test chan-io-31.11 {Tcl_Write crlf, Tcl_Gets cr} {
     set l
 } {hello 6 cr 0 6 13 cr 0}
 test chan-io-31.12 {Tcl_Write crlf, Tcl_Gets lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     chan puts $f hello\nthere\nand\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf
     set l ""
     lappend l [string length [chan gets $f]]
@@ -3468,8 +3471,8 @@ test chan-io-31.12 {Tcl_Write crlf, Tcl_Gets lf} {
     set l
 } {6 7 lf 0 6 14 lf 0}
 test chan-io-31.13 {binary mode is synonym of lf mode} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation binary
     set x [chan configure $f -translation]
     chan close $f
@@ -3480,12 +3483,12 @@ test chan-io-31.13 {binary mode is synonym of lf mode} {
 # not supoprted.
 #
 test chan-io-31.14 {Tcl_Write mixed, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts $f hello\nthere\rand\r\nhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3499,12 +3502,12 @@ test chan-io-31.14 {Tcl_Write mixed, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.15 {Tcl_Write mixed, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f hello\nthere\rand\r\nhere\r
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3518,12 +3521,12 @@ test chan-io-31.15 {Tcl_Write mixed, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.16 {Tcl_Write mixed, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f hello\nthere\rand\r\nhere\n
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     lappend l [chan gets $f]
     lappend l [chan gets $f]
@@ -3536,12 +3539,12 @@ test chan-io-31.16 {Tcl_Write mixed, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.17 {Tcl_Write mixed, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f hello\nthere\rand\r\nhere\r\n
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3555,13 +3558,13 @@ test chan-io-31.17 {Tcl_Write mixed, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.18 {Tcl_Write ^Z at end, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "hello\nthere\nand\rhere\n\%c" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3575,12 +3578,12 @@ test chan-io-31.18 {Tcl_Write ^Z at end, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.19 {Tcl_Write, implicit ^Z at end, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -eofchar \x1a -translation lf
     chan puts $f hello\nthere\nand\rhere
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3594,13 +3597,13 @@ test chan-io-31.19 {Tcl_Write, implicit ^Z at end, Tcl_Gets auto} {
     set l
 } {hello there and here 0 {} 1}
 test chan-io-31.20 {Tcl_Write, ^Z in middle, Tcl_Gets auto, eofChar} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a
     chan configure $f -translation auto
     set l ""
@@ -3613,13 +3616,13 @@ test chan-io-31.20 {Tcl_Write, ^Z in middle, Tcl_Gets auto, eofChar} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.21 {Tcl_Write, no newline ^Z in middle, Tcl_Gets auto, eofChar} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     set l ""
     lappend l [chan gets $f]
@@ -3631,13 +3634,13 @@ test chan-io-31.21 {Tcl_Write, no newline ^Z in middle, Tcl_Gets auto, eofChar} 
     set l
 } {abc def 0 {} 1}
 test chan-io-31.22 {Tcl_Write, ^Z in middle ignored, Tcl_Gets lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar {}
     set l ""
     lappend l [chan gets $f]
@@ -3653,13 +3656,13 @@ test chan-io-31.22 {Tcl_Write, ^Z in middle ignored, Tcl_Gets lf} {
     set l
 } "abc def 0 \x1aqrs 0 tuv 0 {} 1"
 test chan-io-31.23 {Tcl_Write, ^Z in middle ignored, Tcl_Gets cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar {}
     set l ""
     lappend l [chan gets $f]
@@ -3675,13 +3678,13 @@ test chan-io-31.23 {Tcl_Write, ^Z in middle ignored, Tcl_Gets cr} {
     set l
 } "abc def 0 \x1aqrs 0 tuv 0 {} 1"
 test chan-io-31.24 {Tcl_Write, ^Z in middle ignored, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar {}
     set l ""
     lappend l [chan gets $f]
@@ -3697,13 +3700,13 @@ test chan-io-31.24 {Tcl_Write, ^Z in middle ignored, Tcl_Gets crlf} {
     set l
 } "abc def 0 \x1aqrs 0 tuv 0 {} 1"
 test chan-io-31.25 {Tcl_Write lf, ^Z in middle, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3715,13 +3718,13 @@ test chan-io-31.25 {Tcl_Write lf, ^Z in middle, Tcl_Gets auto} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.26 {Tcl_Write lf, ^Z in middle, Tcl_Gets lf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3733,13 +3736,13 @@ test chan-io-31.26 {Tcl_Write lf, ^Z in middle, Tcl_Gets lf} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.27 {Tcl_Write cr, ^Z in middle, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3751,13 +3754,13 @@ test chan-io-31.27 {Tcl_Write cr, ^Z in middle, Tcl_Gets auto} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.28 {Tcl_Write cr, ^Z in middle, Tcl_Gets cr} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3769,13 +3772,13 @@ test chan-io-31.28 {Tcl_Write cr, ^Z in middle, Tcl_Gets cr} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.29 {Tcl_Write crlf, ^Z in middle, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3787,13 +3790,13 @@ test chan-io-31.29 {Tcl_Write crlf, ^Z in middle, Tcl_Gets auto} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.30 {Tcl_Write crlf, ^Z in middle, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     set s [format "abc\ndef\n%cqrs\ntuv" 26]
     chan puts $f $s
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar \x1a
     set l ""
     lappend l [chan gets $f]
@@ -3805,8 +3808,8 @@ test chan-io-31.30 {Tcl_Write crlf, ^Z in middle, Tcl_Gets crlf} {
     set l
 } {abc def 0 {} 1}
 test chan-io-31.31 {Tcl_Write crlf on block boundary, Tcl_Gets crlf} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set line "123456789ABCDE"	;# 14 char plus crlf
     chan puts -nonewline $f x	;# shift crlf across block boundary
@@ -3814,7 +3817,7 @@ test chan-io-31.31 {Tcl_Write crlf on block boundary, Tcl_Gets crlf} {
 	chan puts $f $line
     }
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf 
     set c ""
     while {[chan gets $f line] >= 0} {
@@ -3824,8 +3827,8 @@ test chan-io-31.31 {Tcl_Write crlf on block boundary, Tcl_Gets crlf} {
     string length $c
 } [expr 700*15+1]
 test chan-io-31.32 {Tcl_Write crlf on block boundary, Tcl_Gets auto} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set line "123456789ABCDE"	;# 14 char plus crlf
     chan puts -nonewline $f x	;# shift crlf across block boundary
@@ -3833,7 +3836,7 @@ test chan-io-31.32 {Tcl_Write crlf on block boundary, Tcl_Gets auto} {
 	chan puts $f $line
     }
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto
     set c ""
     while {[chan gets $f line] >= 0} {
@@ -3955,36 +3958,36 @@ test chan-io-32.11 {Tcl_Read from a pipe} {stdio openpipe} {
 } {hello
 }}
 test chan-io-32.12 {Tcl_Read, -nonewline} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan puts $f1 hello
     chan puts $f1 bye
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     set c [chan read -nonewline $f1]
     chan close $f1
     set c
 } {hello
 bye}
 test chan-io-32.13 {Tcl_Read, -nonewline} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan puts $f1 hello
     chan puts $f1 bye
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     set c [chan read -nonewline $f1]
     chan close $f1
     list [string length $c] $c
 } {9 {hello
 bye}}
 test chan-io-32.14 {Tcl_Read, reading in small chunks} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f "Two lines: this one"
     chan puts $f "and this one"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [list [chan read $f 1] [chan read $f 2] [chan read $f]]
     chan close $f
     set x
@@ -3992,12 +3995,12 @@ test chan-io-32.14 {Tcl_Read, reading in small chunks} {
 and this one
 }}
 test chan-io-32.15 {Tcl_Read, asking for more input than available} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f "Two lines: this one"
     chan puts $f "and this one"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [chan read $f 100]
     chan close $f
     set x
@@ -4005,12 +4008,12 @@ test chan-io-32.15 {Tcl_Read, asking for more input than available} {
 and this one
 }
 test chan-io-32.16 {Tcl_Read, read to end of file with -nonewline} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f "Two lines: this one"
     chan puts $f "and this one"
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [chan read -nonewline $f]
     chan close $f
     set x
@@ -4020,12 +4023,12 @@ and this one}
 # Test Tcl_Gets.
 
 test chan-io-33.1 {Tcl_Gets, reading what was written} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set y "first line"
     chan puts $f1 $y
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     set x [chan gets $f1]
     set z ok
     if {"$x" != "$y"} {
@@ -4062,31 +4065,31 @@ test chan-io-33.3 {Tcl_Gets from pipe} {stdio openpipe} {
     set z
 } ok
 test chan-io-33.4 {Tcl_Gets with long line} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts -nonewline $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan puts -nonewline $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan puts -nonewline $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan puts -nonewline $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan close $f
-    set f [open $path(test3)]
+    set f [open $path(test3ChanIo)]
     set x [chan gets $f]
     chan close $f
     set x
 } {abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
 test chan-io-33.5 {Tcl_Gets with long line} {
-    set f [open $path(test3)]
+    set f [open $path(test3ChanIo)]
     set x [chan gets $f y]
     chan close $f
     list $x $y
 } {260 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
 test chan-io-33.6 {Tcl_Gets and end of file} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts -nonewline $f "Test1\nTest2"
     chan close $f
-    set f [open $path(test3)]
+    set f [open $path(test3ChanIo)]
     set x {}
     set y {}
     lappend x [chan gets $f y] $y
@@ -4098,51 +4101,51 @@ test chan-io-33.6 {Tcl_Gets and end of file} {
     set x
 } {5 Test1 5 Test2 -1 {}}
 test chan-io-33.7 {Tcl_Gets and bad variable} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan puts $f "Line 1"
     chan puts $f "Line 2"
     chan close $f
     catch {unset x}
     set x 24
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set result [list [catch {chan gets $f x(0)} msg] $msg]
     chan close $f
     set result
 } {1 {can't set "x(0)": variable isn't array}}
 test chan-io-33.8 {Tcl_Gets, exercising double buffering} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set x ""
     for {set y 0} {$y < 99} {incr y} {set x "a$x"}
     for {set y 0} {$y < 100} {incr y} {chan puts $f $x}
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     chan configure $f -translation lf
     for {set y 0} {$y < 100} {incr y} {chan gets $f}
     chan close $f
     set y
 } 100
 test chan-io-33.9 {Tcl_Gets, exercising double buffering} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set x ""
     for {set y 0} {$y < 99} {incr y} {set x "a$x"}
     for {set y 0} {$y < 200} {incr y} {chan puts $f $x}
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     chan configure $f -translation lf
     for {set y 0} {$y < 200} {incr y} {chan gets $f}
     chan close $f
     set y
 } 200
 test chan-io-33.10 {Tcl_Gets, exercising double buffering} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set x ""
     for {set y 0} {$y < 99} {incr y} {set x "a$x"}
     for {set y 0} {$y < 300} {incr y} {chan puts $f $x}
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     chan configure $f -translation lf
     for {set y 0} {$y < 300} {incr y} {chan gets $f}
     chan close $f
@@ -4159,52 +4162,52 @@ test chan-io-34.1 {Tcl_Seek to current position at start of file} {
     set c
 } 0
 test chan-io-34.2 {Tcl_Seek to offset from start} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 10 start
     set c [chan tell $f1]
     chan close $f1
     set c
 } 10
 test chan-io-34.3 {Tcl_Seek to end of file} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 0 end
     set c [chan tell $f1]
     chan close $f1
     set c
 } 54
 test chan-io-34.4 {Tcl_Seek to offset from end of file} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 -10 end
     set c [chan tell $f1]
     chan close $f1
     set c
 } 44
 test chan-io-34.5 {Tcl_Seek to offset from current position} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 10 current
     chan seek $f1 10 current
     set c [chan tell $f1]
@@ -4212,13 +4215,13 @@ test chan-io-34.5 {Tcl_Seek to offset from current position} {
     set c
 } 20
 test chan-io-34.6 {Tcl_Seek to offset from end of file} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 -10 end
     set c [chan tell $f1]
     set r [chan read $f1]
@@ -4227,13 +4230,13 @@ test chan-io-34.6 {Tcl_Seek to offset from end of file} {
 } {44 {rstuvwxyz
 }}
 test chan-io-34.7 {Tcl_Seek to offset from end of file, then to current position} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 -10 end
     set c1 [chan tell $f1]
     set r1 [chan read $f1 5]
@@ -4250,12 +4253,12 @@ test chan-io-34.8 {Tcl_Seek on pipes: not supported} {stdio openpipe} {
     string tolower $x
 } {1 {error during seek on "": invalid argument}}
 test chan-io-34.9 {Tcl_Seek, testing buffered input flushing} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan configure $f -eofchar {}
     chan puts -nonewline $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chan close $f
-    set f [open $path(test3) RDWR]
+    set f [open $path(test3ChanIo) RDWR]
     set x [chan read $f 1]
     chan seek $f 3
     lappend x [chan read $f 1]
@@ -4272,38 +4275,38 @@ test chan-io-34.9 {Tcl_Seek, testing buffered input flushing} {
     chan close $f
     set x
 } {a d a l Y {} b}
-set path(test3) [makeFile {} test3]
+set path(test3ChanIo) [makeFile {} test3ChanIo]
 test chan-io-34.10 {Tcl_Seek testing flushing of buffered input} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf
     chan puts $f xyz\n123
     chan close $f
-    set f [open $path(test3) r+]
+    set f [open $path(test3ChanIo) r+]
     chan configure $f -translation lf
     set x [chan gets $f]
     chan seek $f 0 current
     chan puts $f 456
     chan close $f
-    list $x [viewFile test3]
+    list $x [viewFile test3ChanIo]
 } "xyz {xyz
 456}"
 test chan-io-34.11 {Tcl_Seek testing flushing of buffered output} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan puts $f xyz\n123
     chan close $f
-    set f [open $path(test3) w+]
+    set f [open $path(test3ChanIo) w+]
     chan puts $f xyzzy
     chan seek $f 2
     set x [chan gets $f]
     chan close $f
-    list $x [viewFile test3]
+    list $x [viewFile test3ChanIo]
 } "zzy xyzzy"
 test chan-io-34.12 {Tcl_Seek testing combination of write, seek back and read} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts $f xyz\n123
     chan close $f
-    set f [open $path(test3) a+]
+    set f [open $path(test3ChanIo) a+]
     chan configure $f -translation lf -eofchar {}
     chan puts $f xyzzy
     chan flush $f
@@ -4311,38 +4314,38 @@ test chan-io-34.12 {Tcl_Seek testing combination of write, seek back and read} {
     chan seek $f -4 cur
     set y [chan gets $f]
     chan close $f
-    list $x [viewFile test3] $y
+    list $x [viewFile test3ChanIo] $y
 } {14 {xyz
 123
 xyzzy} zzy}
 test chan-io-34.13 {Tcl_Tell at start of file} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set p [chan tell $f1]
     chan close $f1
     set p
 } 0
 test chan-io-34.14 {Tcl_Tell after seek to end of file} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 0 end
     set c1 [chan tell $f1]
     chan close $f1
     set c1
 } 54
 test chan-io-34.15 {Tcl_Tell combined with seeking} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -eofchar {}
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan puts $f1 "abcdefghijklmnopqrstuvwxyz"
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     chan seek $f1 10 start
     set c1 [chan tell $f1]
     chan seek $f1 10 current
@@ -4366,12 +4369,12 @@ test chan-io-34.17 {Tcl_Tell on pipe: always -1} {stdio openpipe} {
     set c
 } -1
 test chan-io-34.18 {Tcl_Tell combined with seeking and reading} {
-    file delete $path(test2)
-    set f [open $path(test2) w]
+    file delete $path(test2ChanIo)
+    set f [open $path(test2ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts -nonewline $f "line1\nline2\nline3\nline4\nline5\n"
     chan close $f
-    set f [open $path(test2)]
+    set f [open $path(test2ChanIo)]
     chan configure $f -translation lf
     set x [chan tell $f]
     chan read $f 3
@@ -4386,18 +4389,18 @@ test chan-io-34.18 {Tcl_Tell combined with seeking and reading} {
     set x
 } {0 3 2 12 30}
 test chan-io-34.19 {Tcl_Tell combined with opening in append mode} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts $f "abcdefghijklmnopqrstuvwxyz"
     chan puts $f "abcdefghijklmnopqrstuvwxyz"
     chan close $f
-    set f [open $path(test3) a]
+    set f [open $path(test3ChanIo) a]
     set c [chan tell $f]
     chan close $f
     set c
 } 54
 test chan-io-34.20 {Tcl_Tell combined with writing} {
-    set f [open $path(test3) w]
+    set f [open $path(test3ChanIo) w]
     set l ""
     chan seek $f 29 start
     lappend l [chan tell $f]
@@ -4412,8 +4415,8 @@ test chan-io-34.20 {Tcl_Tell combined with writing} {
     set l
 } {29 39 40 447}
 test chan-io-34.21 {Tcl_Seek and Tcl_Tell on large files} {largefileSupport} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan configure $f -encoding binary
     set l ""
     lappend l [chan tell $f]
@@ -4427,22 +4430,22 @@ test chan-io-34.21 {Tcl_Seek and Tcl_Tell on large files} {largefileSupport} {
     chan puts -nonewline $f abcdef
     lappend l [chan tell $f]
     chan close $f
-    lappend l [file size $path(test3)]
+    lappend l [file size $path(test3ChanIo)]
     # truncate...
-    chan close [open $path(test3) w]
-    lappend l [file size $path(test3)]
+    chan close [open $path(test3ChanIo) w]
+    lappend l [file size $path(test3ChanIo)]
     set l
 } {0 6 6 4294967296 4294967302 4294967302 0}
 
 # Test Tcl_Eof
 
 test chan-io-35.1 {Tcl_Eof} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f hello
     chan puts $f hello
     chan close $f
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     set x [chan eof $f]
     lappend x [chan eof $f]
     chan gets $f
@@ -4496,10 +4499,10 @@ test chan-io-35.3 {Tcl_Eof with pipe} {stdio openpipe} {
     set x
 } {0 0 0 1 1 1}
 test chan-io-35.4 {Tcl_Eof, eof detection on nonblocking file} {nonBlockFiles} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -blocking off
     set l ""
     lappend l [chan gets $f]
@@ -4522,13 +4525,13 @@ test chan-io-35.5 {Tcl_Eof, eof detection on nonblocking pipe} {stdio openpipe} 
     set l
 } {{} 1}
 test chan-io-35.6 {Tcl_Eof, eof char, lf write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4536,13 +4539,13 @@ test chan-io-35.6 {Tcl_Eof, eof char, lf write, auto read} {
     list $s $l $e
 } {9 8 1}
 test chan-io-35.7 {Tcl_Eof, eof char, lf write, lf read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4550,13 +4553,13 @@ test chan-io-35.7 {Tcl_Eof, eof char, lf write, lf read} {
     list $s $l $e
 } {9 8 1}
 test chan-io-35.8 {Tcl_Eof, eof char, cr write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4564,13 +4567,13 @@ test chan-io-35.8 {Tcl_Eof, eof char, cr write, auto read} {
     list $s $l $e
 } {9 8 1}
 test chan-io-35.9 {Tcl_Eof, eof char, cr write, cr read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4578,13 +4581,13 @@ test chan-io-35.9 {Tcl_Eof, eof char, cr write, cr read} {
     list $s $l $e
 } {9 8 1}
 test chan-io-35.10 {Tcl_Eof, eof char, crlf write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4592,13 +4595,13 @@ test chan-io-35.10 {Tcl_Eof, eof char, crlf write, auto read} {
     list $s $l $e
 } {11 8 1}
 test chan-io-35.11 {Tcl_Eof, eof char, crlf write, crlf read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar \x1a
     chan puts $f abc\ndef
     chan close $f
-    set s [file size $path(test1)]
-    set f [open $path(test1) r]
+    set s [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4606,14 +4609,14 @@ test chan-io-35.11 {Tcl_Eof, eof char, crlf write, crlf read} {
     list $s $l $e
 } {11 8 1}
 test chan-io-35.12 {Tcl_Eof, eof char in middle, lf write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4621,14 +4624,14 @@ test chan-io-35.12 {Tcl_Eof, eof char in middle, lf write, auto read} {
     list $c $l $e
 } {17 8 1}
 test chan-io-35.13 {Tcl_Eof, eof char in middle, lf write, lf read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4636,14 +4639,14 @@ test chan-io-35.13 {Tcl_Eof, eof char in middle, lf write, lf read} {
     list $c $l $e
 } {17 8 1}
 test chan-io-35.14 {Tcl_Eof, eof char in middle, cr write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4651,14 +4654,14 @@ test chan-io-35.14 {Tcl_Eof, eof char in middle, cr write, auto read} {
     list $c $l $e
 } {17 8 1}
 test chan-io-35.15 {Tcl_Eof, eof char in middle, cr write, cr read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4666,14 +4669,14 @@ test chan-io-35.15 {Tcl_Eof, eof char in middle, cr write, cr read} {
     list $c $l $e
 } {17 8 1}
 test chan-io-35.16 {Tcl_Eof, eof char in middle, crlf write, auto read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4681,14 +4684,14 @@ test chan-io-35.16 {Tcl_Eof, eof char in middle, crlf write, auto read} {
     list $c $l $e
 } {21 8 1}
 test chan-io-35.17 {Tcl_Eof, eof char in middle, crlf write, crlf read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf -eofchar {}
     set i [format abc\ndef\n%cqrs\nuvw 26]
     chan puts $f $i
     chan close $f
-    set c [file size $path(test1)]
-    set f [open $path(test1) r]
+    set c [file size $path(test1ChanIo)]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar \x1a
     set l [string length [chan read $f]]
     set e [chan eof $f]
@@ -4732,11 +4735,11 @@ test chan-io-36.2 {Tcl_InputBlocked on blocking pipe} {stdio openpipe} {
     set x
 } {hello_from_pipe 0 {} 0 1}
 test chan-io-36.3 {Tcl_InputBlocked vs files, short read} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnop
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     lappend l [chan blocked $f]
     lappend l [chan read $f 3]
@@ -4754,11 +4757,11 @@ test chan-io-36.4 {Tcl_InputBlocked vs files, event driven read} {fileevent} {
 	lappend l [chan read $f 3]
 	if {[chan eof $f]} {lappend l eof; chan close $f; set x done}
     }
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnop
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
     chan event $f readable [namespace code [list in $f]]
     variable x
@@ -4767,11 +4770,11 @@ test chan-io-36.4 {Tcl_InputBlocked vs files, event driven read} {fileevent} {
 } {abc def ghi jkl mno {p
 } eof}
 test chan-io-36.5 {Tcl_InputBlocked vs files, short read, nonblocking} {nonBlockFiles} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnop
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -blocking off
     set l ""
     lappend l [chan blocked $f]
@@ -4790,11 +4793,11 @@ test chan-io-36.6 {Tcl_InputBlocked vs files, event driven read} {nonBlockFiles 
 	lappend l [chan read $f 3]
 	if {[chan eof $f]} {lappend l eof; chan close $f; set x done}
     }
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan puts $f abcdefghijklmnop
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -blocking off
     set l ""
     chan event $f readable [namespace code [list in $f]]
@@ -4871,8 +4874,8 @@ test chan-io-38.3 {Tcl_SetChannelBufferSize, changing buffersize between reads} 
 # Test Tcl_SetChannelOption, Tcl_GetChannelOption
 
 test chan-io-39.1 {Tcl_GetChannelOption} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set x [chan configure $f1 -blocking]
     chan close $f1
     set x
@@ -4881,23 +4884,23 @@ test chan-io-39.1 {Tcl_GetChannelOption} {
 # Test 17.2 was removed.
 #
 test chan-io-39.2 {Tcl_GetChannelOption} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set x [chan configure $f1 -buffering]
     chan close $f1
     set x
 } full
 test chan-io-39.3 {Tcl_GetChannelOption} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -buffering line
     set x [chan configure $f1 -buffering]
     chan close $f1
     set x
 } line
 test chan-io-39.4 {Tcl_GetChannelOption, Tcl_SetChannelOption} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set l ""
     lappend l [chan configure $f1 -buffering]
     chan configure $f1 -buffering line
@@ -4912,8 +4915,8 @@ test chan-io-39.4 {Tcl_GetChannelOption, Tcl_SetChannelOption} {
     set l
 } {full line none line full}
 test chan-io-39.5 {Tcl_GetChannelOption, invariance} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set l ""
     lappend l [chan configure $f1 -buffering]
     lappend l [list [catch {chan configure $f1 -buffering green} msg] $msg]
@@ -4922,54 +4925,54 @@ test chan-io-39.5 {Tcl_GetChannelOption, invariance} {
     set l
 } {full {1 {bad value for -buffering: must be one of full, line, or none}} full}
 test chan-io-39.6 {Tcl_SetChannelOption, multiple options} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -buffering line
     chan puts $f1 hello
     chan puts $f1 bye
-    set x [file size $path(test1)]
+    set x [file size $path(test1ChanIo)]
     chan close $f1
     set x
 } 10
 test chan-io-39.7 {Tcl_SetChannelOption, buffering, translation} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf
     chan puts $f1 hello
     chan puts $f1 bye
     set x ""
     chan configure $f1 -buffering line
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan puts $f1 really_bye
-    lappend x [file size $path(test1)]
+    lappend x [file size $path(test1ChanIo)]
     chan close $f1
     set x
 } {0 21}
 test chan-io-39.8 {Tcl_SetChannelOption, different buffering options} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     set l ""
     chan configure $f1 -translation lf -buffering none -eofchar {}
     chan puts -nonewline $f1 hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts -nonewline $f1 hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f1 -buffering full
     chan puts -nonewline $f1 hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f1 -buffering none
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan puts -nonewline $f1 hello
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan close $f1
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     set l
 } {5 10 10 10 20 20}
 test chan-io-39.9 {Tcl_SetChannelOption, blocking mode} {nonBlockFiles} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w]
     chan close $f1
-    set f1 [open $path(test1) r]
+    set f1 [open $path(test1ChanIo) r]
     set x ""
     lappend x [chan configure $f1 -blocking]
     chan configure $f1 -blocking off
@@ -5018,62 +5021,62 @@ test chan-io-39.10 {Tcl_SetChannelOption, blocking mode} {stdio openpipe} {
     set x
 } {0 {} 1 {} 1 {} 1 1 hi 0 0 {} 1}
 test chan-io-39.11 {Tcl_SetChannelOption, Tcl_GetChannelOption, buffer size clipped to lower bound} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffersize -10
     set x [chan configure $f -buffersize]
     chan close $f
     set x
 } 1
 test chan-io-39.12 {Tcl_SetChannelOption, Tcl_GetChannelOption buffer size clipped to upper bound} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffersize 10000000
     set x [chan configure $f -buffersize]
     chan close $f
     set x
 } 1048576
 test chan-io-39.13 {Tcl_SetChannelOption, Tcl_GetChannelOption, buffer size} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -buffersize 40000
     set x [chan configure $f -buffersize]
     chan close $f
     set x
 } 40000
 test chan-io-39.14 {Tcl_SetChannelOption: -encoding, binary & utf-8} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding {} 
     chan puts -nonewline $f \xe7\x89\xa6
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -encoding utf-8
     set x [chan read $f]
     chan close $f
     set x
 } \u7266
 test chan-io-39.15 {Tcl_SetChannelOption: -encoding, binary & utf-8} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -encoding binary
     chan puts -nonewline $f \xe7\x89\xa6
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -encoding utf-8
     set x [chan read $f]
     chan close $f
     set x
 } \u7266
 test chan-io-39.16 {Tcl_SetChannelOption: -encoding, errors} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     set result [list [catch {chan configure $f -encoding foobar} msg] $msg]
     chan close $f
     set result
 } {1 {unknown encoding "foobar"}}
 test chan-io-39.17 {Tcl_SetChannelOption: -encoding, clearing CHANNEL_NEED_MORE_DATA} {stdio openpipe fileevent} {
-    set f [open "|[list [interpreter] $path(cat)]" r+]
+    set f [open "|[list [interpreter] $path(catChanIo)]" r+]
     chan configure $f -encoding binary
     chan puts -nonewline $f "\xe7"
     chan flush $f
@@ -5147,8 +5150,8 @@ test chan-io-39.21 {Tcl_SetChannelOption, setting read mode independently} \
     set modes
 } {auto crlf}
 test chan-io-39.22 {Tcl_SetChannelOption, invariance} {unix} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w+]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w+]
     set l ""
     lappend l [chan configure $f1 -eofchar]
     chan configure $f1 -eofchar {ON GO}
@@ -5159,8 +5162,8 @@ test chan-io-39.22 {Tcl_SetChannelOption, invariance} {unix} {
     set l
 } {{{} {}} {O G} {D D}}
 test chan-io-39.22a {Tcl_SetChannelOption, invariance} {
-    file delete $path(test1)
-    set f1 [open $path(test1) w+]
+    file delete $path(test1ChanIo)
+    set f1 [open $path(test1ChanIo) w+]
     set l [list]
     chan configure $f1 -eofchar {ON GO}
     lappend l [chan configure $f1 -eofchar]
@@ -5189,68 +5192,68 @@ test chan-io-39.24 {Tcl_SetChannelOption, server socket is not readable or
 } {{{}} auto}
 
 test chan-io-40.1 {POSIX open access modes: RDWR} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts $f xyzzy
     chan close $f
-    set f [open $path(test3) RDWR]
+    set f [open $path(test3ChanIo) RDWR]
     chan puts -nonewline $f "ab"
     chan seek $f 0 current
     set x [chan gets $f]
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     lappend x [chan gets $f]
     chan close $f
     set x
 } {zzy abzzy}
 test chan-io-40.2 {POSIX open access modes: CREAT} {unix} {
-    file delete $path(test3)
-    set f [open $path(test3) {WRONLY CREAT} 0600]
-    file stat $path(test3) stats
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) {WRONLY CREAT} 0600]
+    file stat $path(test3ChanIo) stats
     set x [format "0%o" [expr $stats(mode)&0o777]]
     chan puts $f "line 1"
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     lappend x [chan gets $f]
     chan close $f
     set x
 } {0600 {line 1}}
 test chan-io-40.3 {POSIX open access modes: CREAT} {unix umask} {
     # This test only works if your umask is 2, like ouster's.
-    file delete $path(test3)
-    set f [open $path(test3) {WRONLY CREAT}]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) {WRONLY CREAT}]
     chan close $f
-    file stat $path(test3) stats
+    file stat $path(test3ChanIo) stats
     format "0%o" [expr $stats(mode)&0o777]
 } [format %04o [expr {0o666 & ~ $umaskValue}]]
 test chan-io-40.4 {POSIX open access modes: CREAT} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan configure $f -eofchar {}
     chan puts $f xyzzy
     chan close $f
-    set f [open $path(test3) {WRONLY CREAT}]
+    set f [open $path(test3ChanIo) {WRONLY CREAT}]
     chan configure $f -eofchar {}
     chan puts -nonewline $f "ab"
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set x [chan gets $f]
     chan close $f
     set x
 } abzzy
 test chan-io-40.5 {POSIX open access modes: APPEND} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan configure $f -translation lf -eofchar {}
     chan puts $f xyzzy
     chan close $f
-    set f [open $path(test3) {WRONLY APPEND}]
+    set f [open $path(test3ChanIo) {WRONLY APPEND}]
     chan configure $f -translation lf
     chan puts $f "new line"
     chan seek $f 0
     chan puts $f "abc"
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     chan configure $f -translation lf
     set x ""
     chan seek $f 6 current
@@ -5260,49 +5263,49 @@ test chan-io-40.5 {POSIX open access modes: APPEND} {
     set x
 } {{new line} abc}
 test chan-io-40.6 {POSIX open access modes: EXCL} -match regexp -body {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts $f xyzzy
     chan close $f
-    open $path(test3) {WRONLY CREAT EXCL}
-} -returnCodes error -result {(?i)couldn't open ".*test3": file (already )?exists}
+    open $path(test3ChanIo) {WRONLY CREAT EXCL}
+} -returnCodes error -result {(?i)couldn't open ".*test3ChanIo": file (already )?exists}
 test chan-io-40.7 {POSIX open access modes: EXCL} {
-    file delete $path(test3)
-    set f [open $path(test3) {WRONLY CREAT EXCL}]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) {WRONLY CREAT EXCL}]
     chan configure $f -eofchar {}
     chan puts $f "A test line"
     chan close $f
-    viewFile test3
+    viewFile test3ChanIo
 } {A test line}
 test chan-io-40.8 {POSIX open access modes: TRUNC} {
-    file delete $path(test3)
-    set f [open $path(test3) w]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) w]
     chan puts $f xyzzy
     chan close $f
-    set f [open $path(test3) {WRONLY TRUNC}]
+    set f [open $path(test3ChanIo) {WRONLY TRUNC}]
     chan puts $f abc
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set x [chan gets $f]
     chan close $f
     set x
 } abc
 test chan-io-40.9 {POSIX open access modes: NONBLOCK} {nonPortable unix} {
-    file delete $path(test3)
-    set f [open $path(test3) {WRONLY NONBLOCK CREAT}]
+    file delete $path(test3ChanIo)
+    set f [open $path(test3ChanIo) {WRONLY NONBLOCK CREAT}]
     chan puts $f "NONBLOCK test"
     chan close $f
-    set f [open $path(test3) r]
+    set f [open $path(test3ChanIo) r]
     set x [chan gets $f]
     chan close $f
     set x
 } {NONBLOCK test}
 test chan-io-40.10 {POSIX open access modes: RDONLY} {
-    set f [open $path(test1) w]
+    set f [open $path(test1ChanIo) w]
     chan puts $f "two lines: this one"
     chan puts $f "and this"
     chan close $f
-    set f [open $path(test1) RDONLY]
+    set f [open $path(test1ChanIo) RDONLY]
     set x [list [chan gets $f] [catch {chan puts $f Test} msg] $msg]
     chan close $f
     string compare [string tolower $x] \
@@ -5310,37 +5313,37 @@ test chan-io-40.10 {POSIX open access modes: RDONLY} {
 		[format "channel \"%s\" wasn't opened for writing" $f]]
 } 0
 test chan-io-40.11 {POSIX open access modes: RDONLY} -match regexp -body {
-    file delete $path(test3)
-    open $path(test3) RDONLY
-} -returnCodes error -result {(?i)couldn't open ".*test3": no such file or directory}
+    file delete $path(test3ChanIo)
+    open $path(test3ChanIo) RDONLY
+} -returnCodes error -result {(?i)couldn't open ".*test3ChanIo": no such file or directory}
 test chan-io-40.12 {POSIX open access modes: WRONLY} -match regexp -body {
-    file delete $path(test3)
-    open $path(test3) WRONLY
-} -returnCodes error -result {(?i)couldn't open ".*test3": no such file or directory}
+    file delete $path(test3ChanIo)
+    open $path(test3ChanIo) WRONLY
+} -returnCodes error -result {(?i)couldn't open ".*test3ChanIo": no such file or directory}
 test chan-io-40.13 {POSIX open access modes: WRONLY} {
-    makeFile xyzzy test3
-    set f [open $path(test3) WRONLY]
+    makeFile xyzzy test3ChanIo
+    set f [open $path(test3ChanIo) WRONLY]
     chan configure $f -eofchar {}
     chan puts -nonewline $f "ab"
     chan seek $f 0 current
     set x [list [catch {chan gets $f} msg] $msg]
     chan close $f
-    lappend x [viewFile test3]
+    lappend x [viewFile test3ChanIo]
     string compare [string tolower $x] \
 	[list 1 "channel \"$f\" wasn't opened for reading" abzzy]
 } 0
 test chan-io-40.14 {POSIX open access modes: RDWR} -match regexp -body {
-    file delete $path(test3)
-    open $path(test3) RDWR
-} -returnCodes error -result {(?i)couldn't open ".*test3": no such file or directory}
+    file delete $path(test3ChanIo)
+    open $path(test3ChanIo) RDWR
+} -returnCodes error -result {(?i)couldn't open ".*test3ChanIo": no such file or directory}
 test chan-io-40.15 {POSIX open access modes: RDWR} {
-    makeFile xyzzy test3
-    set f [open $path(test3) RDWR]
+    makeFile xyzzy test3ChanIo
+    set f [open $path(test3ChanIo) RDWR]
     chan puts -nonewline $f "ab"
     chan seek $f 0 current
     set x [chan gets $f]
     chan close $f
-    lappend x [viewFile test3]
+    lappend x [viewFile test3ChanIo]
 } {zzy abzzy}
 test chan-io-40.16 {tilde substitution in open} -constraints makeFileInHome -setup {
     makeFile {Some text} _test_ ~
@@ -5517,7 +5520,7 @@ test chan-io-44.4 {FileEventProc procedure: eror in write event} -constraints {
     catch {chan close $f3}
 } -result {bad-write {}}
 test chan-io-44.5 {FileEventProc procedure: end of file} {stdio unixExecs openpipe fileevent} {
-    set f4 [open "|[list [interpreter] $path(cat) << foo]" r]
+    set f4 [open "|[list [interpreter] $path(catChanIo) << foo]" r]
     chan event $f4 readable [namespace code {
 	if {[chan gets $f4 line] < 0} {
 	    lappend x eof
@@ -5835,8 +5838,8 @@ test chan-io-48.3 {testing readability conditions} {stdio unix nonBlockFiles ope
     list $x $l
 } {done {0 1 0 1 0 1 0 1 0 1 0 1 0 0}}
 test chan-io-48.4 {lf write, testing readability, ^Z termination, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     variable c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -5855,7 +5858,7 @@ test chan-io-48.4 {lf write, testing readability, ^Z termination, auto read mode
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -5863,8 +5866,8 @@ test chan-io-48.4 {lf write, testing readability, ^Z termination, auto read mode
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.5 {lf write, testing readability, ^Z in middle, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -5883,7 +5886,7 @@ test chan-io-48.5 {lf write, testing readability, ^Z in middle, auto read mode} 
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -5891,8 +5894,8 @@ test chan-io-48.5 {lf write, testing readability, ^Z in middle, auto read mode} 
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.6 {cr write, testing readability, ^Z termination, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -5911,7 +5914,7 @@ test chan-io-48.6 {cr write, testing readability, ^Z termination, auto read mode
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -5919,8 +5922,8 @@ test chan-io-48.6 {cr write, testing readability, ^Z termination, auto read mode
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.7 {cr write, testing readability, ^Z in middle, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -5939,7 +5942,7 @@ test chan-io-48.7 {cr write, testing readability, ^Z in middle, auto read mode} 
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -5947,8 +5950,8 @@ test chan-io-48.7 {cr write, testing readability, ^Z in middle, auto read mode} 
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.8 {crlf write, testing readability, ^Z termination, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -5967,7 +5970,7 @@ test chan-io-48.8 {crlf write, testing readability, ^Z termination, auto read mo
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation auto -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -5975,8 +5978,8 @@ test chan-io-48.8 {crlf write, testing readability, ^Z termination, auto read mo
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.9 {crlf write, testing readability, ^Z in middle, auto read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -5995,7 +5998,7 @@ test chan-io-48.9 {crlf write, testing readability, ^Z in middle, auto read mode
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation auto
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6003,8 +6006,8 @@ test chan-io-48.9 {crlf write, testing readability, ^Z in middle, auto read mode
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.10 {lf write, testing readability, ^Z in middle, lf read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -6023,7 +6026,7 @@ test chan-io-48.10 {lf write, testing readability, ^Z in middle, lf read mode} {
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation lf
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6031,8 +6034,8 @@ test chan-io-48.10 {lf write, testing readability, ^Z in middle, lf read mode} {
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.11 {lf write, testing readability, ^Z termination, lf read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     set c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -6051,7 +6054,7 @@ test chan-io-48.11 {lf write, testing readability, ^Z termination, lf read mode}
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation lf -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6059,8 +6062,8 @@ test chan-io-48.11 {lf write, testing readability, ^Z termination, lf read mode}
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.12 {cr write, testing readability, ^Z in middle, cr read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -6079,7 +6082,7 @@ test chan-io-48.12 {cr write, testing readability, ^Z in middle, cr read mode} {
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation cr
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6087,8 +6090,8 @@ test chan-io-48.12 {cr write, testing readability, ^Z in middle, cr read mode} {
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.13 {cr write, testing readability, ^Z termination, cr read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation cr
     set c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -6107,7 +6110,7 @@ test chan-io-48.13 {cr write, testing readability, ^Z termination, cr read mode}
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation cr -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6115,8 +6118,8 @@ test chan-io-48.13 {cr write, testing readability, ^Z termination, cr read mode}
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.14 {crlf write, testing readability, ^Z in middle, crlf read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format "abc\ndef\n%cfoo\nbar\n" 26]
     chan puts -nonewline $f $c
@@ -6135,7 +6138,7 @@ test chan-io-48.14 {crlf write, testing readability, ^Z in middle, crlf read mod
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -eofchar \x1a -translation crlf
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6143,8 +6146,8 @@ test chan-io-48.14 {crlf write, testing readability, ^Z in middle, crlf read mod
     list $c $l
 } {3 {abc def {}}}
 test chan-io-48.15 {crlf write, testing readability, ^Z termi, crlf read mode} {fileevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation crlf
     set c [format "abc\ndef\n%c" 26]
     chan puts -nonewline $f $c
@@ -6163,7 +6166,7 @@ test chan-io-48.15 {crlf write, testing readability, ^Z termi, crlf read mode} {
     }
     set c 0
     set l ""
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     chan configure $f -translation crlf -eofchar \x1a
     chan event $f readable [namespace code [list consume $f]]
     variable x
@@ -6172,14 +6175,14 @@ test chan-io-48.15 {crlf write, testing readability, ^Z termi, crlf read mode} {
 } {3 {abc def {}}}
 
 test chan-io-49.1 {testing crlf reading, leftover cr disgorgment} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\rb\rc\r\n"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f -translation crlf
     lappend l [chan read $f 1]
     lappend l [chan tell $f]
@@ -6201,14 +6204,14 @@ test chan-io-49.1 {testing crlf reading, leftover cr disgorgment} {
 } "7 a 1 [list \r] 2 b 3 [list \r] 4 c 5 {
 } 7 0 {} 1"
 test chan-io-49.2 {testing crlf reading, leftover cr disgorgment} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\rb\rc\r\n"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f -translation crlf
     lappend l [chan read $f 2]
     lappend l [chan tell $f]
@@ -6224,14 +6227,14 @@ test chan-io-49.2 {testing crlf reading, leftover cr disgorgment} {
     set l
 } "7 [list a\r] 2 [list b\r] 4 [list c\n] 7 0 {} 7 1"
 test chan-io-49.3 {testing crlf reading, leftover cr disgorgment} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\rb\rc\r\n"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f -translation crlf
     lappend l [chan read $f 3]
     lappend l [chan tell $f]
@@ -6245,14 +6248,14 @@ test chan-io-49.3 {testing crlf reading, leftover cr disgorgment} {
     set l
 } "7 [list a\rb] 3 [list \rc\n] 7 0 {} 7 1"
 test chan-io-49.4 {testing crlf reading, leftover cr disgorgment} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\rb\rc\r\n"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f -translation crlf
     lappend l [chan read $f 3]
     lappend l [chan tell $f]
@@ -6266,14 +6269,14 @@ test chan-io-49.4 {testing crlf reading, leftover cr disgorgment} {
     set l
 } "7 [list a\rb] 3 [list \rc] 7 0 {} 7 1"
 test chan-io-49.5 {testing crlf reading, leftover cr disgorgment} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan configure $f -translation lf
     chan puts -nonewline $f "a\rb\rc\r\n"
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     set l ""
-    lappend l [file size $path(test1)]
+    lappend l [file size $path(test1ChanIo)]
     chan configure $f -translation crlf
     lappend l [set x [chan gets $f]]
     lappend l [chan tell $f]
@@ -6285,10 +6288,10 @@ test chan-io-49.5 {testing crlf reading, leftover cr disgorgment} {
 } [list 7 a\rb\rc 7 {} 7 1]
 
 test chan-io-50.1 {testing handler deletion} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list delhandler $f]]
     proc delhandler {f} {
 	variable z
@@ -6301,10 +6304,10 @@ test chan-io-50.1 {testing handler deletion} {testchannelevent} {
     set z
 } called
 test chan-io-50.2 {testing handler deletion with multiple handlers} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list delhandler $f 1]]
     testchannelevent $f add readable [namespace code [list delhandler $f 0]]
     proc delhandler {f i} {
@@ -6319,10 +6322,10 @@ test chan-io-50.2 {testing handler deletion with multiple handlers} {testchannel
 	[list [list called delhandler $f 0] [list called delhandler $f 1]]
 } 0
 test chan-io-50.3 {testing handler deletion with multiple handlers} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list notcalled $f 1]]
     testchannelevent $f add readable [namespace code [list delhandler $f 0]]
     set z ""
@@ -6345,10 +6348,10 @@ test chan-io-50.3 {testing handler deletion with multiple handlers} {testchannel
 	      [list delhandler $f 0 deleted myself]]
 } 0
 test chan-io-50.4 {testing handler deletion vs reentrant calls} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list delrecursive $f]]
     proc delrecursive {f} {
 	variable z
@@ -6370,10 +6373,10 @@ test chan-io-50.4 {testing handler deletion vs reentrant calls} {testchanneleven
 	{{delrecursive calling recursive} {delrecursive deleting recursive}}
 } 0
 test chan-io-50.5 {testing handler deletion vs reentrant calls} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list notcalled $f]]
     testchannelevent $f add readable [namespace code [list del $f]]
     proc notcalled {f} {
@@ -6404,10 +6407,10 @@ test chan-io-50.5 {testing handler deletion vs reentrant calls} {testchanneleven
 	      {del deleted myself} {del after update}]
 } 0
 test chan-io-50.6 {testing handler deletion vs reentrant calls} {testchannelevent} {
-    file delete $path(test1)
-    set f [open $path(test1) w]
+    file delete $path(test1ChanIo)
+    set f [open $path(test1ChanIo) w]
     chan close $f
-    set f [open $path(test1) r]
+    set f [open $path(test1ChanIo) r]
     testchannelevent $f add readable [namespace code [list second $f]]
     testchannelevent $f add readable [namespace code [list first $f]]
     proc first {f} {
@@ -6489,9 +6492,9 @@ test chan-io-51.1 {Test old socket deletion on Macintosh} {socket} {
 } {sock1 sock2 sock3 sock4}
 
 test chan-io-52.1 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan copy $f1 $f2 -command { # }
     catch { chan copy $f1 $f2 } msg
     chan close $f1
@@ -6499,9 +6502,9 @@ test chan-io-52.1 {TclCopyChannel} {fcopy} {
     string compare $msg "channel \"$f1\" is busy"
 } {0}
 test chan-io-52.2 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     set f3 [open $thisScript]
     chan copy $f1 $f2 -command { # }
     catch { chan copy $f3 $f2 } msg
@@ -6511,9 +6514,9 @@ test chan-io-52.2 {TclCopyChannel} {fcopy} {
     string compare $msg "channel \"$f2\" is busy"
 } {0}
 test chan-io-52.3 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation cr -blocking 0
     set s0 [chan copy $f1 $f2]
@@ -6521,28 +6524,28 @@ test chan-io-52.3 {TclCopyChannel} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {("$s1" == "$s2") && ($s0 == $s1)} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-52.4 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation cr -blocking 0
     chan copy $f1 $f2 -size 40
     set result [list [chan configure $f1 -blocking] [chan configure $f2 -blocking]]
     chan close $f1
     chan close $f2
-    lappend result [file size $path(test1)]
+    lappend result [file size $path(test1ChanIo)]
 } {0 0 40}
 test chan-io-52.5 {TclCopyChannel, all} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation lf -blocking 0
     chan copy $f1 $f2 -size -1 ;# -1 means 'copy all', same as if no -size specified.
@@ -6550,16 +6553,16 @@ test chan-io-52.5 {TclCopyChannel, all} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {"$s1" == "$s2"} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-52.5a {TclCopyChannel, all, other negative value} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation lf -blocking 0
     chan copy $f1 $f2 -size -2 ;# < 0 behaves like -1, copy all
@@ -6567,16 +6570,16 @@ test chan-io-52.5a {TclCopyChannel, all, other negative value} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {"$s1" == "$s2"} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-52.5b {TclCopyChannel, all, wrapped to ngative value} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation lf -blocking 0
     chan copy $f1 $f2 -size 3221176172 ;# Wrapped to < 0, behaves like -1, copy all
@@ -6584,16 +6587,16 @@ test chan-io-52.5b {TclCopyChannel, all, wrapped to ngative value} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {"$s1" == "$s2"} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-52.6 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation lf -blocking 0
     set s0 [chan copy $f1 $f2 -size [expr [file size $thisScript] + 5]]
@@ -6601,22 +6604,22 @@ test chan-io-52.6 {TclCopyChannel} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {("$s1" == "$s2") && ($s0 == $s1)} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-52.7 {TclCopyChannel} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation lf -blocking 0
     chan copy $f1 $f2
     set result [list [chan configure $f1 -blocking] [chan configure $f2 -blocking]]
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     chan close $f1
     chan close $f2
     if {"$s1" == "$s2"} {
@@ -6625,7 +6628,7 @@ test chan-io-52.7 {TclCopyChannel} {fcopy} {
     set result
 } {0 0 ok}
 test chan-io-52.8 {TclCopyChannel} {stdio openpipe fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     file delete $path(pipe)
     set f1 [open $path(pipe) w]
     chan configure $f1 -translation lf
@@ -6643,12 +6646,12 @@ test chan-io-52.8 {TclCopyChannel} {stdio openpipe fcopy} {
     chan gets $f1
     chan puts $f1 ready
     chan flush $f1
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f2 -translation lf
     set s0 [chan copy $f1 $f2 -size 40]
     catch {chan close $f1}
     chan close $f2
-    list $s0 [file size $path(test1)]
+    list $s0 [file size $path(test1ChanIo)]
 } {40 40}
 # Empty files, to register them with the test facility
 set path(kyrillic.txt)   [makeFile {} kyrillic.txt]
@@ -6725,21 +6728,21 @@ test chan-io-52.11 {TclCopyChannel & encodings} {fcopy} {
 } 3
 
 test chan-io-53.1 {CopyData} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation cr -blocking 0
     chan copy $f1 $f2 -size 0
     set result [list [chan configure $f1 -blocking] [chan configure $f2 -blocking]]
     chan close $f1
     chan close $f2
-    lappend result [file size $path(test1)]
+    lappend result [file size $path(test1ChanIo)]
 } {0 0 0}
 test chan-io-53.2 {CopyData} {fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     set f1 [open $thisScript]
-    set f2 [open $path(test1) w]
+    set f2 [open $path(test1ChanIo) w]
     chan configure $f1 -translation lf -blocking 0
     chan configure $f2 -translation cr -blocking 0
     chan copy $f1 $f2 -command [namespace code {set s0}]
@@ -6749,14 +6752,14 @@ test chan-io-53.2 {CopyData} {fcopy} {
     chan close $f1
     chan close $f2
     set s1 [file size $thisScript]
-    set s2 [file size $path(test1)]
+    set s2 [file size $path(test1ChanIo)]
     if {("$s1" == "$s2") && ($s0 == $s1)} {
         lappend result ok
     }
     set result
 } {0 0 ok}
 test chan-io-53.3 {CopyData: background read underflow} {stdio unix openpipe fcopy} {
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     file delete $path(pipe)
     set f1 [open $path(pipe) w]
     chan puts -nonewline $f1 {
@@ -6765,7 +6768,7 @@ test chan-io-53.3 {CopyData: background read underflow} {stdio unix openpipe fco
 	chan copy stdin stdout -command { set x }
 	vwait x
 	set f [}
-    chan puts $f1 [list open $path(test1) w]]
+    chan puts $f1 [list open $path(test1ChanIo) w]]
     chan puts $f1 {
 	chan configure $f -translation lf
 	chan puts $f "done"
@@ -6782,7 +6785,7 @@ test chan-io-53.3 {CopyData: background read underflow} {stdio unix openpipe fco
     lappend result [chan gets $f1]
     chan close $f1
     after 500
-    set f [open $path(test1)]
+    set f [open $path(test1ChanIo)]
     lappend result [chan read $f]
     chan close $f
     set result
@@ -6793,14 +6796,14 @@ test chan-io-53.4 {CopyData: background write overflow} {stdio unix openpipe fil
     for {set x 0} {$x < 12} {incr x} {
 	append big $big
     }
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     file delete $path(pipe)
     set f1 [open $path(pipe) w]
     chan puts $f1 {
 	chan puts ready
 	chan copy stdin stdout -command { set x }
 	vwait x
-	set f [open $path(test1) w]
+	set f [open $path(test1ChanIo) w]
 	chan configure $f -translation lf
 	chan puts $f "done"
 	chan close $f
@@ -6855,13 +6858,13 @@ test chan-io-53.5 {CopyData: error during chan copy} {socket fcopy} {
 test chan-io-53.6 {CopyData: error during chan copy} {stdio openpipe fcopy} {
     variable fcopyTestDone
     file delete $path(pipe)
-    file delete $path(test1)
+    file delete $path(test1ChanIo)
     catch {unset fcopyTestDone}
     set f1 [open $path(pipe) w]
     chan puts $f1 "exit 1"
     chan close $f1
     set in [open "|[list [interpreter] $path(pipe)]" r+]
-    set out [open $path(test1) w]
+    set out [open $path(test1ChanIo) w]
     chan copy $in $out -command [namespace code FcopyTestDone]
     variable fcopyTestDone
     if ![info exists fcopyTestDone] {
@@ -6908,7 +6911,7 @@ test chan-io-53.7 {CopyData: Flooding chan copy from pipe} {stdio openpipe fcopy
     }
     chan close $f1
     set in [open "|[list [interpreter] $path(pipe) &]" r+]
-    set out [open $path(test1) w]
+    set out [open $path(test1ChanIo) w]
     doFcopy $in $out
     variable fcopyTestDone
     if ![info exists fcopyTestDone] {
@@ -7696,8 +7699,8 @@ test chan-io-73.1 {channel Tcl_Obj SetChannelFromAny} {} {
 # ### ### ### ######### ######### #########
 
 # cleanup
-foreach file [list fooBar longfile script output test1 pipe my_script \
-	test2 test3 cat stdout kyrillic.txt utf8-fcopy.txt utf8-rp.txt] {
+foreach file [list fooBar longfile script output test1ChanIo pipe my_script \
+	test2ChanIo test3ChanIo catChanIo stdout kyrillic.txt utf8-fcopy.txt utf8-rp.txt] {
     removeFile $file
 }
 cleanupTests

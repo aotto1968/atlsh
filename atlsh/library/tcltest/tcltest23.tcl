@@ -16,6 +16,8 @@
 # Contributions from Don Porter, NIST, 2002.  (not subject to US copyright)
 # All rights reserved.
 
+#puts stderr "load: 2.3.8"
+
 package require Tcl 8.5		;# -verbose line uses [info frame]
 namespace eval tcltest {
 
@@ -34,7 +36,7 @@ namespace eval tcltest {
     #
     # Export the main functional commands that do useful things
     namespace export cleanupTests loadTestedCommands makeDirectory \
-	makeFile removeDirectory removeFile runAllTests test
+	makeFile removeDirectory removeFile runAllTests runAllTop test
 
     # Export configuration commands that control the functional commands
     namespace export configure customMatch errorChannel interpreter \
@@ -2709,7 +2711,7 @@ proc tcltest::runAllTests { {shell ""} } {
     variable DefaultValue
 
     FillFilesExisted
-    if {[llength [info level 0]] == 1} {
+    if {$shell eq ""} {
 	set shell [interpreter]
     }
 
@@ -2821,6 +2823,10 @@ proc tcltest::runAllTests { {shell ""} } {
 
     # cleanup
     puts [outputChannel] "\nTests ended at [eval $timeCmd]"
+
+    # aotto 29 apr 2025 - require ERROR indicator for automake check integration
+    variable reportFailFiles
+      lappend reportFailFiles {*}$failFiles
     cleanupTests 1
     if {[info exists testFileFailures]} {
 	puts [outputChannel] "\nTest files exiting with errors:  \n"
@@ -2843,6 +2849,14 @@ proc tcltest::runAllTests { {shell ""} } {
 	puts [outputChannel] [string repeat ~ 44]
     }
     return
+}
+proc tcltest::runAllTop { {shell ""} } {
+  variable reportFailFiles 
+  set reportFailFiles [list]
+  runAllTests $shell
+  if {[llength $reportFailFiles]} {
+    exit 1
+  }
 }
 
 #####################################################################

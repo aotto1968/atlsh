@@ -1,12 +1,9 @@
 /**
  @file         NHI1/theATL/docs/main/main.doc
- @brief        main.doc - 25 Apr 2025 - aotto1968
+ @brief        tag: nhi1-release-250425
  @copyright    (C) NHI - #1 - Project - Group
                This software has NO permission to copy,
                please contact AUTHOR for additional information
- @version      6b7ff3cdcc61ece5dbc182fd6a905e2bd0fbacc9
- @date         Fri Apr 25 22:35:01 2025 +0200
- @author       aotto1968 <aotto1968@t-online.de>
 ***
 
 \mainpage_top
@@ -18,25 +15,21 @@
 
 <TABLE class="top">
   \top_last
-  \top_summary{The central goal of @atlsh is to replace @bash as the central system programming tool 
-      for the @LINUX operating system.}
+  \top_summary{The goal of @atlsh is to create an **AI-based** tool and replace @bash as the main tool for 
+      system programming and system control.}
   \top_latest
   <tr>  <td>  DETAILS      <td> 
-
-The \atl85 source distribution :
-
-\li https://github.com/aotto1968/atlsh
-
-is the continuation of the :
-
-\li https://www.tcl-lang.org/software/tcltk/8.5.html - \c tcl8.5.19
-
-development with the goal of offering a fast, simple and complete language that is based on \TCL but still 
-enables new innovative concepts.
-
-  <tr>  <td>  DEPENDENCIES <td>  \theATL is an \e independent part of the \NHI10 project.  </tr>
+    \snippet{doc} theATL/docs/main/atlsh.doc atlsh-details
+  <tr>  <td>  DEPENDENCIES <td> \theATL is an independent part of the \NHI10 project but uses various 
+    subprojects such as @theKernel, @theLink, and @theLib
 
 </TABLE>
+
+\section theATL_intro Summary
+
+ target  | atlsh       | atltest      | README_TESTS        |
+ ------- | ----------- | ------------ | ------------------- |
+ \b ATL  | \ref atlsh  | \ref atltest | \ref README_TESTS
 
 \main_Files
 

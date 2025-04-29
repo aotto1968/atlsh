@@ -10566,7 +10566,7 @@ TCL_SHARED_BUILD=${SHARED_BUILD}
 
 
 
-ac_config_files="$ac_config_files Makefile:../unix/Makefile.in dltest/Makefile:../unix/dltest/Makefile.in tclConfig.sh:../unix/tclConfig.sh.in tcl.pc:../unix/tcl.pc.in"
+ac_config_files="$ac_config_files Makefile:../unix/Makefile.orig dltest/Makefile:../unix/dltest/Makefile.orig tclConfig.sh:../unix/tclConfig.sh.in tclBuild.sh:../unix/tclBuild.sh.in tcl.pc:../unix/tcl.pc.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -11272,9 +11272,10 @@ do
     "Tcl-Info.plist") CONFIG_FILES="$CONFIG_FILES Tcl-Info.plist:../macosx/Tcl-Info.plist.in" ;;
     "Tclsh-Info.plist") CONFIG_FILES="$CONFIG_FILES Tclsh-Info.plist:../macosx/Tclsh-Info.plist.in" ;;
     "Tcl.framework") CONFIG_COMMANDS="$CONFIG_COMMANDS Tcl.framework" ;;
-    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile:../unix/Makefile.in" ;;
-    "dltest/Makefile") CONFIG_FILES="$CONFIG_FILES dltest/Makefile:../unix/dltest/Makefile.in" ;;
+    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile:../unix/Makefile.orig" ;;
+    "dltest/Makefile") CONFIG_FILES="$CONFIG_FILES dltest/Makefile:../unix/dltest/Makefile.orig" ;;
     "tclConfig.sh") CONFIG_FILES="$CONFIG_FILES tclConfig.sh:../unix/tclConfig.sh.in" ;;
+    "tclBuild.sh") CONFIG_FILES="$CONFIG_FILES tclBuild.sh:../unix/tclBuild.sh.in" ;;
     "tcl.pc") CONFIG_FILES="$CONFIG_FILES tcl.pc:../unix/tcl.pc.in" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

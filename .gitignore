@@ -3,5 +3,6 @@ tags
 **/.labelignore
 **/.vimrc
 **/*.sw*
+**/Makefile.in
 .vimdiff
 .test-result.txt

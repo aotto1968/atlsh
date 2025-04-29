@@ -652,11 +652,11 @@ testConstraint exec [llength [info commands exec]]
 test regexpComp-14.3 {CompileRegexp: regexp cache, empty regexp and empty cache} -constraints {
 	exec
 } -setup {
-    set junk [makeFile {puts [regexp {} foo]} junk.tcl]
+    set junk [makeFile {puts [regexp {} foo]} junkRegexpComp.tcl]
 } -body {
     exec [interpreter] $junk
 } -cleanup {
-    removeFile junk.tcl
+    removeFile junkRegexpComp.tcl
 } -result 1
 
 test regexpComp-15.1 {regexp -start} {
