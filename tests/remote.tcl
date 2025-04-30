@@ -1,1 +1,0 @@
-../atlsh/tests/remote.tcl

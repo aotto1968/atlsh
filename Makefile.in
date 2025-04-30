@@ -417,7 +417,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 version_LDFLAGS = @version_LDFLAGS@
-SUBDIRS = docs tests atlsh 
+SUBDIRS = docs tests 
 all: all-recursive
 
 .SUFFIXES:
