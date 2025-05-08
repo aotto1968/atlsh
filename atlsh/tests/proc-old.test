@@ -14,9 +14,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest
-    namespace import -force ::tcltest::*
+if {"::atltest" ni [namespace children]} {
+    package require atltest 2.5
+    namespace import -force ::atltest::*
 }
 
 catch {rename t1 ""}
@@ -25,7 +25,7 @@ catch {rename foo ""}
 proc tproc {} {return a; return b}
 test proc-old-1.1 {simple procedure call and return} {tproc} a
 proc tproc x {
-    set x [expr $x+1]
+    set x [expr {$x + 1}]
     return $x
 }
 test proc-old-1.2 {simple procedure call and return} {tproc 2} 3
@@ -49,7 +49,7 @@ test proc-old-1.6 {simple procedure call and return (shared proc body string)} {
 
 test proc-old-2.1 {local and global variables} {
     proc tproc x {
-	set x [expr $x+1]
+	set x [expr {$x + 1}]
 	return $x
     }
     set x 42
@@ -57,7 +57,7 @@ test proc-old-2.1 {local and global variables} {
 } {7 42}
 test proc-old-2.2 {local and global variables} {
     proc tproc x {
-	set y [expr $x+1]
+	set y [expr {$x + 1}]
 	return $y
     }
     set y 18
@@ -66,7 +66,7 @@ test proc-old-2.2 {local and global variables} {
 test proc-old-2.3 {local and global variables} {
     proc tproc x {
 	global y
-	set y [expr $x+1]
+	set y [expr {$x + 1}]
 	return $y
     }
     set y 189
@@ -75,7 +75,7 @@ test proc-old-2.3 {local and global variables} {
 test proc-old-2.4 {local and global variables} {
     proc tproc x {
 	global y
-	return [expr $x+$y]
+	return [expr {$x + $y}]
     }
     set y 189
     list [tproc 6] $y
@@ -231,7 +231,7 @@ test proc-old-30.12 {arguments and defaults} {
 	return [list $x $y $args]
     }
     list [catch {tproc} msg] $msg
-} {1 {wrong # args: should be "tproc x ?y? ..."}}
+} {1 {wrong # args: should be "tproc x ?y? ?arg ...?"}}
 
 test proc-old-4.1 {variable numbers of arguments} {
     proc tproc args {return $args}
@@ -256,7 +256,7 @@ test proc-old-4.5 {variable numbers of arguments} {
 test proc-old-4.6 {variable numbers of arguments} {
     proc tproc {x missing args} {return $args}
     list [catch {tproc 1} msg] $msg
-} {1 {wrong # args: should be "tproc x missing ..."}}
+} {1 {wrong # args: should be "tproc x missing ?arg ...?"}}
 
 test proc-old-5.1 {error conditions} {
     list [catch {proc} msg] $msg
@@ -282,9 +282,6 @@ test proc-old-5.7 {error conditions} {
 test proc-old-5.8 {error conditions} {
     catch {return}
 } 2
-test proc-old-5.9 {error conditions} {
-    list [catch {global} msg] $msg
-} {1 {wrong # args: should be "global varName ?varName ...?"}}
 proc tproc {} {
     set a 22
     global a
@@ -409,12 +406,12 @@ test proc-old-7.5 {return with special completion code} {
 test proc-old-7.6 {return with special completion code} {
     list [catch {tproc -14} msg] $msg
 } {-14 abc}
-test proc-old-7.7 {return with special completion code} {
-    list [catch {tproc gorp} msg] $msg
-} {1 {bad completion code "gorp": must be ok, error, return, break, continue, or an integer}}
-test proc-old-7.8 {return with special completion code} {
-    list [catch {tproc 10b} msg] $msg
-} {1 {bad completion code "10b": must be ok, error, return, break, continue, or an integer}}
+test proc-old-7.7 {return with special completion code} -body {
+    tproc err
+} -returnCodes error -match glob -result {bad completion code "err": must be ok, error, return, break, continue*, or an integer}
+test proc-old-7.8 {return with special completion code} -body {
+    tproc 10b
+} -returnCodes error -match glob -result {bad completion code "10b": must be ok, error, return, break, continue*, or an integer}
 test proc-old-7.9 {return with special completion code} {
     proc tproc2 {} {
 	tproc return
@@ -507,7 +504,7 @@ test proc-old-10.1 {ByteCode epoch change during recursive proc execution} {
         set y 20
         rename expr expr.old
         rename expr.old expr
-        if $x then {t1 0} ;# recursive call after foo's code is invalidated
+        if {$x} then {t1 0} ;# recursive call after foo's code is invalidated
         return 20
     }
     t1 1
@@ -516,5 +513,5 @@ test proc-old-10.1 {ByteCode epoch change during recursive proc execution} {
 # cleanup
 catch {rename t1 ""}
 catch {rename foo ""}
-::tcltest::cleanupTests
+::atltest::cleanupTests
 return

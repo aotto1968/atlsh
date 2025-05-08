@@ -3,10 +3,10 @@ Makefile
 config.log
 config.status
 dltest/Makefile
-libtclstub8.5.a
-tcl.pc
-tclConfig.sh
-libtcl8.5.so
-tclsh
+libatlstub8.5.a
+atl.pc
+atlConfig.sh
+libatl8.5.so
+atlsh
 autom4te.cache
 

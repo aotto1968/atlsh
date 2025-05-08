@@ -6,16 +6,15 @@
 #:                 please contact AUTHOR for additional information
 #:
 
-package require Tcl 8.5
-package require tcltest 2.3
+package require Tcl 1
+package require atltest 2
 
-namespace import tcltest::*
+namespace import atltest::*
 
 # the directory where "all.tcl" is located is also used as "-testdir"
 configure {*}$argv -testdir [file dir [info script]]
 
-# Some tests simply do not work in parallel mode, disable them with "!parallel".
-configure -constraints parallel
-
 # extra feature to exit with 1 on failed test
-runAllTop
+if {[runAllTests]} {
+  exit 1
+}

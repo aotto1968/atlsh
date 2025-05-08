@@ -11,8 +11,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-package require tcltest 2.3
-namespace import ::tcltest::*
+package require atltest 2.5
+namespace import ::atltest::*
+
+::atltest::loadTestedCommands
+catch [list package require -exact Tcltest [info patchlevel]]
 
 testConstraint testgetassocdata [llength [info commands testgetassocdata]]
 testConstraint testsetassocdata [llength [info commands testsetassocdata]]

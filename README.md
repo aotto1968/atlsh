@@ -78,7 +78,7 @@ here](https://www.tcl-lang.org/man/tcl8.5/).
 ### <a id="doc.unix">2a.</a> Unix Documentation {#doc_unix}
 The `doc` subdirectory in this release contains a complete set of
 reference manual entries for Tcl.  Files with extension "`.1`" are for
-programs (for example, `tclsh.1`); files with extension "`.3`" are for C
+programs (for example, `atlsh.1`); files with extension "`.3`" are for C
 library procedures; and files with extension "`.n`" describe Tcl
 commands.  The file "`doc/Tcl.n`" gives a quick summary of the Tcl
 language syntax.  To print any of the man pages on Unix, cd to the

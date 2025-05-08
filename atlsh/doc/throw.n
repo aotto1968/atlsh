@@ -25,7 +25,7 @@ display to a human being.
 The stack will be unwound until the error is trapped by a suitable \fBcatch\fR
 or \fBtry\fR command. If it reaches the event loop without being trapped, it
 will be reported through the \fBbgerror\fR mechanism. If it reaches the top
-level of script evaluation in \fBtclsh\fR, it will be printed on the console
+level of script evaluation in \fBatlsh\fR, it will be printed on the console
 before, in the non-interactive case, causing an exit (the behavior in other
 programs will depend on the details of how Tcl is embedded and used).
 .PP

@@ -1,4 +1,4 @@
-/* 
+/*
  * strtol.c --
  *
  *	Source code for the "strtol" library procedure.
@@ -10,7 +10,6 @@
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
-#include <ctype.h>
 #include "tclInt.h"
 
 /*
@@ -46,7 +45,7 @@ strtol(
 				 * hex, "0" means octal, anything else means
 				 * decimal. */
 {
-    register const char *p;
+    const char *p;
     long result;
 
     /*

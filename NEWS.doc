@@ -11,21 +11,31 @@
 \hidegroupgraph
 \brief news summary of the \theATL project
 
-\defgroup theATL_news_latest 29 apr, 2025
+\defgroup theATL_news_latest 18 mai, 2025
+\{
+\hidegroupgraph
+\brief switch from @tcl85 to @tcl86 → read more at \ref atlsh
+
+\par atlsh
+- ANNOUNCE: \ref update_2_mai_2025 
+- ANNOUNCE: \ref update_5_mai_2025 
+- ANNOUNCE: \ref update_8_mai_2025 
+    
+\}
+
+\defgroup theATL_news_2 29 apr, 2025
 \{
 \hidegroupgraph
 \brief Create a massively parallel test environment that reduces **full** testing of @atlsh to less than 1 minute.
     
 \par atltest
-- @atltest is a wrapper around @tcltest and primarily serves to provide the correct environment from  
+- @atltest is a wrapper around @atltest and primarily serves to provide the correct environment from  
   the *build* and *source* source, as well as an @automake-specific adjustment that affects the sequence of 
   \e test-option and \e test-case.
 - Parallel testing under `make check` in `automake` requires the return code of a failed test.
-  However, @tcltest doesn't provide it, so `tcltest.2.3.8` has been patched.
+  However, @atltest doesn't provide it, so `atltest.2.3.8` has been patched.
 - A large number of files in the `tests` directory were parallelized, which was necessary because
   @TCL itself only supports \e sequential-testing.
-
-
 \}
 
 \defgroup theATL_news_1 25 apr, 2025

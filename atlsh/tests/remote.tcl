@@ -30,11 +30,9 @@ proc __doCommands__ {l s} {
 	puts "---"
     }
     set callerSocket $s
-    if {[catch {uplevel #0 $l} msg]} {
-	list error $msg
-    } else {
-	list success $msg
-    }
+    set ::errorInfo ""
+    set code [catch {uplevel "#0" $l} msg]
+    return [list $code $::errorInfo $msg]
 }
 
 proc __readAndExecute__ {s} {
@@ -42,10 +40,9 @@ proc __readAndExecute__ {s} {
 
     set l [gets $s]
     if {[string compare $l "--Marker--Marker--Marker--"] == 0} {
-	if {[info exists command($s)]} {
-	    puts $s [list error incomplete_command]
-	}
+        puts $s [__doCommands__ $command($s) $s]
 	puts $s "--Marker--Marker--Marker--"
+        set command($s) ""
 	return
     }
     if {[string compare $l ""] == 0} {
@@ -57,28 +54,26 @@ proc __readAndExecute__ {s} {
 	}
 	return
     }
-    append command($s) $l "\n"
-    if {[info complete $command($s)]} {
-	set cmds $command($s)
-	unset command($s)
-	puts $s [__doCommands__ $cmds $s]
-    }
     if {[eof $s]} {
 	if {$VERBOSE} {
 	    puts "Server closing $s, eof from client"
 	}
 	close $s
+        unset command($s)
+        return
     }
+    append command($s) $l "\n"
 }
 
 proc __accept__ {s a p} {
-    global VERBOSE
+    global command VERBOSE
 
     if {$VERBOSE} {
 	puts "Server accepts new connection from $a:$p on $s"
     }
-    fileevent $s readable [list __readAndExecute__ $s]
+    set command($s) ""
     fconfigure $s -buffering line -translation crlf
+    fileevent $s readable [list __readAndExecute__ $s]
 }
 
 set serverIsSilent 0
@@ -96,8 +91,8 @@ if {![info exists serverPort]} {
 if {![info exists serverPort]} {
     for {set i 0} {$i < $argc} {incr i} {
 	if {[string compare -port [lindex $argv $i]] == 0} {
-	    if {$i < [expr $argc - 1]} {
-		set serverPort [lindex $argv [expr $i + 1]]
+	    if {$i < $argc - 1} {
+		set serverPort [lindex $argv [expr {$i + 1}]]
 	    }
 	    break
 	}
@@ -115,8 +110,8 @@ if {![info exists serverAddress]} {
 if {![info exists serverAddress]} {
     for {set i 0} {$i < $argc} {incr i} {
 	if {[string compare -address [lindex $argv $i]] == 0} {
-	    if {$i < [expr $argc - 1]} {
-		set serverAddress [lindex $argv [expr $i + 1]]
+	    if {$i < $argc - 1} {
+		set serverAddress [lindex $argv [expr {$i + 1}]]
 	    }
 	    break
 	}
@@ -141,7 +136,7 @@ if {$serverIsSilent == 0} {
     puts "NOTE: The tests will not work properly if serverAddress is set to"
     puts "\"localhost\" or 127.0.0.1."
     puts ""
-    puts "When you invoke tcltest to run the tests, set the variables"
+    puts "When you invoke atltest to run the tests, set the variables"
     puts "remoteServerPort to $serverPort and remoteServerIP to"
     puts "[info hostname]. You can set these as environment variables"
     puts "from the shell. The tests will not work properly if you set"
@@ -151,20 +146,14 @@ if {$serverIsSilent == 0} {
     flush stdout
 }
 
+proc getPort sock {
+    lindex [fconfigure $sock -sockname] 2
+}
+
 if {[catch {set serverSocket \
 	[socket -myaddr $serverAddress -server __accept__ $serverPort]} msg]} {
     puts "Server on $serverAddress:$serverPort cannot start: $msg"
 } else {
+    puts ready
     vwait __server_wait_variable__
 }
-
-
-
-
-
-
-
-
-
-
-

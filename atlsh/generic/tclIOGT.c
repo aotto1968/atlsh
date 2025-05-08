@@ -23,6 +23,8 @@ static int		TransformBlockModeProc(ClientData instanceData,
 			    int mode);
 static int		TransformCloseProc(ClientData instanceData,
 			    Tcl_Interp *interp);
+static int		TransformClose2Proc(ClientData instanceData,
+			    Tcl_Interp *interp, int flags);
 static int		TransformInputProc(ClientData instanceData, char *buf,
 			    int toRead, int *errorCodePtr);
 static int		TransformOutputProc(ClientData instanceData,
@@ -116,7 +118,7 @@ static inline void	ResultAdd(ResultBuffer *r, unsigned char *buf,
  * transformations.
  */
 
-static Tcl_ChannelType transformChannelType = {
+static const Tcl_ChannelType transformChannelType = {
     "transform",		/* Type name. */
     TCL_CHANNEL_VERSION_5,	/* v5 channel */
     TransformCloseProc,		/* Close proc. */
@@ -127,7 +129,7 @@ static Tcl_ChannelType transformChannelType = {
     TransformGetOptionProc,	/* Get option proc. */
     TransformWatchProc,		/* Initialize notifier. */
     TransformGetFileHandleProc,	/* Get OS handles out of channel. */
-    NULL,			/* close2proc */
+    TransformClose2Proc,	/* close2proc */
     TransformBlockModeProc,	/* Set blocking/nonblocking mode.*/
     NULL,			/* Flush proc. */
     TransformNotifyProc,	/* Handling of events bubbling up. */
@@ -230,7 +232,7 @@ ReleaseData(
     }
     ResultClear(&dataPtr->result);
     Tcl_DecrRefCount(dataPtr->command);
-    ckfree((char *) dataPtr);
+    ckfree(dataPtr);
 }
 
 /*
@@ -287,7 +289,7 @@ TclChannelTransform(
      * regime of the underlying channel and to use the same for us too.
      */
 
-    dataPtr = (TransformChannelData *) ckalloc(sizeof(TransformChannelData));
+    dataPtr = (TransformChannelData *)ckalloc(sizeof(TransformChannelData));
 
     dataPtr->refCount = 1;
     Tcl_DStringInit(&ds);
@@ -313,8 +315,8 @@ TclChannelTransform(
     dataPtr->self = Tcl_StackChannel(interp, &transformChannelType, dataPtr,
 	    mode, chan);
     if (dataPtr->self == NULL) {
-	Tcl_AppendResult(interp, "\nfailed to stack channel \"",
-		Tcl_GetChannelName(chan), "\"", NULL);
+	Tcl_AppendPrintfToObj(Tcl_GetObjResult(interp),
+		"\nfailed to stack channel \"%s\"", Tcl_GetChannelName(chan));
 	ReleaseData(dataPtr);
 	return TCL_ERROR;
     }
@@ -503,7 +505,7 @@ TransformBlockModeProc(
     ClientData instanceData,	/* State of transformation. */
     int mode)			/* New blocking mode. */
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
 
     if (mode == TCL_MODE_NONBLOCKING) {
 	dataPtr->flags |= CHANNEL_ASYNC;
@@ -516,7 +518,7 @@ TransformBlockModeProc(
 /*
  *----------------------------------------------------------------------
  *
- * TransformCloseProc --
+ * TransformCloseProc/TransformClose2Proc --
  *
  *	Trap handler. Called by the generic IO system during destruction of
  *	the transformation channel.
@@ -592,6 +594,18 @@ TransformCloseProc(
     ReleaseData(dataPtr);
     return TCL_OK;
 }
+
+static int
+TransformClose2Proc(
+    ClientData instanceData,
+    Tcl_Interp *interp,
+	int flags)
+{
+    if ((flags & (TCL_CLOSE_READ | TCL_CLOSE_WRITE)) == 0) {
+	return TransformCloseProc(instanceData, interp);
+    }
+    return EINVAL;
+}
 
 /*
  *----------------------------------------------------------------------
@@ -616,7 +630,7 @@ TransformInputProc(
     int toRead,
     int *errorCodePtr)
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     int gotBytes, read, copied;
     Tcl_Channel downChan;
 
@@ -683,7 +697,7 @@ TransformInputProc(
 	     * Already saw EOF from downChan; don't ask again.
 	     * NOTE: Could move this up to avoid the last maxRead
 	     * execution.  Believe this would still be correct behavior,
-	     * but the test suite tests the whole command callback 
+	     * but the test suite tests the whole command callback
 	     * sequence, so leave it unchanged for now.
 	     */
 
@@ -696,7 +710,6 @@ TransformInputProc(
 
 	read = Tcl_ReadRaw(downChan, buf, toRead);
 	if (read < 0) {
-
 	    if (Tcl_InputBlocked(downChan) && (gotBytes > 0)) {
 		/*
 		 * Zero bytes available from downChan because blocked.
@@ -784,7 +797,7 @@ TransformOutputProc(
     int toWrite,
     int *errorCodePtr)
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
 
     /*
      * Should assert(dataPtr->mode & TCL_WRITABLE);
@@ -836,9 +849,9 @@ TransformSeekProc(
     int mode,			/* How to move. */
     int *errorCodePtr)		/* Location of error flag. */
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     Tcl_Channel parent = Tcl_GetStackedChannel(dataPtr->self);
-    Tcl_ChannelType *parentType = Tcl_GetChannelType(parent);
+    const Tcl_ChannelType *parentType = Tcl_GetChannelType(parent);
     Tcl_DriverSeekProc *parentSeekProc = Tcl_ChannelSeekProc(parentType);
 
     if ((offset == 0) && (mode == SEEK_CUR)) {
@@ -903,15 +916,15 @@ TransformWideSeekProc(
     int mode,			/* How to move. */
     int *errorCodePtr)		/* Location of error flag. */
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     Tcl_Channel parent = Tcl_GetStackedChannel(dataPtr->self);
-    Tcl_ChannelType *parentType	= Tcl_GetChannelType(parent);
+    const Tcl_ChannelType *parentType	= Tcl_GetChannelType(parent);
     Tcl_DriverSeekProc *parentSeekProc = Tcl_ChannelSeekProc(parentType);
     Tcl_DriverWideSeekProc *parentWideSeekProc =
 	    Tcl_ChannelWideSeekProc(parentType);
     ClientData parentData = Tcl_GetChannelInstanceData(parent);
 
-    if ((offset == Tcl_LongAsWide(0)) && (mode == SEEK_CUR)) {
+    if ((offset == 0) && (mode == SEEK_CUR)) {
 	/*
 	 * This is no seek but a request to tell the caller the current
 	 * location. Simply pass the request down.
@@ -996,7 +1009,7 @@ TransformSetOptionProc(
     const char *optionName,
     const char *value)
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     Tcl_Channel downChan = Tcl_GetStackedChannel(dataPtr->self);
     Tcl_DriverSetOptionProc *setOptionProc;
 
@@ -1034,7 +1047,7 @@ TransformGetOptionProc(
     const char *optionName,
     Tcl_DString *dsPtr)
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     Tcl_Channel downChan = Tcl_GetStackedChannel(dataPtr->self);
     Tcl_DriverGetOptionProc *getOptionProc;
 
@@ -1080,7 +1093,7 @@ TransformWatchProc(
     ClientData instanceData,	/* Channel to watch. */
     int mask)			/* Events of interest. */
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
     Tcl_Channel downChan;
 
     /*
@@ -1159,7 +1172,7 @@ TransformGetFileHandleProc(
     int direction,		/* Direction of interest. */
     ClientData *handlePtr)	/* Place to store the handle into. */
 {
-    TransformChannelData *dataPtr = instanceData;
+    TransformChannelData *dataPtr = (TransformChannelData *)instanceData;
 
     /*
      * Return the handle belonging to parent channel. IOW, pass the request
@@ -1193,7 +1206,7 @@ TransformNotifyProc(
 				 * transformation. */
     int mask)			/* The mask of occuring events. */
 {
-    TransformChannelData *dataPtr = clientData;
+    TransformChannelData *dataPtr = (TransformChannelData *)clientData;
 
     /*
      * An event occured in the underlying channel. This transformation doesn't
@@ -1236,7 +1249,7 @@ static void
 TransformChannelHandlerTimer(
     ClientData clientData)	/* Transformation to query. */
 {
-    TransformChannelData *dataPtr = clientData;
+    TransformChannelData *dataPtr = (TransformChannelData *)clientData;
 
     dataPtr->timer = NULL;
     if (!(dataPtr->watchMask&TCL_READABLE) || ResultEmpty(&dataPtr->result)) {
@@ -1274,7 +1287,7 @@ ResultClear(
     r->used = 0;
 
     if (r->allocated) {
-	ckfree((char *) r->buf);
+	ckfree(r->buf);
 	r->buf = NULL;
 	r->allocated = 0;
     }
@@ -1418,10 +1431,10 @@ ResultAdd(
 
 	if (r->allocated == 0) {
 	    r->allocated = toWrite + INCREMENT;
-	    r->buf = UCHARP(ckalloc(r->allocated));
+	    r->buf = (unsigned char *)ckalloc(r->allocated);
 	} else {
 	    r->allocated += toWrite + INCREMENT;
-	    r->buf = UCHARP(ckrealloc((char *) r->buf, r->allocated));
+	    r->buf = (unsigned char *)ckrealloc(r->buf, r->allocated);
 	}
     }
 

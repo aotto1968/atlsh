@@ -7,16 +7,16 @@
 ***
 
 \page atlsh   atlsh
-\brief the new shell for system-administration and system-programming …
+\brief The new shell for system-administration and system-programming …
 
-# goal
-
-\noop [[atlsh-goal]]
+@large{
+\noop [atlsh-goal]
 The goal of @atlsh is to replace @bash as the central tool for system programming 
 and system control with an AI-based tool.
-\noop [[atlsh-goal]]
+\noop [atlsh-goal]
+}
 
-# details
+\section atlsh-details  details
 
 \noop [atlsh-details]
 The @atlsh combines @theATL, @theKernel, @theLink, @theLib into one tool for @LINUX system administration.
@@ -28,16 +28,101 @@ The @atlsh combines @theATL, @theKernel, @theLink, @theLib into one tool for @LI
   the programmer with an environment that works **without** external dependencies.
 \noop [atlsh-details]
 
-# roadmap
+\section atlsh-roadmap  roadmap
 
-## initial setup
+\subsection update_8_mai_2025   update 8 mai 2025
+
+- After switching from @tcl85 to @tcl86, it became apparent that there was a problem distinguishing an @b existing 
+  @tcl86 installation from the new @atl10 installation. 
+- To circumvent this and protect @tcl86, the distribution was renamed to @atl10, thus changing the @e visible interface 
+  to @b atl. 
+- The invisible interface (i.e., functions, variables, constants, etc.) remains untouched and thus binary compatible.
+  - However, this will change in the future when \c atlsh becomes a standalone product.
+- The following changes were made:
+\verbatim
+from                   | to
+------------------     | ----------------
+tclConfig.sh           | atlConfig.sh
+tclsh                  | atlsh
+tcltest                | atltest
+include/tcl*.h         | include/atl/tcl*.h
+lib/tcl8               | lib/atl1
+lib/tcl8.6             | lib/atl1.0
+bin/tclsh              | bin/atlsh
+lib64/pkgconfig/tcl.pc | lib64/pkgconfig/atl.pc
+lib64/libtclstub8.6.a  | lib64/libatlstub1.0.a
+lib64/tclConfig.sh     | lib64/atlConfig.sh
+lib64/libtcl8.6.so     | lib64/libatl1.0.so
+share/man1/*.1         | share/atl/man1/*.1
+share/man3/*.3         | share/atl/man3/*.3
+share/mann/*.n         | share/atl/mann/*.n
+TCLLIBPATH             | ATL_LIBPATH
+TCL_LIBRARY            | ATL_LIBRARY
+\endverbatim
+
+\subsection update_5_mai_2025   update 5 mai 2025
+
+After switching from @tcl85 to @tcl86, the paralellization of @tcltest was complete.
+- @zlib and @tclOO have also been removed.
+- all \e sub-packages from \c pkgs were removed.
+- Next, @NRE and @thread support will be removed.
+- Once all this is complete, the @interp command will be replaced by a \b NEW technology.
+- example: new massive parallel testing of the @tcl86 test suite.
+\verbatim
+...
+PASS: dict.test
+PASS: exec.test
+PASS: expr.test
+PASS: reg.test
+PASS: socket.test
+PASS: thread.test
+PASS: interp.test
+PASS: lmap.test
+PASS: async.test
+PASS: chanio.test
+PASS: tcltest.test
+PASS: main.test
+PASS: clock.test
+PASS: regexp.test
+PASS: io.test
+PASS: ioCmd.test
+============================================================================
+Testsuite summary for NHI1 10.0
+============================================================================
+# TOTAL: 134
+# PASS:  134
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+...
+
+real    1m30,248s
+user    3m55,929s
+sys     0m15,400s 
+\endverbatim
+
+\subsection update_2_mai_2025   update 2 mai 2025
+
+- Testing @tcl85 with the @tcl86 test cases revealed that @tcl85 contains numerous serious (core) bugs that were only 
+  fixed in @tcl86.
+- However, @tcl86 is now the problematic version with @NRE and @tclOO. 
+- An initial attempt to patch @tcl85 required importing a large amount of code from @tcl86. 
+- This raises the question of whether it even makes sense to patch @tcl85 towards @tcl86 when the end result is @tcl86 anyway.
+- The strategy of starting with @tcl86 and removing everything unwanted seems more sensible to me, as it starts with a 
+  bug-free launch, which is then successively retested at each step.
+
+\subsection update_25_apr_2025  update 25 apr 2025
 
 - Splitting @atl85 from @tcl85 and porting all commands from @tcl86 to it.
 - Integrating into @NHI10 with suspension of the \e build environment and definition of the \e directory structure.
-- Updating the \e test cases to the \tcl86 standard with adoption of \tcltest v2.5.3.
+- Updating the \e test cases to the \tcl86 standard with adoption of \atltest v2.5.3.
 - The central goal is a \e lightweight shell that does not require \NRE or \tclOO.
 
-## advanced modification
+
+\section atlsh-advanced  advanced modification
 
 - Now that the @tcl86 level has been reached, @atlsh will be gradually expanded to include @theLib, which 
   provides fast and easy @OOP support.

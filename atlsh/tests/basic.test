@@ -15,8 +15,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-package require tcltest 2.3
-namespace import ::tcltest::*
+if {"::atltest" ni [namespace children]} {
+    package require atltest 2.5
+    namespace import -force ::atltest::*
+}
+
+::atltest::loadTestedCommands
+catch [list package require -exact Tcltest [info patchlevel]]
 
 testConstraint testevalex [llength [info commands testevalex]]
 testConstraint testcmdtoken [llength [info commands testcmdtoken]]
@@ -221,6 +226,21 @@ test basic-15.1 {Tcl_CreateObjCommand, new cmd goes into a namespace specified i
     list [test_ns_basic::cmd] \
          [namespace delete test_ns_basic]
 } {::test_ns_basic {}}
+test basic-15.2 {Tcl_CreateObjCommand, Bug 0e4d88b650} -setup {
+    proc deleter {ns args} {
+        namespace delete $ns
+    }
+    namespace eval n {
+        proc p {} {}
+    }
+    trace add command n::p delete [list [namespace which deleter] [namespace current]::n]
+} -body {
+    proc n::p {} {}
+} -cleanup {
+    namespace delete n
+    rename deleter {}
+}
+
 
 test basic-16.1 {TclInvokeStringCommand} {emptyTest} {
 } {}
@@ -238,7 +258,7 @@ test basic-18.1 {TclRenameCommand, name of existing cmd can have namespace quali
     }
     list [test_ns_basic::p] \
          [rename test_ns_basic::p test_ns_basic::q] \
-         [test_ns_basic::q] 
+         [test_ns_basic::q]
 } {{p in ::test_ns_basic} {} {p in ::test_ns_basic}}
 test basic-18.2 {TclRenameCommand, existing cmd must be found} {
     catch {namespace delete {*}[namespace children :: test_ns_*]}
@@ -427,7 +447,7 @@ test basic-26.1 {Tcl_EvalObj: preserve object while evaling it} -setup {
     }
     set handler [interp bgerror {}]
     interp bgerror {} [namespace which myHandler]
-    set fName [makeFile {} test1Basic]
+    set fName [makeFile {} test1]
 } -body {
     # If object isn't preserved, errorInfo would be set to
     # "foo\n    while executing\n\"garbage bytes\"" because the object's
@@ -440,7 +460,7 @@ test basic-26.1 {Tcl_EvalObj: preserve object while evaling it} -setup {
     close $f
     set x
 } -cleanup {
-    removeFile test1Basic
+    removeFile test1
     interp bgerror {} $handler
     rename myHandler {}
 } -result "foo\n    while executing\n\"error foo\""
@@ -451,11 +471,11 @@ test basic-26.2 {Tcl_EvalObjEx, pure-list branch: preserve "objv"} -body {
     #   a - the pure-list internal rep is destroyed by shimmering
     #   b - the command returns an error
     # As the error code in Tcl_EvalObjv accesses the list elements, this will
-    # cause a segfault if [Bug 1119369] has not been fixed. 
+    # cause a segfault if [Bug 1119369] has not been fixed.
     # NOTE: a MEM_DEBUG build may be necessary to guarantee the segfault.
     #
 
-    set SRC [list foo 1] ;# pure-list command 
+    set SRC [list foo 1] ;# pure-list command
     proc foo str {
 	# Shimmer pure-list to cmdName, cleanup and error
 	proc $::SRC {} {}; $::SRC
@@ -473,11 +493,11 @@ test basic-26.3 {Tcl_EvalObjEx, pure-list branch: preserve "objv"} -body {
     # Follow the pure-list branch in a manner that
     #   a - the pure-list internal rep is destroyed by shimmering
     #   b - the command accesses its command line
-    # This will cause a segfault if [Bug 1119369] has not been fixed. 
+    # This will cause a segfault if [Bug 1119369] has not been fixed.
     # NOTE: a MEM_DEBUG build may be necessary to guarantee the segfault.
     #
 
-    set SRC [list foo 1] ;# pure-list command 
+    set SRC [list foo 1] ;# pure-list command
     proc foo str {
 	# Shimmer pure-list to cmdName, cleanup and error
 	proc $::SRC {} {}; $::SRC
@@ -589,7 +609,7 @@ test basic-46.2 {Tcl_AllowExceptions: exception return not allowed} -setup {
 invoked "break" outside of a loop
     while executing
 "break"
-    (file "*BREAKtest" line 3)}    
+    (file "*BREAKtest" line 3)}
 
 test basic-46.3 {Tcl_AllowExceptions: exception return not allowed} -setup {
     set fName [makeFile {
@@ -606,7 +626,7 @@ test basic-46.3 {Tcl_AllowExceptions: exception return not allowed} -setup {
 } -returnCodes error -match glob -result {invoked "break" outside of a loop
     while executing
 "break"
-    (file "*BREAKtest" line 4)}    
+    (file "*BREAKtest" line 4)}
 
 test basic-46.4 {Tcl_AllowExceptions: exception return not allowed} -setup {
     set fName [makeFile {
@@ -638,8 +658,10 @@ test basic-46.5 {Tcl_AllowExceptions: exception return not allowed} -setup {
 "return -code return"
     (file "*BREAKtest" line 2)}
 
-test basic-47.1 {Tcl_EvalEx: check for missing close-bracket} -body {
-    subst {a[set b [format cd]}
+test basic-47.1 {Tcl_EvalEx: check for missing close-bracket} -constraints {
+    testevalex
+} -body {
+    testevalex {a[set b [format cd]}
 } -returnCodes error -result {missing close-bracket}
 
 # Some lists for expansion tests to work with
@@ -652,7 +674,7 @@ proc l3 {} {
 # Do all tests once byte compiled and once with direct string evaluation
 for {set noComp 0} {$noComp <= 1} {incr noComp} {
 
-if $noComp {
+if {$noComp} {
     interp alias {} run {} testevalex
     set constraints testevalex
 } else {
@@ -732,7 +754,7 @@ test basic-48.1.$noComp {expansion: parsing} $constraints {
 		# Another comment
 		list 1  2\
 			3   {*}$::l1
-            
+
 		# Comment again
 	}
 } {1 2 3 a {b b} c d}
@@ -805,7 +827,7 @@ test basic-48.13.$noComp {expansion: odd usage} $constraints {
 test basic-48.14.$noComp {expansion: hash command} -setup {
         catch {rename \# ""}
         set cmd "#"
-    } -constraints $constraints -body { 
+    } -constraints $constraints -body {
            run { {*}$cmd apa bepa }
     } -cleanup {
 	unset cmd
@@ -865,7 +887,7 @@ test basic-48.16.$noComp {expansion: testing for leaks} -setup {
             stress
             set tmp $end
             set end [getbytes]
-        }    
+        }
         set leak [expr {$end - $tmp}]
     } -cleanup {
 	unset end i tmp
@@ -876,7 +898,7 @@ test basic-48.16.$noComp {expansion: testing for leaks} -setup {
 test basic-48.17.$noComp {expansion: object safety} -setup {
         set old_precision $::tcl_precision
         set ::tcl_precision 4
-    } -constraints $constraints -body { 
+    } -constraints $constraints -body {
             set third [expr {1.0/3.0}]
             set l [list $third $third]
             set x [run {list $third {*}$l $third}]
@@ -942,6 +964,24 @@ test basic-48.23.$noComp {expansion: handle return codes} -constraints $constrai
 	unset res t
 } -result {0 10 1 Hejsan}
 
+test basic-48.24.$noComp {expansion: empty not canonical list, regression test, bug [cc1e91552c]} -constraints $constraints -setup {
+    unset -nocomplain a
+} -body {
+    run {list [list {*}{ }] [list {*}[format %c 32]] [list {*}[set a { }]]}
+} -result [lrepeat 3 {}] -cleanup {unset -nocomplain a}
+
+test basic-48.25.$noComp {Bug cc191552c: expansion: empty non-canonical list} -constraints $constraints -setup {
+    unset -nocomplain ::CRLF
+    set ::CRLF "\r\n"
+} -body {
+    # Force variant that turned up in Bug 2c154a40be as that's externally
+    # noticeable in an important downstream project.
+    run {scan [list {*}$::CRLF]x %c%c%c}
+} -cleanup {
+    unset -nocomplain ::CRLF
+} -result {120 {} {}}
+
+
 } ;# End of noComp loop
 
 test basic-49.1 {Tcl_EvalEx: verify TCL_EVAL_GLOBAL operation} testevalex {
@@ -963,6 +1003,16 @@ test basic-49.2 {Tcl_EvalEx: verify TCL_EVAL_GLOBAL operation} testevalex {
     namespace delete ns
     set ::context
 } {global}
+
+test basic-50.1 {[586e71dce4] EvalObjv level #0 exception handling} -setup {
+    interp create child
+    interp alias {} foo child return
+} -body {
+    list [catch foo m] $m
+} -cleanup {
+    unset -nocomplain m
+    interp delete child
+} -result {0 {}}
 
 # Clean up after expand tests
 unset noComp l1 l2 constraints

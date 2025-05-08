@@ -5,6 +5,7 @@
  *	the real work is done in the platform dependent files.
  *
  * Copyright (c) 1998 by Sun Microsystems, Inc.
+ * Copyright (c) 2008 by George Peter Staplin
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -82,21 +83,23 @@ Tcl_GetThreadData(
     /*
      * Initialize the key for this thread.
      */
-    result = TclpThreadDataKeyGet(keyPtr);
+
+    result = TclThreadStorageKeyGet(keyPtr);
 
     if (result == NULL) {
-	result = ckalloc((size_t) size);
-	memset(result, 0, (size_t) size);
-	TclpThreadDataKeySet(keyPtr, result);
+	result = ckalloc(size);
+	memset(result, 0, size);
+	TclThreadStorageKeySet(keyPtr, result);
     }
 #else /* TCL_THREADS */
     if (*keyPtr == NULL) {
-	result = ckalloc((size_t) size);
-	memset(result, 0, (size_t) size);
-	*keyPtr = (Tcl_ThreadDataKey)result;
+	result = ckalloc(size);
+	memset(result, 0, size);
+	*keyPtr = result;
 	RememberSyncObject(keyPtr, &keyRecord);
+    } else {
+	result = *keyPtr;
     }
-    result = * (void **) keyPtr;
 #endif /* TCL_THREADS */
     return result;
 }
@@ -120,17 +123,15 @@ Tcl_GetThreadData(
 
 void *
 TclThreadDataKeyGet(
-    Tcl_ThreadDataKey *keyPtr)	/* Identifier for the data chunk, really
-				 * (pthread_key_t **) */
+    Tcl_ThreadDataKey *keyPtr)	/* Identifier for the data chunk. */
+
 {
 #ifdef TCL_THREADS
-    return TclpThreadDataKeyGet(keyPtr);
+    return TclThreadStorageKeyGet(keyPtr);
 #else /* TCL_THREADS */
-    char *result = *(char **) keyPtr;
-    return result;
+    return *keyPtr;
 #endif /* TCL_THREADS */
 }
-
 
 /*
  *----------------------------------------------------------------------
@@ -140,7 +141,7 @@ TclThreadDataKeyGet(
  *	Keep a list of (mutexes/condition variable/data key) used during
  *	finalization.
  *
- *	Assume master lock is held.
+ *	Assume global lock is held.
  *
  * Results:
  *	None.
@@ -178,14 +179,14 @@ RememberSyncObject(
 
     if (recPtr->num >= recPtr->max) {
 	recPtr->max += 8;
-	newList = (void **) ckalloc(recPtr->max * sizeof(char *));
+	newList = ckalloc(recPtr->max * sizeof(void *));
 	for (i=0,j=0 ; i<recPtr->num ; i++) {
 	    if (recPtr->list[i] != NULL) {
 		newList[j++] = recPtr->list[i];
 	    }
 	}
 	if (recPtr->list != NULL) {
-	    ckfree((char *) recPtr->list);
+	    ckfree(recPtr->list);
 	}
 	recPtr->list = newList;
 	recPtr->num = j;
@@ -201,7 +202,7 @@ RememberSyncObject(
  * ForgetSyncObject
  *
  *	Remove a single object from the list.
- *	Assume master lock is held.
+ *	Assume global lock is held.
  *
  * Results:
  *	None.
@@ -233,7 +234,7 @@ ForgetSyncObject(
  * TclRememberMutex
  *
  *	Keep a list of mutexes used during finalization.
- *	Assume master lock is held.
+ *	Assume global lock is held.
  *
  * Results:
  *	None.
@@ -275,9 +276,9 @@ Tcl_MutexFinalize(
 #ifdef TCL_THREADS
     TclpFinalizeMutex(mutexPtr);
 #endif
-    TclpMasterLock();
+    TclpGlobalLock();
     ForgetSyncObject(mutexPtr, &mutexRecord);
-    TclpMasterUnlock();
+    TclpGlobalUnlock();
 }
 
 /*
@@ -286,7 +287,7 @@ Tcl_MutexFinalize(
  * TclRememberCondition
  *
  *	Keep a list of condition variables used during finalization.
- *	Assume master lock is held.
+ *	Assume global lock is held.
  *
  * Results:
  *	None.
@@ -328,9 +329,9 @@ Tcl_ConditionFinalize(
 #ifdef TCL_THREADS
     TclpFinalizeCondition(condPtr);
 #endif
-    TclpMasterLock();
+    TclpGlobalLock();
     ForgetSyncObject(condPtr, &condRecord);
-    TclpMasterUnlock();
+    TclpGlobalUnlock();
 }
 
 /*
@@ -352,11 +353,16 @@ Tcl_ConditionFinalize(
  */
 
 void
-TclFinalizeThreadData(void)
+TclFinalizeThreadData(int quick)
 {
-    TclpFinalizeThreadDataThread();
+    TclFinalizeThreadDataThread();
 #if defined(TCL_THREADS) && defined(USE_THREAD_ALLOC)
-    TclFinalizeThreadAllocThread();
+    if (!quick) {
+	/*
+	 * Quick exit principle makes it useless to terminate allocators
+	 */
+	TclFinalizeThreadAllocThread();
+    }
 #endif
 }
 
@@ -387,7 +393,7 @@ TclFinalizeSynchronization(void)
     Tcl_Mutex *mutexPtr;
     Tcl_Condition *condPtr;
 
-    TclpMasterLock();
+    TclpGlobalLock();
 #endif
 
     /*
@@ -398,18 +404,18 @@ TclFinalizeSynchronization(void)
     if (keyRecord.list != NULL) {
 	for (i=0 ; i<keyRecord.num ; i++) {
 	    keyPtr = (Tcl_ThreadDataKey *) keyRecord.list[i];
-	    blockPtr = (void *) *keyPtr;
+	    blockPtr = *keyPtr;
 	    ckfree(blockPtr);
 	}
-	ckfree((char *) keyRecord.list);
+	ckfree(keyRecord.list);
 	keyRecord.list = NULL;
     }
     keyRecord.max = 0;
     keyRecord.num = 0;
-    
+
 #ifdef TCL_THREADS
     /*
-     * Call thread storage master cleanup.
+     * Call thread storage global cleanup.
      */
 
     TclFinalizeThreadStorage();
@@ -421,7 +427,7 @@ TclFinalizeSynchronization(void)
 	}
     }
     if (mutexRecord.list != NULL) {
-	ckfree((char *) mutexRecord.list);
+	ckfree(mutexRecord.list);
 	mutexRecord.list = NULL;
     }
     mutexRecord.max = 0;
@@ -434,13 +440,13 @@ TclFinalizeSynchronization(void)
 	}
     }
     if (condRecord.list != NULL) {
-	ckfree((char *) condRecord.list);
+	ckfree(condRecord.list);
 	condRecord.list = NULL;
     }
     condRecord.max = 0;
     condRecord.num = 0;
 
-    TclpMasterUnlock();
+    TclpGlobalUnlock();
 #endif /* TCL_THREADS */
 }
 
@@ -497,7 +503,7 @@ void
 Tcl_ConditionWait(
     Tcl_Condition *condPtr,	/* Really (pthread_cond_t **) */
     Tcl_Mutex *mutexPtr,	/* Really (pthread_mutex_t **) */
-    Tcl_Time *timePtr)		/* Timeout on waiting period */
+    const Tcl_Time *timePtr) /* Timeout on waiting period */
 {
 }
 

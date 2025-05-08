@@ -1,0 +1,14 @@
+# atl pkg-config source file
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ATL Command Language
+Description: Atl is a powerful, easy-to-learn dynamic programming language, suitable for a wide range of uses.
+URL: http://thedev.nhi1.de/theATL/main/index.htm
+Version: @TCL_VERSION@@TCL_PATCH_LEVEL@
+Libs: -L${libdir} @TCL_LIB_FLAG@ @TCL_STUB_LIB_FLAG@
+Libs.private: @TCL_LIBS@
+Cflags: -I${includedir}

@@ -1,4 +1,3 @@
-
 /*
  * Minimal set of shared macro definitions and declarations so that multiple
  * source files can make use of the parsing table in tclParse.c

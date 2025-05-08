@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------
 # SC_PATH_TCLCONFIG --
 #
-#	Locate the tclConfig.sh file and perform a sanity check on
+#	Locate the atlConfig.sh file and perform a sanity check on
 #	the Tcl compile flags
 #
 # Arguments:
@@ -10,62 +10,62 @@
 # Results:
 #
 #	Adds the following arguments to configure:
-#		--with-tcl=...
+#		--with-atl=...
 #
 #	Defines the following vars:
 #		TCL_BIN_DIR	Full path to the directory containing
-#				the tclConfig.sh file
+#				the atlConfig.sh file
 #------------------------------------------------------------------------
 
 AC_DEFUN([SC_PATH_TCLCONFIG], [
     #
-    # Ok, lets find the tcl configuration
+    # Ok, lets find the atl configuration
     # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-tcl
+    # the alternative search directory is invoked by --with-atl
     #
 
     if test x"${no_tcl}" = x ; then
 	# we reset no_tcl in case something fails here
 	no_tcl=true
-	AC_ARG_WITH(tcl,
-	    AS_HELP_STRING([--with-tcl],
-		[directory containing tcl configuration (tclConfig.sh)]),
+	AC_ARG_WITH(atl,
+	    AS_HELP_STRING([--with-atl],
+		[directory containing atl configuration (atlConfig.sh)]),
 	    [with_tclconfig="${withval}"])
 	AC_MSG_CHECKING([for Tcl configuration])
 	AC_CACHE_VAL(ac_cv_c_tclconfig,[
 
-	    # First check to see if --with-tcl was specified.
+	    # First check to see if --with-atl was specified.
 	    if test x"${with_tclconfig}" != x ; then
 		case "${with_tclconfig}" in
-		    */tclConfig.sh )
+		    */atlConfig.sh )
 			if test -f "${with_tclconfig}"; then
-			    AC_MSG_WARN([--with-tcl argument should refer to directory containing tclConfig.sh, not to tclConfig.sh itself])
+			    AC_MSG_WARN([--with-atl argument should refer to directory containing atlConfig.sh, not to atlConfig.sh itself])
 			    with_tclconfig="`echo "${with_tclconfig}" | sed 's!/tclConfig\.sh$!!'`"
 			fi ;;
 		esac
-		if test -f "${with_tclconfig}/tclConfig.sh" ; then
+		if test -f "${with_tclconfig}/atlConfig.sh" ; then
 		    ac_cv_c_tclconfig="`(cd "${with_tclconfig}"; pwd)`"
 		else
-		    AC_MSG_ERROR([${with_tclconfig} directory doesn't contain tclConfig.sh])
+		    AC_MSG_ERROR([${with_tclconfig} directory doesn't contain atlConfig.sh])
 		fi
 	    fi
 
 	    # then check for a private Tcl installation
 	    if test x"${ac_cv_c_tclconfig}" = x ; then
 		for i in \
-			../tcl \
-			`ls -dr ../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../tcl \
-			`ls -dr ../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../../tcl \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclConfig.sh" ; then
+			../atl \
+			`ls -dr ../atl[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../atl[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../atl[[1-2]].[[0-9]]* 2>/dev/null` \
+			../../atl \
+			`ls -dr ../../atl[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../../atl[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../../atl[[1-2]].[[0-9]]* 2>/dev/null` \
+			../../../atl \
+			`ls -dr ../../../atl[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../../../atl[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../../../atl[[1-2]].[[0-9]]* 2>/dev/null` ; do
+		    if test -f "$i/unix/atlConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i/unix; pwd)`"
 			break
 		    fi
@@ -78,7 +78,7 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
 			; do
-		    if test -f "$i/Tcl.framework/tclConfig.sh" ; then
+		    if test -f "$i/Tcl.framework/atlConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i/Tcl.framework; pwd)`"
 			break
 		    fi
@@ -97,9 +97,9 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl8.6 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl/tcl8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/atl/tcl8.6 2>/dev/null` \
 			; do
-		    if test -f "$i/tclConfig.sh" ; then
+		    if test -f "$i/atlConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i; pwd)`"
 			break
 		    fi
@@ -109,11 +109,11 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 	    # check in a few other private locations
 	    if test x"${ac_cv_c_tclconfig}" = x ; then
 		for i in \
-			${srcdir}/../tcl \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclConfig.sh" ; then
+			${srcdir}/../atl \
+			`ls -dr ${srcdir}/../atl[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ${srcdir}/../atl[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ${srcdir}/../atl[[1-2]].[[0-9]]* 2>/dev/null` ; do
+		    if test -f "$i/unix/atlConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i/unix; pwd)`"
 			break
 		    fi
@@ -123,11 +123,11 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 
 	if test x"${ac_cv_c_tclconfig}" = x ; then
 	    TCL_BIN_DIR="# no Tcl configs found"
-	    AC_MSG_ERROR([Can't find Tcl configuration definitions. Use --with-tcl to specify a directory containing tclConfig.sh])
+	    AC_MSG_ERROR([Can't find Tcl configuration definitions. Use --with-atl to specify a directory containing atlConfig.sh])
 	else
 	    no_tcl=
 	    TCL_BIN_DIR="${ac_cv_c_tclconfig}"
-	    AC_MSG_RESULT([found ${TCL_BIN_DIR}/tclConfig.sh])
+	    AC_MSG_RESULT([found ${TCL_BIN_DIR}/atlConfig.sh])
 	fi
     fi
 ])
@@ -187,17 +187,17 @@ AC_DEFUN([SC_PATH_TKCONFIG], [
 	    if test x"${ac_cv_c_tkconfig}" = x ; then
 		for i in \
 			../tk \
-			`ls -dr ../tk[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../tk[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../tk[[8-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../tk[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../tk[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../tk[[1-2]].[[0-9]]* 2>/dev/null` \
 			../../tk \
-			`ls -dr ../../tk[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../tk[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../tk[[8-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../../tk[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../../tk[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../../tk[[1-2]].[[0-9]]* 2>/dev/null` \
 			../../../tk \
-			`ls -dr ../../../tk[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../../tk[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../../tk[[8-9]].[[0-9]]* 2>/dev/null` ; do
+			`ls -dr ../../../tk[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ../../../tk[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ../../../tk[[1-2]].[[0-9]]* 2>/dev/null` ; do
 		    if test -f "$i/unix/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i/unix; pwd)`"
 			break
@@ -230,7 +230,7 @@ AC_DEFUN([SC_PATH_TKCONFIG], [
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/local/lib/tk8.6 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl/tk8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/atl/tk8.6 2>/dev/null` \
 			; do
 		    if test -f "$i/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i; pwd)`"
@@ -243,9 +243,9 @@ AC_DEFUN([SC_PATH_TKCONFIG], [
 	    if test x"${ac_cv_c_tkconfig}" = x ; then
 		for i in \
 			${srcdir}/../tk \
-			`ls -dr ${srcdir}/../tk[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../tk[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ${srcdir}/../tk[[8-9]].[[0-9]]* 2>/dev/null` ; do
+			`ls -dr ${srcdir}/../tk[[1-2]].[[0-9]].[[0-9]]* 2>/dev/null` \
+			`ls -dr ${srcdir}/../tk[[1-2]].[[0-9]] 2>/dev/null` \
+			`ls -dr ${srcdir}/../tk[[1-2]].[[0-9]]* 2>/dev/null` ; do
 		    if test -f "$i/unix/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i/unix; pwd)`"
 			break
@@ -268,7 +268,7 @@ AC_DEFUN([SC_PATH_TKCONFIG], [
 #------------------------------------------------------------------------
 # SC_LOAD_TCLCONFIG --
 #
-#	Load the tclConfig.sh file
+#	Load the atlConfig.sh file
 #
 # Arguments:
 #
@@ -284,13 +284,13 @@ AC_DEFUN([SC_PATH_TKCONFIG], [
 #------------------------------------------------------------------------
 
 AC_DEFUN([SC_LOAD_TCLCONFIG], [
-    AC_MSG_CHECKING([for existence of ${TCL_BIN_DIR}/tclConfig.sh])
+    AC_MSG_CHECKING([for existence of ${TCL_BIN_DIR}/atlConfig.sh])
 
-    if test -f "${TCL_BIN_DIR}/tclConfig.sh" ; then
+    if test -f "${TCL_BIN_DIR}/atlConfig.sh" ; then
         AC_MSG_RESULT([loading])
-	. "${TCL_BIN_DIR}/tclConfig.sh"
+	. "${TCL_BIN_DIR}/atlConfig.sh"
     else
-        AC_MSG_RESULT([could not find ${TCL_BIN_DIR}/tclConfig.sh])
+        AC_MSG_RESULT([could not find ${TCL_BIN_DIR}/atlConfig.sh])
     fi
 
     # If the TCL_BIN_DIR is the build directory (not the install directory),
@@ -414,7 +414,7 @@ AC_DEFUN([SC_LOAD_TKCONFIG], [
 
 #------------------------------------------------------------------------
 # SC_PROG_TCLSH
-#	Locate a tclsh shell installed on the system path. This macro
+#	Locate a atlsh shell installed on the system path. This macro
 #	will only find a Tcl shell that already exists on the system.
 #	It will not find a Tcl shell in the Tcl build directory or
 #	a Tcl shell that has been installed from the Tcl build directory.
@@ -433,15 +433,15 @@ AC_DEFUN([SC_LOAD_TKCONFIG], [
 #------------------------------------------------------------------------
 
 AC_DEFUN([SC_PROG_TCLSH], [
-    AC_MSG_CHECKING([for tclsh])
-    AC_CACHE_VAL(ac_cv_path_tclsh, [
+    AC_MSG_CHECKING([for atlsh])
+    AC_CACHE_VAL(ac_cv_path_atlsh, [
 	search_path=`echo ${PATH} | sed -e 's/:/ /g'`
 	for dir in $search_path ; do
-	    for j in `ls -r $dir/tclsh[[8-9]]* 2> /dev/null` \
-		    `ls -r $dir/tclsh* 2> /dev/null` ; do
-		if test x"$ac_cv_path_tclsh" = x ; then
+	    for j in `ls -r $dir/atlsh[[1-2]]* 2> /dev/null` \
+		    `ls -r $dir/atlsh* 2> /dev/null` ; do
+		if test x"$ac_cv_path_atlsh" = x ; then
 		    if test -f "$j" ; then
-			ac_cv_path_tclsh=$j
+			ac_cv_path_atlsh=$j
 			break
 		    fi
 		fi
@@ -449,23 +449,23 @@ AC_DEFUN([SC_PROG_TCLSH], [
 	done
     ])
 
-    if test -f "$ac_cv_path_tclsh" ; then
-	TCLSH_PROG="$ac_cv_path_tclsh"
+    if test -f "$ac_cv_path_atlsh" ; then
+	TCLSH_PROG="$ac_cv_path_atlsh"
 	AC_MSG_RESULT([$TCLSH_PROG])
     else
 	# It is not an error if an installed version of Tcl can't be located.
 	TCLSH_PROG=""
-	AC_MSG_RESULT([No tclsh found on PATH])
+	AC_MSG_RESULT([No atlsh found on PATH])
     fi
     AC_SUBST(TCLSH_PROG)
 ])
 
 #------------------------------------------------------------------------
 # SC_BUILD_TCLSH
-#	Determine the fully qualified path name of the tclsh executable
+#	Determine the fully qualified path name of the atlsh executable
 #	in the Tcl build directory. This macro will correctly determine
-#	the name of the tclsh executable even if tclsh has not yet
-#	been built in the build directory. The build tclsh must be used
+#	the name of the atlsh executable even if atlsh has not yet
+#	been built in the build directory. The build atlsh must be used
 #	when running tests from an extension build directory. It is not
 #	correct to use the TCLSH_PROG in cases like this.
 #
@@ -478,8 +478,8 @@ AC_DEFUN([SC_PROG_TCLSH], [
 #------------------------------------------------------------------------
 
 AC_DEFUN([SC_BUILD_TCLSH], [
-    AC_MSG_CHECKING([for tclsh in Tcl build directory])
-    BUILD_TCLSH="${TCL_BIN_DIR}"/tclsh
+    AC_MSG_CHECKING([for atlsh in Tcl build directory])
+    BUILD_TCLSH="${TCL_BIN_DIR}"/atlsh
     AC_MSG_RESULT([$BUILD_TCLSH])
     AC_SUBST(BUILD_TCLSH)
 ])
@@ -511,14 +511,6 @@ AC_DEFUN([SC_ENABLE_SHARED], [
 	AS_HELP_STRING([--enable-shared],
 	    [build and link with shared libraries (default: on)]),
 	[tcl_ok=$enableval], [tcl_ok=yes])
-
-    if test "${enable_shared+set}" = set; then
-	enableval="$enable_shared"
-	tcl_ok=$enableval
-    else
-	tcl_ok=yes
-    fi
-
     if test "$tcl_ok" = "yes" ; then
 	AC_MSG_RESULT([shared])
 	SHARED_BUILD=1
@@ -604,8 +596,8 @@ AC_DEFUN([SC_ENABLE_FRAMEWORK], [
 AC_DEFUN([SC_ENABLE_THREADS], [
     AC_ARG_ENABLE(threads,
 	AS_HELP_STRING([--enable-threads],
-	    [build with threads (default: off)]),
-	[tcl_ok=$enableval], [tcl_ok=no])
+	    [build with threads (default: on)]),
+	[tcl_ok=$enableval], [tcl_ok=yes])
 
     if test "${TCL_THREADS}" = 1; then
 	tcl_threaded_core=1;
@@ -666,39 +658,6 @@ AC_DEFUN([SC_ENABLE_THREADS], [
 	ac_saved_libs=$LIBS
 	LIBS="$LIBS $THREADS_LIBS"
 	AC_CHECK_FUNCS(pthread_attr_setstacksize pthread_atfork)
-	AC_CHECK_FUNC(pthread_attr_get_np,tcl_ok=yes,tcl_ok=no)
-	if test $tcl_ok = yes ; then
-	    AC_DEFINE(HAVE_PTHREAD_ATTR_GET_NP, 1,
-		[Do we want a BSD-like thread-attribute interface?])
-	    AC_CACHE_CHECK([for pthread_attr_get_np declaration],
-		tcl_cv_grep_pthread_attr_get_np, [
-		AC_EGREP_HEADER(pthread_attr_get_np, pthread.h,
-		    tcl_cv_grep_pthread_attr_get_np=present,
-		    tcl_cv_grep_pthread_attr_get_np=missing)])
-	    if test $tcl_cv_grep_pthread_attr_get_np = missing ; then
-		AC_DEFINE(ATTRGETNP_NOT_DECLARED, 1,
-		    [Is pthread_attr_get_np() declared in <pthread.h>?])
-	    fi
-	else
-	    AC_CHECK_FUNC(pthread_getattr_np,tcl_ok=yes,tcl_ok=no)
-	    if test $tcl_ok = yes ; then
-		AC_DEFINE(HAVE_PTHREAD_GETATTR_NP, 1,
-		    [Do we want a Linux-like thread-attribute interface?])
-		AC_CACHE_CHECK([for pthread_getattr_np declaration],
-		    tcl_cv_grep_pthread_getattr_np, [
-		    AC_EGREP_HEADER(pthread_getattr_np, pthread.h,
-			tcl_cv_grep_pthread_getattr_np=present,
-			tcl_cv_grep_pthread_getattr_np=missing)])
-		if test $tcl_cv_grep_pthread_getattr_np = missing ; then
-		    AC_DEFINE(GETATTRNP_NOT_DECLARED, 1,
-			[Is pthread_getattr_np declared in <pthread.h>?])
-		fi
-	    fi
-	fi
-	if test $tcl_ok = no; then
-	    # Darwin thread stacksize API
-	    AC_CHECK_FUNCS(pthread_get_stacksize_np)
-	fi
 	LIBS=$ac_saved_libs
     else
 	TCL_THREADS=0
@@ -964,19 +923,19 @@ AC_DEFUN([SC_CONFIG_SYSTEM], [
 #
 #       DL_OBJS -       Name of the object file that implements dynamic
 #                       loading for Tcl on this system.
-#       DL_LIBS -       Library file(s) to include in tclsh and other base
+#       DL_LIBS -       Library file(s) to include in atlsh and other base
 #                       applications in order for the "load" command to work.
 #       LDFLAGS -      Flags to pass to the compiler when linking object
 #                       files into an executable application binary such
-#                       as tclsh.
-#       LD_SEARCH_FLAGS-Flags to pass to ld, such as "-R /usr/local/tcl/lib",
+#                       as atlsh.
+#       LD_SEARCH_FLAGS-Flags to pass to ld, such as "-R /usr/local/atl/lib",
 #                       that tell the run-time dynamic linker where to look
-#                       for shared libraries such as libtcl.so.  Depends on
+#                       for shared libraries such as libatl.so.  Depends on
 #                       the variable LIB_RUNTIME_DIR in the Makefile. Could
 #                       be the same as CC_SEARCH_FLAGS if ${CC} is used to link.
-#       CC_SEARCH_FLAGS-Flags to pass to ${CC}, such as "-Wl,-rpath,/usr/local/tcl/lib",
+#       CC_SEARCH_FLAGS-Flags to pass to ${CC}, such as "-Wl,-rpath,/usr/local/atl/lib",
 #                       that tell the run-time dynamic linker where to look
-#                       for shared libraries such as libtcl.so.  Depends on
+#                       for shared libraries such as libatl.so.  Depends on
 #                       the variable LIB_RUNTIME_DIR in the Makefile.
 #       MAKE_LIB -      Command to execute to build the a library;
 #                       differs when building shared or static.
@@ -1009,7 +968,7 @@ AC_DEFUN([SC_CONFIG_SYSTEM], [
 #                       to use shared libraries on this platform.
 # TCL_SHLIB_LD_EXTRAS - Additional element which are added to SHLIB_LD_LIBS
 #  TK_SHLIB_LD_EXTRAS   for the build of Tcl and Tk, but not recorded in the
-#                       tclConfig.sh, since they are only used for the build
+#                       atlConfig.sh, since they are only used for the build
 #                       of Tcl and Tk.
 #                       Examples: MacOS X records the library version and
 #                       compatibility version in the shared library.  But
@@ -1232,7 +1191,6 @@ AC_DEFUN([SC_CONFIG_CFLAGS], [
 	    DL_OBJS="tclLoadDl.o"
 	    PLAT_OBJS='${CYGWIN_OBJS}'
 	    PLAT_SRCS='${CYGWIN_SRCS}'
-	    DL_OBJS="tclLoadDl.o tclWinError.o"
 	    DL_LIBS="-ldl"
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
@@ -1605,10 +1563,6 @@ AC_DEFUN([SC_CONFIG_CFLAGS], [
 	    SHLIB_SUFFIX=".dylib"
 	    DL_OBJS="tclLoadDyld.o"
 	    DL_LIBS=""
-	    # Don't use -prebind when building for Mac OS X 10.4 or later only:
-	    AS_IF([test "`echo "${MACOSX_DEPLOYMENT_TARGET}" | awk -F '10\\.' '{print int([$]2)}'`" -lt 4 -a \
-		"`echo "${CPPFLAGS}" | awk -F '-mmacosx-version-min=10\\.' '{print int([$]2)}'`" -lt 4], [
-		LDFLAGS="$LDFLAGS -prebind"])
 	    LDFLAGS="$LDFLAGS -headerpad_max_install_names"
 	    AC_CACHE_CHECK([if ld accepts -search_paths_first flag],
 		    tcl_cv_ld_search_paths_first, [
@@ -1810,7 +1764,7 @@ AC_DEFUN([SC_CONFIG_CFLAGS], [
 	    # SunOS can't handle version numbers with dots in them in library
 	    # specs, like -ltcl7.5, so use -ltcl75 instead.  Also, it
 	    # requires an extra version number at the end of .so file names.
-	    # So, the library has to have a name like libtcl75.so.1.0
+	    # So, the library has to have a name like libatl75.so.1.0
 
 	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
 	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
@@ -2065,7 +2019,7 @@ dnl # preprocessing tests use only CPPFLAGS.
 
     # Define TCL_LIBS now that we know what DL_LIBS is.
     # The trick here is that we don't want to change the value of TCL_LIBS if
-    # it is already set when tclConfig.sh had been loaded by Tk.
+    # it is already set when atlConfig.sh had been loaded by Tk.
     AS_IF([test "x${TCL_LIBS}" = x], [
         TCL_LIBS="${DL_LIBS} ${LIBS} ${MATH_LIBS}"])
     AC_SUBST(TCL_LIBS)
@@ -2102,7 +2056,7 @@ dnl # preprocessing tests use only CPPFLAGS.
 	fi
 
     # FIXME: This subst was left in only because the TCL_DL_LIBS
-    # entry in tclConfig.sh uses it. It is not clear why someone
+    # entry in atlConfig.sh uses it. It is not clear why someone
     # would use TCL_DL_LIBS instead of TCL_LIBS.
     AC_SUBST(DL_LIBS)
 
@@ -2157,14 +2111,13 @@ dnl # preprocessing tests use only CPPFLAGS.
 #
 #	Defines some of the following vars:
 #		NO_DIRENT_H
+#		NO_FLOAT_H
 #		NO_VALUES_H
-#		HAVE_LIMITS_H or NO_LIMITS_H
 #		NO_STDLIB_H
 #		NO_STRING_H
 #		NO_SYS_WAIT_H
 #		NO_DLFCN_H
 #		HAVE_SYS_PARAM_H
-#
 #		HAVE_STRING_H ?
 #
 #--------------------------------------------------------------------
@@ -2198,9 +2151,6 @@ closedir(d);
 
     AC_CHECK_HEADER(float.h, , [AC_DEFINE(NO_FLOAT_H, 1, [Do we have <float.h>?])])
     AC_CHECK_HEADER(values.h, , [AC_DEFINE(NO_VALUES_H, 1, [Do we have <values.h>?])])
-    AC_CHECK_HEADER(limits.h,
-	[AC_DEFINE(HAVE_LIMITS_H, 1, [Do we have <limits.h>?])],
-	[AC_DEFINE(NO_LIMITS_H, 1, [Do we have <limits.h>?])])
     AC_CHECK_HEADER(stdlib.h, tcl_ok=1, tcl_ok=0)
     AC_EGREP_HEADER(strtol, stdlib.h, , tcl_ok=0)
     AC_EGREP_HEADER(strtoul, stdlib.h, , tcl_ok=0)
@@ -2339,11 +2289,6 @@ AC_DEFUN([SC_BLOCKING_STYLE], [
     SC_CONFIG_SYSTEM
     AC_MSG_CHECKING([FIONBIO vs. O_NONBLOCK for nonblocking I/O])
     case $system in
-	# There used to be code here to use FIONBIO under AIX.  However, it
-	# was reported that FIONBIO doesn't work under AIX 3.2.5.  Since
-	# using O_NONBLOCK seems fine under AIX 4.*, I removed the FIONBIO
-	# code (JO, 5/31/97).
-
 	OSF*)
 	    AC_DEFINE(USE_FIONBIO, 1, [Should we use FIONBIO?])
 	    AC_MSG_RESULT([FIONBIO])
@@ -2432,7 +2377,7 @@ AC_DEFUN([SC_TIME_HANDLER], [
 #
 #	Search for the libraries needed to link the Tcl shell.
 #	Things like the math library (-lm), socket stuff (-lsocket vs.
-#	-lnsl), zlib (-lz) and libtommath (-ltommath) are dealt with here.
+#	-lnsl), and libtommath (-ltommath) are dealt with here.
 #
 # Arguments:
 #	None.
@@ -2452,12 +2397,9 @@ AC_DEFUN([SC_TCL_LINK_LIBS], [
     #--------------------------------------------------------------------
     # On a few very rare systems, all of the libm.a stuff is
     # already in libc.a.  Set compiler flags accordingly.
-    # Also, Linux requires the "ieee" library for math to work
-    # right (and it must appear before "-lm").
     #--------------------------------------------------------------------
 
     AC_CHECK_FUNC(sin, MATH_LIBS="", MATH_LIBS="-lm")
-    AC_CHECK_LIB(ieee, main, [MATH_LIBS="-lieee $MATH_LIBS"])
 
     #--------------------------------------------------------------------
     # Interactive UNIX requires -linet instead of -lsocket, plus it

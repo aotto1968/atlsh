@@ -13,9 +13,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.3
-    namespace import -force ::tcltest::*
+if {"::atltest" ni [namespace children]} {
+    package require atltest 2.5
+    namespace import -force ::atltest::*
 }
 
 catch {unset x}
@@ -88,5 +88,5 @@ test incr-old-2.10 {incr errors} {
 } {1 {expected integer but got "20 x"}}
 
 # cleanup
-::tcltest::cleanupTests
+::atltest::cleanupTests
 return

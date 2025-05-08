@@ -4,7 +4,7 @@
 ## Overview
 
 # Higher-level commands which invoke the functionality of this package
-# for an arbitrary tcl shell (tclsh, wish, ...). This is required by a
+# for an arbitrary tcl shell (atlsh, wish, ...). This is required by a
 # repository as while the tcl shell executing packages uses the same
 # platform in general as a repository application there can be
 # differences in detail (i.e. 32/64 bit builds).

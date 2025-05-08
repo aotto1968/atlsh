@@ -23,6 +23,7 @@ command   |     definition
 help      |     this message
 log       |     show the test-results (only on error)
 test      |     run single test-case
+link      |     link `*.test` files from `../atlsh/tests` into `.`
 
 make check
 ----------
@@ -61,9 +62,9 @@ used to execute all tests in **parallel** to get **fast** test-results.
 
 ## CONFIGURABLE OPTIONS
 
-> man n tcltest
+> man n atltest
 
-The configure command is used to set and query the configurable options of tcltest.  The valid options are:
+The configure command is used to set and query the configurable options of atltest.  The valid options are:
 
 ###  -singleproc boolean
 
@@ -162,9 +163,9 @@ Sets the filename from which to read a script to be evaluated by loadTestedComma
 
 ###  -outfile filename
 
-Sets the file to which all output produced by tcltest should be written.  A file named filename will be opened for writing, and the resulting channel will be set as the value of outputChannel.
+Sets the file to which all output produced by atltest should be written.  A file named filename will be opened for writing, and the resulting channel will be set as the value of outputChannel.
 
 ###  -errfile filename
 
-Sets the file to which all error output produced by tcltest should be written.  A file named filename will be opened for writing, and the resulting channel will be set as the value of errorChannel.
+Sets the file to which all error output produced by atltest should be written.  A file named filename will be opened for writing, and the resulting channel will be set as the value of errorChannel.
 

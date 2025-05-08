@@ -482,7 +482,6 @@ FreeIndex(
     objPtr->typePtr = NULL;
 }
 
-#if 0 
 /*
  *----------------------------------------------------------------------
  *
@@ -794,7 +793,6 @@ PrefixLongestObjCmd(
     }
     return TCL_OK;
 }
-#endif
 
 /*
  *----------------------------------------------------------------------
@@ -891,7 +889,7 @@ Tcl_WrongNumArgs(
     if (iPtr->ensembleRewrite.sourceObjs != NULL) {
 	int toSkip = iPtr->ensembleRewrite.numInsertedObjs;
 	int toPrint = iPtr->ensembleRewrite.numRemovedObjs;
-	Tcl_Obj *const *origObjv = iPtr->ensembleRewrite.sourceObjs;
+	Tcl_Obj *const *origObjv = TclEnsembleGetRewriteValues(interp);
 
 	/*
 	 * Only do rewrite the command if all the replaced objects are

@@ -1,12 +1,12 @@
 # This file contains a collection of tests for generic/tclMain.c.
 
-if {[catch {package require tcltest 2.0.2}]} {
-    puts stderr "Skipping tests in [info script]. tcltest 2.0.2 required."
+if {[catch {package require atltest 2.0.2}]} {
+    puts stderr "Skipping tests in [info script]. atltest 2.0.2 required."
     return
 }
 
 namespace eval ::tcl::test::main {
-    namespace import ::tcltest::*
+    namespace import ::atltest::*
 
     # Is [exec] defined?
     testConstraint exec [llength [info commands exec]]
@@ -40,66 +40,60 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	stdio
     } -setup {
-	makeFile {puts [list $argv0 $argv $tcl_interactive]} scriptMain
-	catch {set f [open "|[list [interpreter] scriptMain]" r]}
+	makeFile {puts [list $argv0 $argv $tcl_interactive]} script
+	catch {set f [open "|[list [interpreter] script]" r]}
     } -body {
 	read $f
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result [list scriptMain {} 0]\n
+	removeFile script
+    } -result [list script {} 0]\n
 
     test Tcl_Main-1.2 {
 	Tcl_Main: startup script - can't begin with '-'
     } -constraints {
 	stdio
     } -setup {
-	makeFile {puts [list $argv0 $argv $tcl_interactive]} -scriptMain
-	catch {set f [open "|[list [interpreter] -scriptMain]" w+]}
+	makeFile {puts [list $argv0 $argv $tcl_interactive]} -script
+	catch {set f [open "|[list [interpreter] -script]" w+]}
     } -body {
 	puts $f {puts [list $argv0 $argv $tcl_interactive]; exit}
 	flush $f
 	read $f
     } -cleanup {
 	close $f
-	removeFile -scriptMain
-    } -result [list [interpreter] -scriptMain 0]\n
+	removeFile -script
+    } -result [list [interpreter] -script 0]\n
 
     test Tcl_Main-1.3 {
-	Tcl_Main: encoding of arguments: done by system encoding
-	Note the shortcoming explained in Tcl Feature Request 491789
     } -constraints {
 	stdio
     } -setup {
-	makeFile {puts [list $argv0 $argv $tcl_interactive]} scriptMain
-	catch {set f [open "|[list [interpreter] scriptMain \u00c0]" r]}
+	makeFile {puts [list $argv0 $argv $tcl_interactive]} script
+	catch {set f [open "|[list [interpreter] script \u00c0]" r]}
     } -body {
 	read $f
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result [list scriptMain [list [encoding convertfrom [encoding system] \
+	removeFile script
+    } -result [list script [list [encoding convertfrom [encoding system] \
 	[encoding convertto [encoding system] \u00c0]]] 0]\n
 
     test Tcl_Main-1.4 {
-	Tcl_Main: encoding of arguments: done by system encoding
-	Note the shortcoming explained in Tcl Feature Request 491789
     } -constraints {
-	stdio tempNotWin
+	stdio
     } -setup {
-	makeFile {puts [list $argv0 $argv $tcl_interactive]} scriptMain
-	catch {set f [open "|[list [interpreter] scriptMain \u20ac]" r]}
+	makeFile {puts [list $argv0 $argv $tcl_interactive]} script
+	catch {set f [open "|[list [interpreter] script \u20ac]" r]}
     } -body {
 	read $f
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result [list scriptMain [list [encoding convertfrom [encoding system] \
+	removeFile script
+    } -result [list script [list [encoding convertfrom [encoding system] \
 	[encoding convertto [encoding system] \u20ac]]] 0]\n
 
     test Tcl_Main-1.5 {
-	Tcl_Main: encoding of script name: system encoding loss
-	Note the shortcoming explained in Tcl Feature Request 491789
     } -constraints {
 	stdio
     } -setup {
@@ -114,10 +108,8 @@ namespace eval ::tcl::test::main {
 	[encoding convertto [encoding system] \u00c0]]] {} 0]\n
 
     test Tcl_Main-1.6 {
-	Tcl_Main: encoding of script name: system encoding loss
-	Note the shortcoming explained in Tcl Feature Request 491789
     } -constraints {
-	stdio tempNotWin
+	stdio
     } -setup {
 	makeFile {puts [list $argv0 $argv $tcl_interactive]} \u20ac
 	catch {set f [open "|[list [interpreter] \u20ac]" r]}
@@ -134,57 +126,57 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	stdio
     } -setup {
-	set scriptMain [makeFile {} scriptMain]
-	file delete $scriptMain
-	set f [open $scriptMain w]
+	set script [makeFile {} script]
+	file delete $script
+	set f [open $script w]
 	chan configure $f -encoding utf-8
 	puts $f {puts [list $argv0 $argv $tcl_interactive]}
 	puts -nonewline $f {puts [string equal \u20ac }
 	puts $f "\u20ac]"
 	close $f
-	catch {set f [open "|[list [interpreter] -encoding utf-8 scriptMain]" r]}
+	catch {set f [open "|[list [interpreter] -encoding utf-8 script]" r]}
     } -body {
 	read $f
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result [list scriptMain {} 0]\n1\n
+	removeFile script
+    } -result [list script {} 0]\n1\n
 
     test Tcl_Main-1.8 {
 	Tcl_Main: startup script - -encoding option - mismatched encodings
     } -constraints {
 	stdio
     } -setup {
-	set scriptMain [makeFile {} scriptMain]
-	file delete $scriptMain
-	set f [open $scriptMain w]
+	set script [makeFile {} script]
+	file delete $script
+	set f [open $script w]
 	chan configure $f -encoding utf-8
 	puts $f {puts [list $argv0 $argv $tcl_interactive]}
 	puts -nonewline $f {puts [string equal \u20ac }
 	puts $f "\u20ac]"
 	close $f
-	catch {set f [open "|[list [interpreter] -encoding ascii scriptMain]" r]}
+	catch {set f [open "|[list [interpreter] -encoding ascii script]" r]}
     } -body {
 	read $f
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result [list scriptMain {} 0]\n0\n
+	removeFile script
+    } -result [list script {} 0]\n0\n
 
     test Tcl_Main-1.9 {
 	Tcl_Main: startup script - -encoding option - no abbrevation
     } -constraints {
 	stdio
     } -setup {
-	set scriptMain [makeFile {} scriptMain]
-	file delete $scriptMain
-	set f [open $scriptMain w]
+	set script [makeFile {} script]
+	file delete $script
+	set f [open $script w]
 	chan configure $f -encoding utf-8
 	puts $f {puts [list $argv0 $argv $tcl_interactive]}
 	puts -nonewline $f {puts [string equal \u20ac }
 	puts $f "\u20ac]"
 	close $f
-	catch {set f [open "|[list [interpreter] -enc utf-8 scriptMain]" r+]}
+	catch {set f [open "|[list [interpreter] -enc utf-8 script]" r+]}
     } -body {
 	type $f {
 	    puts $argv
@@ -192,8 +184,8 @@ namespace eval ::tcl::test::main {
 	list [catch {gets $f} line] $line
     } -cleanup {
 	close $f
-	removeFile scriptMain
-    } -result {0 {-enc utf-8 scriptMain}}
+	removeFile script
+    } -result {0 {-enc utf-8 script}}
 
     # Tests Tcl_Main-2.*: application-initialization procedure
 
@@ -202,15 +194,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec Tcltest
     } -setup {
-	makeFile {puts "In script"} scriptMain
+	makeFile {puts "In script"} script
     } -body {
-	exec [interpreter] scriptMain -appinitprocerror >& result
+	exec [interpreter] script -appinitprocerror >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "application-specific initialization failed: \nIn script\n"
 
     test Tcl_Main-2.2 {
@@ -231,15 +223,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec Tcltest
     } -setup {
-	makeFile {puts "In script"} scriptMain
+	makeFile {puts "In script"} script
     } -body {
-	exec [interpreter] scriptMain -appinitprocdeleteinterp >& result
+	exec [interpreter] script -appinitprocdeleteinterp >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "application-specific initialization failed: \n"
 
     test Tcl_Main-2.4 {
@@ -296,15 +288,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec
     } -setup {
-	makeFile {error ERROR} scriptMain
+	makeFile {error ERROR} script
     } -body {
-	set code [catch {exec [interpreter] scriptMain >& result} result]
+	set code [catch {exec [interpreter] script >& result} result]
 	set f [open result]
 	list $code $result [read $f]
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -match glob -result [list 1 {child process exited abnormally} \
 	"ERROR\n    while executing*"]
 
@@ -313,15 +305,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec
     } -setup {
-	makeFile {close stderr; error ERROR} scriptMain
+	makeFile {close stderr; error ERROR} script
     } -body {
-	set code [catch {exec [interpreter] scriptMain >& result} result]
+	set code [catch {exec [interpreter] script >& result} result]
 	set f [open result]
 	list $code $result [read $f]
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result [list 1 {child process exited abnormally} {}]
 
     test Tcl_Main-3.4 {
@@ -329,15 +321,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec
     } -setup {
-	makeFile "if 1 \{" scriptMain
+	makeFile "if 1 \{" script
     } -body {
-	set code [catch {exec [interpreter] scriptMain >& result} result]
+	set code [catch {exec [interpreter] script >& result} result]
 	set f [open result]
 	join [list $code $result [read $f]] \n
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -match glob -result [join [list 1 {child process exited abnormally}\
 	"missing close-brace\n    while executing*"] \n]
 
@@ -358,15 +350,15 @@ namespace eval ::tcl::test::main {
 		}
 		testexithandler create 0
 		testsetmainloop
-	} scriptMain
+	} script
     } -body {
-	exec [interpreter] scriptMain >& result
+	exec [interpreter] script >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "event\nExit MainLoop\nIn exit\neven 0\n"
 
     test Tcl_Main-3.6 {
@@ -387,15 +379,15 @@ namespace eval ::tcl::test::main {
 			testexitmainloop
 		}
 		testexithandler create 0
-	} scriptMain
+	} script
     } -body {
-	exec [interpreter] scriptMain >& result
+	exec [interpreter] script >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "event\nExit MainLoop\nIn exit\neven 0\n"
 
     test Tcl_Main-3.7 {
@@ -411,15 +403,15 @@ namespace eval ::tcl::test::main {
 		}
 		testexithandler create 0
 		testinterpdelete {}
-	} scriptMain
+	} script
     } -body {
-	exec [interpreter] scriptMain >& result
+	exec [interpreter] script >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "even 0\n"
 
     test Tcl_Main-3.8 {
@@ -437,15 +429,15 @@ namespace eval ::tcl::test::main {
 		testexitmainloop
 		testexithandler create 0
 		testinterpdelete {}
-	} scriptMain
+	} script
     } -body {
-	exec [interpreter] scriptMain >& result
+	exec [interpreter] script >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result "Exit MainLoop\neven 0\n"
 
     test Tcl_Main-3.9 {
@@ -453,15 +445,15 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec
     } -setup {
-	makeFile {set tcl_interactive foo} scriptMain
+	makeFile {set tcl_interactive foo} script
     } -body {
-	exec [interpreter] scriptMain >& result
+	exec [interpreter] script >& result
 	set f [open result]
 	read $f
     } -cleanup {
 	close $f
 	file delete result
-	removeFile scriptMain
+	removeFile script
     } -result {}
 
     # Tests Tcl_Main-4.*: rc file evaluation
@@ -621,7 +613,7 @@ namespace eval ::tcl::test::main {
 	variable wait
 	chan event $f readable \
 		[list set [namespace which -variable wait] "child exit"]
-	set id [after 2000 [list set [namespace which -variable wait] timeout]]
+	set id [after 5000 [list set [namespace which -variable wait] timeout]]
 	vwait [namespace which -variable wait]
 	after cancel $id
 	set wait
@@ -637,14 +629,14 @@ namespace eval ::tcl::test::main {
     } -constraints {
 	exec
     } -setup {
-	set cmd {makeFile "if 1 \{" scriptMain}
+	set cmd {makeFile "if 1 \{" script}
 	catch {set f [open "|[list [interpreter]] < [list [eval $cmd]]" r]}
 	catch {chan configure $f -blocking 0}
     } -body {
 	variable wait
 	chan event $f readable \
 		[list set [namespace which -variable wait] "child exit"]
-	set id [after 2000 [list set [namespace which -variable wait] timeout]]
+	set id [after 5000 [list set [namespace which -variable wait] timeout]]
 	vwait [namespace which -variable wait]
 	after cancel $id
 	set wait
@@ -653,7 +645,7 @@ namespace eval ::tcl::test::main {
 	    exec kill [pid $f]
 	}
 	close $f
-	removeFile scriptMain
+	removeFile script
     } -result {child exit}
 
     test Tcl_Main-5.5 {
@@ -727,7 +719,7 @@ namespace eval ::tcl::test::main {
     } -result "Exit MainLoop\nIn exit\neven 0\n"
 
     test Tcl_Main-5.9 {
-	Tcl_Main: interactive mode: delete interp 
+	Tcl_Main: interactive mode: delete interp
 		-> main loop & exit handlers, but no [exit]
     } -constraints {
 	exec Tcltest
@@ -1218,8 +1210,6 @@ namespace eval ::tcl::test::main {
 	Bug 1775878
     } -constraints {
 	exec Tcltest
-    } -setup {
-	catch {set f [open "|[list [interpreter]]" w+]}
     } -body {
 	exec [interpreter] << "testsetmainloop\nputs \\\npwd\ntestexitmainloop" >& result
 	set f [open result]
